@@ -1,0 +1,68 @@
+define( [ 'Bricks/HueLamp'
+		, 'Bricks/SmartPlug'
+		, 'Bricks/protoBricks'
+		, "Bricks/Presentations/PresoTilesAlxAppsGateRoot"
+		]
+	  , function(HueLamp, SmartPlug, Brick, Preso) { 
+			 var AlxClient = {nbBricks:0};
+			 AlxClient.__proto__ = new Brick();
+			 AlxClient.devices = {};
+			 AlxClient.bricksMap = {
+				  0		: null // Temperature
+				, 1		: null // Luminosité
+				, 2		: null // ???
+				, 3		: null // Capteur de contact
+				, 6		: SmartPlug
+				, 7		: null // HueLamp
+				, 20	: null // ???
+				, 21	: null // Horloge
+				, 'urn:schemas-upnp-org:device:MediaRenderer:1' : null
+				, 'urn:schemas-upnp-org:device:MediaServer:1'	: null
+				}
+			 
+			 AlxClient.init = function() {
+				 this.presentations = []; this.presentations.push( new Preso() );
+				 console.log('1');
+				 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].init(this);}
+				 console.log('2');
+				 document.body.appendChild( this.presentations[0].Render() );
+				 
+				 // Subscribe to socket.io
+				 socket.on('newDevice', function(data) {AlxClient.updateBrickList(data);});
+				 this.call( 'AlxServer'
+						  , {mtd:'getBricks', args:[]}
+						  , function(data) {
+								 console.log("Received", data);
+								 if(data.success) {
+									 AlxClient.newBricksList(data.res);
+									}
+								}
+						  );
+				}
+			 AlxClient.newBricksList = function(bricks) {
+				 // Re-init the device list
+				 var brick, type, id;
+				 for(var i in bricks) {
+					 brick	= bricks[i];
+					 type	= brick.type[0].val;
+					 id		= brick.id[0].val;
+					 //console.log("New brick", brick.type[0].val, " : ", brick.id[0].val, " : ", brick.name[0].val);
+					 if(this.bricksMap[type]) {
+						 var Constr	  = this.bricksMap[type];
+						 var newBrick = new Constr(id, brick);
+						 newBrick.type = type;
+						 console.log(this.presentations.length,"New brick", brick);
+						 pipo = this;
+						 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].integrateBrick(newBrick);}
+						} else {/*console.log("Unsupported brick type :", type, " for", brick);*/}
+					}
+				}
+			 AlxClient.updateBrickList = function(data) {
+				 // Update the device list
+				 this.newBricksList([data]);
+				}
+			
+			 // Return the singleton
+			 return AlxClient;
+			}
+	  );
