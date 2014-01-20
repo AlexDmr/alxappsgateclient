@@ -171,6 +171,7 @@ var RRServer = {
 		 var newBrick = this.updateBrick( {id:'AlxUPnP->'+device.uuid, uuid:device.uuid, type:device.deviceType, device:device, name:device.friendlyName} );
 		 newBrick.origin = 'UPnP';
 		 console.log("Adding AlxUPnP->"+device.uuid+"\n" + device.deviceType + " " + device.friendlyName);
+		 device.friendlyName = device.friendlyName || 'NO DEVICE NAME...';
 		 if(device.friendlyName.indexOf("Philips hue") == 0) {	// Found Hue bridge
 			 this.HueLocation = "http://"+device.host+":"+device.port; console.log("Hue bridge at " + device.host + ":" + device.port);
 			}

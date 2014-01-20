@@ -8,13 +8,17 @@ define( [ "Bricks/Presentations/protoPresentation"
 				}
 			
 			 PresoTilesAlxAppsGate.prototype.getTileSize = function() {return size;}
+			 PresoTilesAlxAppsGate.prototype = new Presentation();
+			 PresoTilesAlxAppsGate.prototype.constructor = PresoTilesAlxAppsGate;
 			 PresoTilesAlxAppsGate.prototype.init = function() {
+				 Presentation.prototype.init.apply(this,[]);
+				 // console.log("PresoTilesAlxAppsGate Init");
 				 this.x = this.y = 0;
 				 this.w = this.h = 12;
+				 this.innerMagnitude = 12;
 				 this.color = 'cyan';
 				 this.display = true;			 
 				}
-			 PresoTilesAlxAppsGate.prototype = new Presentation();
 			 PresoTilesAlxAppsGate.prototype.getPresoCoords = function() {
 				 return { x1 : 0.5*dt*size
 						, y1 : 0.5*dt*size
@@ -28,7 +32,8 @@ define( [ "Bricks/Presentations/protoPresentation"
 						 g.setAttribute('transform', 'translate(' + this.x*size
 														   + ', ' + this.y*size + ')');
 					 var gr = document.createElementNS("http://www.w3.org/2000/svg", 'g');
-						 var scale = (Math.max(this.w,this.h)-2*dt)/12;
+						 var scale = (Math.max(this.w,this.h)-2*dt)/this.innerMagnitude;//12;//
+						 // console.log(scale, 'with', this.innerMagnitude);
 						 gr.classList.add('rootInternal');
 						 gr.setAttribute('transform', 'translate('+ dt*size
 															+', '+ dt*size
