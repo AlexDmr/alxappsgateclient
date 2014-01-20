@@ -17,6 +17,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						, { x:3,y:0,w:3,h:3,color:'blue',name:'Thermomètres',categId:'0'}
 						, { x:6,y:0,w:3,h:3,color:'blue',name:'Luminomètres',categId:'1'}
 						, { x:9,y:0,w:3,h:3,color:'blue',name:'Lampes Hue',categId:'7'}
+						, { x:0,y:3,w:3,h:3,color:'blue',name:'Prises pilotable',categId:'urn:schemas-upnp-org:device:MediaServer:1'}
+						, { x:3,y:3,w:3,h:3,color:'blue',name:'Prises pilotable',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
 						, { x:9,y:9,w:3,h:3,color:'blue',name:'Horloge',categId:'21'}
 						]
 					}

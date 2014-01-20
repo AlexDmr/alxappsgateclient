@@ -17,8 +17,11 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 				
 			 PresoBasicUnivers.prototype = new PresoTile();
+			 PresoBasicUnivers.prototype.constructor = PresoBasicUnivers;
 			 PresoBasicUnivers.prototype.init = function(brick, children) {
+				 // console.log("PresoBasicUnivers init", this);
 				 PresoTile.prototype.init.apply(this,[brick,children]); //this.initPresoTile(brick, children);
+				 // console.log(PresoTile.prototype.init);
 				 // Image
 				 this.svg_image = null;
 				 // Plug rooms and spaces
@@ -54,10 +57,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoBasicUnivers.prototype.integrateBrick = function(brick) {
 				 // Find where to place the brick if it can be...
 				 var L; if(this.mapCategIdToTile[brick.type]) {L=this.mapCategIdToTile[brick.type].length;} else {L=0;}
+				 // console.log('New brick typed ', brick.type, 'mapped to ', L);
 				 for(var i=0;i<L;i++) {
 					 var parentTile = this.mapCategIdToTile[brick.type][i].tile;
-					 var x = parentTile.children.length % parentTile.w;
-					 var y = Math.floor(parentTile.children.length / parentTile.w);
+					 var width = Math.floor( this.innerMagnitude*parentTile.w / Math.max(parentTile.w, parentTile.h) );
+					 var x = parentTile.children.length % width;
+					 var y = Math.floor(parentTile.children.length / width);
 					 var tile = parentTile.appendChildFromBrick	( brick
 					 											, function() {this.x = x; this.y = y; this.w = 1; this.h = 1;}
 																);
