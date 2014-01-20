@@ -65,6 +65,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var y = Math.floor(parentTile.children.length / width);
 					 var tile = parentTile.appendChildFromBrick	( brick
 					 											, function() {this.x = x; this.y = y; this.w = 1; this.h = 1;}
+																, undefined
+																, this.getChildrenContext(1, 1)
 																);
 					}
 				 if(this.mapBrickIdToTile[brick.type]) {L=this.mapBrickIdToTile[brick.type].length;} else {L=0;}
@@ -75,6 +77,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 parentTile.removeChild( prevTile );
 					 var tile = parentTile.appendChildFromBrick	( brick
 					 											, function() {this.x = data.x; this.y = data.y; this.w = data.w; this.h = data.h; this.color = data.color || 'white';}
+																, undefined
+																, this.getChildrenContext(1, 1)
 																);
 					 this.mapBrickIdToTile[brick.id][i].tile = tile;
 					}
