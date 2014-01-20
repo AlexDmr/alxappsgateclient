@@ -45,6 +45,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						this.root.TileRoot = this;
 						// this.root.setAttribute('xmlns:xlink', "http://www.w3.org/1999/xlink");
 						this.root.setAttributeNS('http://www.w3.org/2000/svg','xlink','http://www.w3.org/1999/xlink');
+						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'width' , '100%');
+						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'height', '100%');
 
 					 this.groot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 						this.groot.classList.add('rootInternal');
@@ -53,6 +55,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 
 					 var svg = this.root;
 					 this.svg_point = svg.createSVGPoint();
+					 this.mapTile.set_svg_point( this.svg_point );
 					 
 					 svg.addEventListener( 'mousedown'
 										 , function(e) {
@@ -65,14 +68,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 												 
 												 var ms = Date.now(); //(new Date()).getTime();
 												 window.requestAnimFrame( function(time) {
-													var /*L_toAppear    = [],
-														L_toDisappear = [],*/
-														L_CB = [];
-													self.ComputeSemanticZoom( self.svg_point
-														, M1.inverse().multiply(M2)
-														, L_CB
-														//, L_toAppear, L_toDisappear
-														);
+													var L_CB = [];
+													self.ComputeSemanticZoom( M1.inverse().multiply(M2)
+																			, L_CB );
 													for(var i=0;i<L_CB.length;i++) {L_CB[i](0);} // Start
 													self.CB_zoom(ms, ms+1000, M1, M2, self.groot, L_CB/*L_toAppear, L_toDisappear*/);
 													});

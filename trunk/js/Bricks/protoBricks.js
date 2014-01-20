@@ -12,15 +12,48 @@ define( function() {
 				 this.presoFactories= {};
 				 for(var i=0;i<this.children.length;i++) {this.appendChild(this.children[i]);}
 				}
-			 Brick.prototype.appendPresoFactory = function(name, constr) {
-				 this.presoFactories[name] = {name:name,constr:constr};
+			 Brick.prototype.appendPresoFactory = function(name, constr, validity) {
+				 if(!validity) {throw('Pas de domaine de validité définit pour ' + name);}
+				 this.presoFactories[name] = {name:name,constr:constr,validity:validity,UIs:[]};
+				}
+			 Brick.prototype.unPlugPresentation = function(preso) {
+				 if(preso.factory) {
+					 preso.factory.UIs.push(preso);
+					 var parent = preso.parent;
+					 if(parent) {
+						 parent.removeChild(preso);
+						}
+					}
+				}
+			 Brick.prototype.getNewPresentationWithContext = function(context) {
+				 // Context contains informations such as ratio and pixels
+				 for(var i in this.presoFactories) {
+					 var factory = this.presoFactories[i];
+					 if (  factory.validity.pixelsMinDensity <= context.pixelsDensity
+						&& factory.validity.pixelsMaxDensity >= context.pixelsDensity
+						&& factory.validity.pixelsRatio === context.pixelsRatio
+						) {// This is the right factory!
+						   return this.getNewPresentation(factory.name);
+						  }
+					}
+				 return null;
 				}
 			 Brick.prototype.getNewPresentation = function(name) {
-				 var res = null;
-				 if(!res && name && this.presoFactories[name]) {res = new this.presoFactories[name].constr();}
-				 var Constrs = Object.keys(this.presoFactories);
-				 if(!res && Constrs.length > 0   ) {res = new this.presoFactories[Constrs[0]].constr();}
-				 if(res) {res.init(this);}
+				 var res = null, fact = null;
+				 if(name && this.presoFactories[name]) {
+					 fact = this.presoFactories[name];
+					} else {var Constrs = Object.keys(this.presoFactories);
+							if(Constrs.length > 0) {fact = this.presoFactories[Constrs[0]];}
+						   }
+				 if(fact) {
+					 if(fact.UIs.length > 0) {
+						 res = fact.UIs.splice(0,1)[0];
+						} else {res = new fact.constr();}
+					 res.init(this);
+					 res.validity = fact.validity;
+					 res.factory  = fact;
+					}
+					
 				 return res;
 				}
 			 Brick.prototype.call = function(target, json, CB) {

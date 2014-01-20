@@ -12,14 +12,18 @@ define( [ "Bricks/protoBricks"
 				 var self = this;
 				 this.id = id;
 				 socket.on(id, function(data) {self.update(data);});
-				 this.appendPresoFactory('PresoBasicSmartPlug', PresoBasicSmartPlug);
+				 this.appendPresoFactory( 'PresoBasicSmartPlug'
+										, PresoBasicSmartPlug
+										, { pixelsMinDensity : 0
+										  , pixelsMaxDensity : 999999999
+										  , pixelsRatio		 : 1 }
+										);
 				 // this.appendPresentations([new PresoBasicSmartPlug()]);
 				 // for(var p in this.presentations) {this.presentations[p].init(this);}
 				 return this;
 				};
 			 SmartPlug.prototype = new Brick();
 			 SmartPlug.prototype.constructor = SmartPlug;
-			 SmartPlug.prototype.init = Brick.prototype.init;
 			 SmartPlug.prototype.isOn = function() {return this.OnOff[this.OnOff.length-1].val}
 			 SmartPlug.prototype.update = function(data) {
 				 // console.log("Updating", data);
