@@ -1,6 +1,6 @@
 var RRServer = {
 	// Dependencies
-	  fs		: require('fs')
+	  fs		: require('fs-extra')
 	, express	: require('express')
 	, io		: require('socket.io')
 	, upnp		: require("UPnP/lib/upnp-controlpoint").UpnpControlPoint

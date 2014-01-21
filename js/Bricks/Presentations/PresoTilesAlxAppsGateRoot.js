@@ -24,6 +24,25 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					, 'urn:schemas-upnp-org:device:MediaRenderer:1' : null
 					, 'urn:schemas-upnp-org:device:MediaServer:1'	: null
 					}
+				 // Interaction
+				 var self = this;
+				 this.CB_clic = function(e) {
+									 // console.log("Click!", e);
+									 var M1 = self.groot.getCTM();
+									 var r = e.target;
+									 while(r && !r.classList.contains('TileRoot')) {r = r.parentNode;}
+									 r = r.TileRoot.getInnerRoot();
+									 var M2 = r.getCTM().inverse().translate(50,5).multiply(M1);
+									 
+									 var ms = Date.now(); //(new Date()).getTime();
+									 window.requestAnimFrame( function(time) {
+										var L_CB = [];
+										self.ComputeSemanticZoom( M1.inverse().multiply(M2)
+																, L_CB );
+										for(var i=0;i<L_CB.length;i++) {L_CB[i](0);} // Start
+										self.CB_zoom(ms, ms+1000, M1, M2, self.groot, L_CB/*L_toAppear, L_toDisappear*/);
+										});
+									}
 				}
 				
 			 PresoTilesAlxAppsGateRoot.prototype = new PresoTile();
@@ -58,25 +77,11 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.mapTile.set_svg_point( this.svg_point );
 					 
 					 svg.addEventListener( 'mousedown'
-										 , function(e) {
-												 // console.log("Click!", e);
-												 var M1 = self.groot.getCTM();
-												 var r = e.target;
-												 while(r && !r.classList.contains('TileRoot')) {r = r.parentNode;}
-												 r = r.TileRoot.getInnerRoot();
-												 var M2 = r.getCTM().inverse().translate(50,5).multiply(M1);
-												 
-												 var ms = Date.now(); //(new Date()).getTime();
-												 window.requestAnimFrame( function(time) {
-													var L_CB = [];
-													self.ComputeSemanticZoom( M1.inverse().multiply(M2)
-																			, L_CB );
-													for(var i=0;i<L_CB.length;i++) {L_CB[i](0);} // Start
-													self.CB_zoom(ms, ms+1000, M1, M2, self.groot, L_CB/*L_toAppear, L_toDisappear*/);
-													});
-												}
+										 , this.CB_clic
 										 , false);
-			
+					 /*setTimeout( function() {self.CB_clic( {target: svg} );}
+							   , 500 );*/
+					 window.requestAnimFrame( function() {self.CB_clic( {target: svg} );} );
 					}
 				 return this.root;
 				}
