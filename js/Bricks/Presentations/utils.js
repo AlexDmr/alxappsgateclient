@@ -12,7 +12,42 @@ define( function() {
 					    window.mozRequestAnimationFrame    ||
 					    function( callback ){window.setTimeout(callback, 1000 / 60);};
 				})();
+				
+			var AlxUtils = {
+				  L_CB		: []
+				, animate	: function(ms, CB) {
+					 var now = Date.now();
+					 var obj =  { CB		: CB
+								, duration	: ms
+								, start		: now
+								, end		: now + ms
+								}
+					 this.L_CB.push( obj );
+					 CB( {ms:now, dt:0} );
+					 this.animFrame();
+					}
+				, animFrame	: function() {
+					 if(this.isAnimating) {return;}
+					 this.isAnimating = true;
+					 var self = this;
+					 window.requestAnimFrame( function() {
+						 // alert('1');
+						 var now = Date.now();
+						 var L = self.L_CB, dt, o, ms;
+						 self.L_CB = [];
+						 for(var i=0; i<L.length; i++) {
+							 o = L[i];
+							 ms = Math.min(o.duration, now - o.start);
+							 dt = ms  / o.duration;
+							 o.CB( {ms:ms,dt:dt} );
+							 if(dt < 1) {self.L_CB.push(o);}
+							}
+						 self.isAnimating = false;
+						 if(self.L_CB.length) {self.animFrame();}
+						});
+					}
+				}
 			
-			return Math.easeInOutQuad;
+			return AlxUtils;
 		}
 	);

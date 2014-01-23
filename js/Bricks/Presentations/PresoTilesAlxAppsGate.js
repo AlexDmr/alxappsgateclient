@@ -7,10 +7,10 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 var PresoTilesAlxAppsGate = function() {
 				}
 			 PresoTilesAlxAppsGate.prototype = new Presentation();
+			 PresoTilesAlxAppsGate.prototype.constructor = PresoTilesAlxAppsGate;
 			 PresoTilesAlxAppsGate.prototype.set_svg_point = function(p) {svg_point = p;}
 			 PresoTilesAlxAppsGate.prototype.get_svg_point = function( ) {return svg_point;}
 			 PresoTilesAlxAppsGate.prototype.getTileSize   = function() {return size;}
-			 PresoTilesAlxAppsGate.prototype.constructor = PresoTilesAlxAppsGate;
 			 PresoTilesAlxAppsGate.prototype.init = function(brick) {
 				 Presentation.prototype.init.apply(this,[brick]);
 				 // console.log("PresoTilesAlxAppsGate Init");
@@ -109,7 +109,9 @@ define( [ "Bricks/Presentations/protoPresentation"
 						 L_CB.push( function(v) {
 										 self.CB_Fade(v,1,0,self.root);
 										 newPreso.CB_Fade(v,0,1,newPreso.root);
-										 if(v>=1) {self.brick.unPlugPresentation( self );}
+										 if(v>=1) {
+											 self.brick.unPlugPresentation( self );
+											}
 										}
 								  );
 						} else {console.log("Alerte, no other compatible presentations...");}

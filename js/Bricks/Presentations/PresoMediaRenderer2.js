@@ -12,7 +12,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoMediaRenderer2.prototype.Render = function() {
 				 this.root = Presentation.prototype.Render.apply(this,[]);
 				 var self = this;
-				 // if(!this.svgImg) {
+				 if(!this.svgImg) {
 					 this.svgImg = document.createElementNS("http://www.w3.org/2000/svg", 'image');
 						 this.svgImg.setAttributeNS('http://www.w3.org/1999/xlink','href', "images/MediaPlayer/pipoMediaPlayer.png");
 						 var size = this.getTileSize();
@@ -21,16 +21,17 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var parent = this.bgRect.parentNode;
 					 parent.removeChild( this.bgRect );
 					 parent.appendChild( this.svgImg );
-					// }
+					}
 				 return this.root;
 				}
-			 /*PresoMediaRenderer2.prototype.deletePrimitives = function() {
+			 PresoMediaRenderer2.prototype.deletePrimitives = function() {
 				 console.log("Deleting primitives of", this);
-				 if(this.root) {
-					 if(this.root.parentNode) {this.root.parentNode.removeChild(this.root);}
-					 this.root = null;
+				 Presentation.prototype.deletePrimitives.apply(this,[]);
+				 if(this.svgImg) {
+					 if(this.svgImg.parentNode) {this.svgImg.parentNode.removeChild(this.svgImg);}
+					 this.svgImg = null;
 					}
-				}*/
+				}
 			 PresoMediaRenderer2.prototype.adaptRender = function(scale, L_CB) {
 				 var res = Presentation.prototype.adaptRender.apply(this, [scale, L_CB]);
 				 console.log("PresoMediaRenderer2 scaling at", scale, " / [",this.validity.pixelsMinDensity,";",this.validity.pixelsMaxDensity,"]");

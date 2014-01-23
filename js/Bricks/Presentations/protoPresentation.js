@@ -8,11 +8,18 @@ define( function() {
 				 return 'PresoId_' + uid;
 				}
 			 Presentation.prototype.init = function(brick, children) {
-				 this.root			= null;
-				 this.children 		= children || [];
+				 this.root			= this.root || null;
+				 if(this.children) {
+					 for(var i=0; i<this.children.length; i++) {
+						 this.removeChild(this.children[i]);
+						}
+					}
+				 this.children 		= children  || [];
+				 if(this.parent) {this.parent.removeChild(this);}
 				 this.parent		= null;
+				 var prevBrick = this.brick;
 				 this.brick = brick; 
-				 if(brick) brick.appendPresentations([this]);
+				 if(prevBrick != brick) brick.appendPresentations([this]);
 				 for(var i=0;i<this.children.length;i++) {this.appendChild(this.children[i]);}
 				}
 			 // Definition of the Presentation class
@@ -40,6 +47,15 @@ define( function() {
 					 c.setParent(null);
 					}
 				}
+			 Presentation.prototype.getPresoBrickFromDescendant = function(brick) {
+				 if(this.brick === brick) {return this;}
+				 var rep = null;
+				 for(var i=0; i<this.children.length; i++) {
+					 rep = this.children[i].getPresoBrickFromDescendant(brick);
+					 if(rep) break;
+					}
+				 return rep;
+				}
 			 Presentation.prototype.appendChildFromBrick = function(brick, fParams, constrName) {
 				 // If a presentation constructor has been specified...
 				 if(constrName) {
@@ -52,14 +68,14 @@ define( function() {
 				 for(var p in brick.presentations) {
 					 var preso = brick.presentations[p];
 					 if(preso.parent === null) {
-						 fParams.apply(preso, []);
+						 if(fParams) {fParams.apply(preso, []);}
 						 this.appendChild(preso);
 						 return preso;
 						} else {console.log("\tchild preso",p,"is still plugged to",preso.parent);}
 					}
 				 // Last, if there is a factory...
 				 var preso = brick.getNewPresentation();
-				 if(preso) {fParams.apply(preso, []);
+				 if(preso) {if(fParams) {fParams.apply(preso, []);}
 							this.appendChild(preso);
 							return preso;}
 				 return null;
@@ -83,7 +99,11 @@ define( function() {
 				 return this.root;
 				}
 			 Presentation.prototype.deletePrimitives = function() {
-				 if(this.root) {this.root.parentNode.removeChild(this.root);this.root=null;}
+				 console.log("Presentation::deletePrimitives", this);
+				 if(this.root && this.rootparentNode) {
+					 this.root.parentNode.removeChild(this.root);
+					 this.root = null;
+					}
 				}
 			 Presentation.prototype.forceRender = function() {
 				 var primitiveParent;
