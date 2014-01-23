@@ -14,7 +14,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 var self = this;
 				 Presentation.prototype.Render.apply(this, []) ;//this.RenderPresoTile();
 				 // Text for consumption
-				 this.consoText = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+				 if(!this.consoText) {
+					this.consoText = document.createElementNS("http://www.w3.org/2000/svg", 'text');
 					var coords = this.getPresoCoords();
 					this.consoText.setAttribute('x', coords.x2);
 					this.consoText.setAttribute('y', coords.y1);
@@ -22,19 +23,22 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					this.consoText.style.baselineShift = '-1em';
 					this.consoText.textContent = this.brick.consumption[this.brick.consumption.length-1].val + 'W';
 					this.updateOnOff(this.brick.isOn());
-					this.rect.addEventListener( 'dblclick'
+					this.root.addEventListener( 'click'
 											  , function(e) {self.toggle();
 															 e.preventDefault();
 															 e.stopPropagation();
 															}
 											  , false);
-				 this.gPreso.appendChild(this.consoText);
+					this.gPreso.appendChild(this.consoText);
+					}
 				 
 				 return this.root;
 				}
 			 PresoBasicSmartPlug.prototype.deletePrimitives = function() {
-				 PresoBasicSmartPlug.prototype.deletePrimitives.apply(this, []);
-				 if(this.consoText) {this.consoText.parentNode.removeChild( this.consoText );}
+				 Presentation.prototype.deletePrimitives.apply(this, []);
+				 if(this.consoText) {this.consoText.parentNode.removeChild( this.consoText );
+									 this.consoText = null;
+									}
 				}
 			 PresoBasicSmartPlug.prototype.updateConsumption = function(v) {
 				 // if(this.Consumption) {this.Consumption.innerText = v;}

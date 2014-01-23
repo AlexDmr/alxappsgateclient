@@ -2,28 +2,22 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		, "Bricks/Presentations/PresoBasicUniversMap"
 		, "Bricks/Presentations/PresoBasicUniversType"
 		, "Bricks/Presentations/utils"
+		, "utils/svg"
 		]
-	  , function(PresoTile, PresoBasicUniversMap, PresoBasicUniversType) {
+	  , function( PresoTile, PresoBasicUniversMap, PresoBasicUniversType, AlxUtils
+				, DragManager
+				) {
 			 // Presentation
 			 var PresoTilesAlxAppsGateRoot = function() {
 				 this.x = 0; this.y = 0;
 				 this.w = this.h = 12;
+				 
+				 // Universe
 				 this.UniversTiles = [];
 				 this.mapTile  = new PresoBasicUniversMap (); this.UniversTiles.push(this.mapTile);
 				 this.typeTile = new PresoBasicUniversType(); this.UniversTiles.push(this.typeTile);
 				 for(var i=0;i<this.UniversTiles.length;i++) {this.UniversTiles[i].init(null,[]);}
-				 this.bricksMap = {
-					  0		: null // Temperature
-					, 1		: null // Luminosité
-					, 2		: null // ???
-					, 3		: null // Capteur de contact
-					, 6		: this.typeTileSmartPlug	// SmartPlug
-					, 7		: null // HueLamp
-					, 20	: null // ???
-					, 21	: null // Horloge
-					, 'urn:schemas-upnp-org:device:MediaRenderer:1' : null
-					, 'urn:schemas-upnp-org:device:MediaServer:1'	: null
-					}
+				 
 				 // Interaction
 				 var self = this;
 				 this.CB_clic = function(e) {
@@ -40,7 +34,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 										self.ComputeSemanticZoom( M1.inverse().multiply(M2)
 																, L_CB );
 										for(var i=0;i<L_CB.length;i++) {L_CB[i](0);} // Start
-										self.CB_zoom(ms, ms+1000, M1, M2, self.groot, L_CB/*L_toAppear, L_toDisappear*/);
+										self.CB_zoom(ms, ms+1000, M1, M2, self.groot, L_CB);
 										});
 									}
 				}
@@ -62,30 +56,56 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.root  = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 						this.root.classList.add('TileRoot');
 						this.root.TileRoot = this;
+						this.idMatrix = this.root.createSVGMatrix();
 						// this.root.setAttribute('xmlns:xlink', "http://www.w3.org/1999/xlink");
 						this.root.setAttributeNS('http://www.w3.org/2000/svg','xlink','http://www.w3.org/1999/xlink');
 						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'width' , '100%');
 						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'height', '100%');
 
+					 this.pipoRoot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 					 this.groot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 						this.groot.classList.add('rootInternal');
 						// this.groot.setAttribute('transform', 'scale(2,2)');
-					 this.root.appendChild(this.groot);
+					 
+					 
+					 //this.root.appendChild(this.groot);
+					 this.pipoRoot.appendChild(this.groot);
+					 this.root.appendChild(this.pipoRoot);
 					 
 					 var svg = this.root;
 					 this.svg_point = svg.createSVGPoint();
 					 this.mapTile.set_svg_point( this.svg_point );
 					 
-					 svg.addEventListener( 'mousedown'
+					 svg.addEventListener( 'dblclick'
 										 , this.CB_clic
 										 , false);
 					 /*setTimeout( function() {self.CB_clic( {target: svg} );}
 							   , 500 );*/
 					 window.requestAnimFrame( function() {self.CB_clic( {target: svg} );} );
+					 // DragManager
+					 DragManager.init(this.root);
+					 DragManager.addDraggable( this.groot
+											 , { eventNode	: this.root
+											   , CB_zoom	: function() {
+													 var L_CB = [];
+													 self.ComputeSemanticZoom( self.idMatrix, L_CB);
+													 // if(L_CB.length) {alert('gogogo?');}
+													 if(L_CB.length)
+													 AlxUtils.animate( 300
+																	 , function(pos) {
+																		 for(var i=0;i<L_CB.length;i++) {
+																			try {
+																				L_CB[i](pos.dt);
+																				} catch(e) {alert('error on CB : ' + e);}
+																			}
+																		}
+																	 );
+													}
+											   }
+											 );
 					}
 				 return this.root;
 				}
-
 			 PresoTilesAlxAppsGateRoot.prototype.CB_zoom = function(ms1,ms2,M1,M2,node,L_CB) {
 				var self = this;
 				var ms = Date.now();

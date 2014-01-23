@@ -1,6 +1,6 @@
 define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		]
-	  , function(PresoTile) {
+	  , function(PresoTile, PresoCategSmartPlug) {
 			 // Presentation
 			 var PresoBasicUnivers = function() {
 				 this.x = this.y = 0;
@@ -8,6 +8,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.imgPath = 'images/lego.jpg';
 				 this.display = true;
 				 // Define some rooms...
+				 // this.mapPreso = {"PresoCategSmartPlug": PresoCategSmartPlug}
 				 this.mapData = {
 					  x : 7, y : 3
 					, w : 5, h : 5
@@ -32,12 +33,16 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoBasicUnivers.prototype.buildMap = function(data, tile) {
 				 // console.log(data.name || data.categId);
 				 if(!tile) {
-					 tile = new PresoTile();
-					 tile.init(null, []);
+					 var tile = null;
+					 if (data.categId && data.brick) {
+						 tile = data.brick.getNewPresentation();
+						} else {tile = new PresoTile();
+								tile.init(null, []);
+							   }
 					 data.tile = tile;
 					 if(data.categId) {
 						 if(!this.mapCategIdToTile[data.categId]) {this.mapCategIdToTile[data.categId] = [];}
-						 this.mapCategIdToTile[data.categId].push( {data: data, tile: tile} );
+						 this.mapCategIdToTile[data.categId].push( {data: data, tile: tile, brick: data.brick} );
 						}
 					 if(data.brickId) {
 						 if(!this.mapBrickIdToTile[data.brickId]) {this.mapBrickIdToTile[data.brickId] = [];}
@@ -55,19 +60,29 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 return tile;
 				}
 			 PresoBasicUnivers.prototype.integrateBrick = function(brick) {
+				 // console.log("Integrating", brick);
 				 // Find where to place the brick if it can be...
 				 var L; if(this.mapCategIdToTile[brick.type]) {L=this.mapCategIdToTile[brick.type].length;} else {L=0;}
 				 // console.log('New brick typed ', brick.type, 'mapped to ', L);
 				 for(var i=0;i<L;i++) {
-					 var parentTile = this.mapCategIdToTile[brick.type][i].tile;
+					 var parentTile  = this.mapCategIdToTile[brick.type][i].tile
+					   , parentBrick = this.mapCategIdToTile[brick.type][i].brick;
 					 var width = Math.floor( this.innerMagnitude*parentTile.w / Math.max(parentTile.w, parentTile.h) );
 					 var x = parentTile.children.length % width;
 					 var y = Math.floor(parentTile.children.length / width);
-					 var tile = parentTile.appendChildFromBrick	( brick
-					 											, function() {this.x = x; this.y = y; this.w = 1; this.h = 1;}
-																, undefined
-																, this.getChildrenContext(1, 1)
-																);
+					 var f_config = function() {this.x = x; this.y = y; this.w = 1; this.h = 1;};
+					 if(parentBrick) {
+						 parentBrick.appendChild(brick);
+						 var tile = this.getPresoBrickFromDescendant(brick);
+						 f_config.apply(tile,[]);
+						 tile.forceRender();
+						} else {
+								 var tile = parentTile.appendChildFromBrick	( brick
+																			, f_config
+																			, undefined
+																			// , this.getChildrenContext(1, 1)
+																			); 
+								}
 					}
 				 if(this.mapBrickIdToTile[brick.type]) {L=this.mapBrickIdToTile[brick.type].length;} else {L=0;}
 				 for(var i=0;i<L;i++) {
@@ -78,7 +93,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var tile = parentTile.appendChildFromBrick	( brick
 					 											, function() {this.x = data.x; this.y = data.y; this.w = data.w; this.h = data.h; this.color = data.color || 'white';}
 																, undefined
-																, this.getChildrenContext(1, 1)
+																// , this.getChildrenContext(1, 1)
 																);
 					 this.mapBrickIdToTile[brick.id][i].tile = tile;
 					}
