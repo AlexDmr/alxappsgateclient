@@ -13,9 +13,20 @@ define( function() {
 					    function( callback ){window.setTimeout(callback, 1000 / 60);};
 				})();
 				
+			var pDebug = null, nb = 0;
 			var AlxUtils = {
 				  L_CB		: []
 				, animate	: function(ms, CB) {
+					 pDebug = document.getElementById('pDebug');
+					 if(!pDebug) {
+						 pDebug = document.createElement('p');
+						 pDebug.setAttribute('id', 'pDebug');
+						 pDebug.style.position = 'fixed';
+						 pDebug.style.top  = '0px';
+						 pDebug.style.left = '0px';
+						 pDebug.innerText = 'Debug';
+						 document.body.appendChild( pDebug );
+						}
 					 var now = Date.now();
 					 var obj =  { CB		: CB
 								, duration	: ms
@@ -30,6 +41,7 @@ define( function() {
 					 if(this.isAnimating) {return;}
 					 this.isAnimating = true;
 					 var self = this;
+					 pDebug.innerText = nb++;
 					 window.requestAnimFrame( function() {
 						 // alert('1');
 						 var now = Date.now();

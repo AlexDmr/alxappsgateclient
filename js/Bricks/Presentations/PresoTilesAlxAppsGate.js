@@ -95,14 +95,17 @@ define( [ "Bricks/Presentations/protoPresentation"
 				var res;
 				var self = this;
 				
-				if(  scale < this.validity.pixelsMinDensity
-				  || scale > this.validity.pixelsMaxDensity ) {
+				if(  !this.isGoingToDisappear
+				  && (  scale < this.validity.pixelsMinDensity
+					 || scale > this.validity.pixelsMaxDensity )
+				  ) {
 					 console.log("Presentation outside its plasticity domain :");
 					 var newPreso = this.brick.getNewPresentationWithContext( 
 										{ pixelsRatio	: this.w / this.h
 										, pixelsDensity	: scale }
 										);
 					 if(newPreso) {
+						 this.isGoingToDisappear = true;
 						 newPreso.x = this.x; newPreso.y = this.y
 						 newPreso.w = this.w; newPreso.h = this.h;
 						 this.parent.appendChild( newPreso );
