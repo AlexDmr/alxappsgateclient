@@ -17,13 +17,9 @@ define( function() {
 				 this.presoFactories[name] = {name:name,constr:constr,validity:validity,UIs:[]};
 				}
 			 Brick.prototype.unPlugPresentation = function(preso) {
-				 if(preso.factory) {
-					 preso.factory.UIs.push(preso);
-					 var parent = preso.parent;
-					 if(parent) {
-						 parent.removeChild(preso);
-						}
-					}
+				 if(preso.factory) {preso.factory.UIs.push(preso);}
+				 var parent = preso.parent;
+				 if(parent) {parent.removeChild(preso);}
 				}
 			 Brick.prototype.getNewPresentationWithContext = function(context) {
 				 // Context contains informations such as ratio and pixels
@@ -53,7 +49,7 @@ define( function() {
 					 res.validity = fact.validity;
 					 res.factory  = fact;
 					}
-					
+				 if(res) {res.isGoingToDisappear = false;}
 				 return res;
 				}
 			 Brick.prototype.call = function(target, json, CB) {

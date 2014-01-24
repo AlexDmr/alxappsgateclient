@@ -65,8 +65,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.pipoRoot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 					 this.groot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 						this.groot.classList.add('rootInternal');
-						// this.groot.setAttribute('transform', 'scale(2,2)');
-					 
 					 
 					 //this.root.appendChild(this.groot);
 					 this.pipoRoot.appendChild(this.groot);
@@ -79,8 +77,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 svg.addEventListener( 'dblclick'
 										 , this.CB_clic
 										 , false);
-					 /*setTimeout( function() {self.CB_clic( {target: svg} );}
-							   , 500 );*/
 					 window.requestAnimFrame( function() {self.CB_clic( {target: svg} );} );
 					 // DragManager
 					 DragManager.init(this.root);
@@ -89,7 +85,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											   , CB_zoom	: function() {
 													 var L_CB = [];
 													 self.ComputeSemanticZoom( self.idMatrix, L_CB);
-													 // if(L_CB.length) {alert('gogogo?');}
 													 if(L_CB.length)
 													 AlxUtils.animate( 300
 																	 , function(pos) {
