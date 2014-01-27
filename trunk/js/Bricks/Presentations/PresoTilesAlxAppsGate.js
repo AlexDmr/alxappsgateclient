@@ -1,16 +1,59 @@
 define( [ "Bricks/Presentations/protoPresentation"
 		]
 	  , function(Presentation) {
-			 var dt = 0.1, size = 32, svg_point = null;
+			 var dt = 0.1, size = 32, svg_point = null
+			   , L_toUnplugged = [], L_dragged = [];
 			 
 			 // Presentation
 			 var PresoTilesAlxAppsGate = function() {
 				}
 			 PresoTilesAlxAppsGate.prototype = new Presentation();
 			 PresoTilesAlxAppsGate.prototype.constructor = PresoTilesAlxAppsGate;
+			 // Taking care of dragged node (to avoid unplugging them while dragging)
+			 PresoTilesAlxAppsGate.prototype.pushDragged = function( obj ) {
+				 var node = obj.target;
+				 obj.L_nodes = [];
+				 while(node.parentNode) {obj.L_nodes.push(node); node=node.parentNode;}
+				 L_dragged.push(obj);
+				 // console.log("added to L_dragged :");
+				 // console.log(obj);
+				}
+			 PresoTilesAlxAppsGate.prototype.removeDragged = function( idPtr ) {
+				 for(var i=0; i<L_dragged.length; i++) {
+					 if(L_dragged[i].id === idPtr) {
+						 L_dragged.splice(i,1);
+						 // console.log("Removing dragged element, now :", L_dragged);
+						 break;
+						}
+					}
+				}
+			 PresoTilesAlxAppsGate.prototype.isDragging = function( node ) {
+				 // console.log("Is dragging", node);
+				 for(var i=0; i<L_dragged.length; i++) {
+					 // console.log( i, ":", L_dragged[i].L_nodes.indexOf(node), ':', L_dragged[i].L_nodes );
+					 if(L_dragged[i].L_nodes.indexOf(node) >= 0) {return L_dragged[i].id;}
+					}
+				 return null;
+				}
+			 PresoTilesAlxAppsGate.prototype.pushTileToUnplug = function(tile) {
+				 L_toUnplugged.push( tile );
+				}
+			 PresoTilesAlxAppsGate.prototype.UnplugTilesNoMoreDragged = function(idPtr) {
+				 // Unplug only if the tile is no more related to any pointer
+				 var L = [];
+				 for(var i=0; i<L_toUnplugged.length; i++) {
+					 if(this.isDragging(L_toUnplugged[i].root) === null) {
+						 // console.log('UnplugTilesNoMoreDragged', L_toUnplugged[i]);
+						 L_toUnplugged[i].brick.unPlugPresentation( L_toUnplugged[i] );
+						} else {L.push( L_toUnplugged[i] );}
+					}
+				 L_toUnplugged = L;
+				}
+			 // Access to SVG point and some shared data
 			 PresoTilesAlxAppsGate.prototype.set_svg_point = function(p) {svg_point = p;}
 			 PresoTilesAlxAppsGate.prototype.get_svg_point = function( ) {return svg_point;}
 			 PresoTilesAlxAppsGate.prototype.getTileSize   = function() {return size;}
+			 // Init & co
 			 PresoTilesAlxAppsGate.prototype.init = function(brick) {
 				 Presentation.prototype.init.apply(this,[brick]);
 				 // console.log("PresoTilesAlxAppsGate Init");
@@ -80,14 +123,14 @@ define( [ "Bricks/Presentations/protoPresentation"
 						} else {scale = 0;}
 				 return {pixelsDensity:scale,pixelsRatio:w/h};
 				}
-			 PresoTilesAlxAppsGate.prototype.ComputeSemanticZoom = function(MT, L_toAppear, L_toDisappear) {
+			 PresoTilesAlxAppsGate.prototype.ComputeSemanticZoom = function(MT, L_CB/*L_toAppear, L_toDisappear*/) {
 				var scale = this.getChildrenContext(this.w, this.h, MT);
 				scale = scale.pixelsDensity;
 				// console.log(scale);
-				if(this.adaptRender(scale,L_toAppear,L_toDisappear)) {
+				if(this.adaptRender(scale,L_CB/*L_toAppear,L_toDisappear*/)) {
 					// Recursing across semantic zoom structure
 					for(var i=0;i<this.children.length;i++) {
-						 this.children[i].ComputeSemanticZoom(MT, L_toAppear, L_toDisappear);
+						 this.children[i].ComputeSemanticZoom(MT, L_CB/*L_toAppear, L_toDisappear*/);
 						}
 					}
 				}
@@ -99,7 +142,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				  && (  scale < this.validity.pixelsMinDensity
 					 || scale > this.validity.pixelsMaxDensity )
 				  ) {
-					 console.log("Presentation outside its plasticity domain :");
+					 // console.log("Presentation outside its plasticity domain :");
 					 var newPreso = this.brick.getNewPresentationWithContext( 
 										{ pixelsRatio	: this.w / this.h
 										, pixelsDensity	: scale }
@@ -113,11 +156,16 @@ define( [ "Bricks/Presentations/protoPresentation"
 										 self.CB_Fade(v,1,0,self.root);
 										 newPreso.CB_Fade(v,0,1,newPreso.root);
 										 if(v>=1) {
-											 self.brick.unPlugPresentation( self );
+											 if(self.isDragging(self.root) != null) {
+												 console.log("Do not unplugged", self);
+												 self.pushTileToUnplug( self );
+												} else {console.log("Unplug", self);
+														self.brick.unPlugPresentation( self );
+													   }
 											}
 										}
 								  );
-						} else {console.log("Alerte, no other compatible presentations...");}
+						} else {console.log("Alert, no other compatible presentations...");}
 					}
 				if(scale < this.scaleToDisplayChildren) {
 					 if(this.display) {this.display = false;

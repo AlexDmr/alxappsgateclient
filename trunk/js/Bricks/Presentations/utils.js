@@ -5,7 +5,6 @@ define( function() {
 				t--;
 				return -c/2 * (t*(t-2) - 1) + b;
 			};
-
 			window.requestAnimFrame = (function(){
 				return  window.requestAnimationFrame       ||
 					    window.webkitRequestAnimationFrame ||
@@ -15,9 +14,18 @@ define( function() {
 				
 			var pDebug = null, nb = 0;
 			var AlxUtils = {
-				  L_CB		: []
+				  generateSubscribers : function(C, name) {
+					 C['initSubscribers_'+name] = function() {this['L_CB_'+name] = {};}
+					 C['Subscribe_'+name] = function(id, CB) {this['L_CB_'+name][id] = CB;}
+					 C['UnSubscribe_'+name] = function(id) {delete this['L_CB_'+name][id];}
+					 C['CallSubscribers_'+name] = function() {
+						 for(var i in this['L_CB_'+name]) {this['L_CB_'+name][i].apply(this, arguments);}
+						}
+					}
+				// --- Animation ---
+				, L_CB		: []
 				, animate	: function(ms, CB) {
-					 pDebug = document.getElementById('pDebug');
+					 pDebug = true;//document.getElementById('pDebug');
 					 if(!pDebug) {
 						 pDebug = document.createElement('p');
 						 pDebug.setAttribute('id', 'pDebug');

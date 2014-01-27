@@ -20,7 +20,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 			 PresoMediaRenderer.prototype.adaptRender = function(scale, L_CB) {
 				 var res = Presentation.prototype.adaptRender.apply(this, [scale, L_CB]);
-				 console.log("PresoMediaRenderer scaling at", scale, " / [",this.validity.pixelsMinDensity,";",this.validity.pixelsMaxDensity,"]");
+				 // console.log("PresoMediaRenderer scaling at", scale, " / [",this.validity.pixelsMinDensity,";",this.validity.pixelsMaxDensity,"]");
 				 return res;
 				}
 				

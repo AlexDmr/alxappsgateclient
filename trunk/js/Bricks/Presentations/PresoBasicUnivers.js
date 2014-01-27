@@ -137,6 +137,10 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					}
 				 return this.root;
 				}
+			 // PresoBasicUnivers.prototype.adaptRender = function(scale, L_CB) {
+				 // var res = PresoTile.prototype.adaptRender.apply(this, [scale, L_CB]);
+				 // return res;
+				// }
 			 PresoBasicUnivers.prototype.CB_Fade = function(dt, v0, v1) {
 				 if(v0 === 1 && dt === 0) {this.gImage.style.display = 'inherit';}
 				 if(v0 === 0 && dt === 0) {this.rect.style.display = 'inherit';}

@@ -34,7 +34,7 @@ define( [ 'Bricks/HueLamp'
 				 this.call( 'AlxServer'
 						  , {mtd:'getBricks', args:[]}
 						  , function(data) {
-								 console.log("Received", data);
+								 // console.log("Received", data);
 								 if(data.success) {
 									 AlxClient.newBricksList(data.res);
 									}
