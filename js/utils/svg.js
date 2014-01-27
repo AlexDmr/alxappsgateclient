@@ -1,6 +1,6 @@
-define( [ 
+define( [ "Bricks/Presentations/utils"
 		]
-		, function() {
+		, function(utils) {
 var DragManager = {
 	  can	: null
 	, id	: 0
@@ -155,7 +155,7 @@ var DragManager = {
 		}
 	, startDragMouse	: function (e, node) {
 		 var coords = DragManager.getCoordinate_relative_to(e.pageX, e.pageY, DragManager.can);
-		 DragManager.startDrag(node /*e.currentTarget*/, "mouse", coords.x, coords.y);
+		 DragManager.startDrag(e, node, "mouse", coords.x, coords.y);
 		}
 	, startDragTouch	: function (e, node) {
 		 e.preventDefault();
@@ -163,10 +163,10 @@ var DragManager = {
 		 for(var i=0;i<e.changedTouches.length;i++) {
 			 evt    = e.changedTouches.item(i);
 			 coords = DragManager.getCoordinate_relative_to(evt.pageX, evt.pageY, DragManager.can);
-			 DragManager.startDrag(node /*evt.currentTarget*/, evt.identifier, coords.x, coords.y);
+			 DragManager.startDrag(evt, node, evt.identifier, coords.x, coords.y);
 			}
 		}
-	, startDrag			: function (node, id_ptr, x, y) {
+	, startDrag			: function (e, node, id_ptr, x, y) {
 		 // Still fully used?
 		 var i = this.indexOfNode(node);
 		 if( this.TabDragged_node.indexOf(node) >= 0
@@ -186,17 +186,20 @@ var DragManager = {
 					 this.TabDraggable[i].pt2.x   = x;
 					 this.TabDraggable[i].pt2.y   = y;
 					 this.TabDraggable[i].pt2     = this.TabDraggable[i].pt2.matrixTransform( M );
+					 // console.log("----------------------------RotoZoom--------------------------------------------");
 					 // console.log("now using pointer2 = " + this.TabDraggable[i].id_ptr2);
 					}
 		 // Register
 		 this.TabDragging_ptr.push(id_ptr);
+		 this.updateInteraction(id_ptr, x, y);
+		 this.CallSubscribers_AddPtr(id_ptr, node, e.target);
 		}
-	, stopDragMouse		: function (e) {DragManager.stopDrag("mouse");}
+	, stopDragMouse		: function (e) {DragManager.stopDrag(e, "mouse");}
 	, stopDragTouch		: function (e) {
 		 e.preventDefault();
-		 for(var i=0;i<e.changedTouches.length;i++) {DragManager.stopDrag(e.changedTouches.item(i).identifier);}
+		 for(var i=0;i<e.changedTouches.length;i++) {DragManager.stopDrag(e.changedTouches.item(i), e.changedTouches.item(i).identifier);}
 		}
-	, stopDrag			: function (id_ptr) {
+	, stopDrag			: function (e, id_ptr) {
 		 var i = this.indexOfPointer(id_ptr);
 		 if(i == -1) {return;}
 		 this.TabDragging_ptr.splice(this.TabDragging_ptr.indexOf(id_ptr), 1);
@@ -210,6 +213,7 @@ var DragManager = {
 			 this.TabDragged_node.splice(this.TabDragged_node.indexOf(this.TabDraggable[i].node), 1);
 			}
 		 // this.TabDraggable[i].id_ptr1 = null;
+		 this.CallSubscribers_SubPtr(id_ptr, e.target);
 		}
 	, updateInteractionMouse : function (e) {
 		 var coords = DragManager.getCoordinate_relative_to(e.pageX, e.pageY, DragManager.can);
@@ -255,7 +259,13 @@ var DragManager = {
 			} else {obj.pt2p.x = x; obj.pt2p.y = y;
 					obj.pt2p = obj.pt2p.matrixTransform( obj.node.parentNode.getCTM().inverse() );
 				   }
-		 // console.log("RotoZoom with " + id_ptr);
+		 // console.log("RotoZoom");
+		 /*console.log("RotoZoom <" + this.TabDraggable[i].pt1p.x + ';' + this.TabDraggable[i].pt1p.y + '>'
+							+' <' + this.TabDraggable[i].pt2p.x + ';' + this.TabDraggable[i].pt2p.y + '>'
+							+ "------"
+							+ "<" + this.TabDraggable[i].pt1.x + ';' + this.TabDraggable[i].pt1.y + '>'
+							+' <' + this.TabDraggable[i].pt2.x + ';' + this.TabDraggable[i].pt2.y + '>');
+		 */
 		 var dx  = this.TabDraggable[i].pt1.x - this.TabDraggable[i].pt2.x
 		   , dy  = this.TabDraggable[i].pt1.y - this.TabDraggable[i].pt2.y
 		   , dxp = this.TabDraggable[i].pt1p.x - this.TabDraggable[i].pt2p.x
@@ -333,6 +343,10 @@ var DragManager = {
 			} ); 
 		}
 };
+
+// Generate_accessors
+utils.generateSubscribers(DragManager, 'AddPtr');
+utils.generateSubscribers(DragManager, 'SubPtr');
 
 return DragManager;
 }
