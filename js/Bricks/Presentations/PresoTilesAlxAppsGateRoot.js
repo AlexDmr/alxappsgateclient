@@ -1,10 +1,14 @@
 define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		, "Bricks/Presentations/PresoBasicUniversMap"
 		, "Bricks/Presentations/PresoBasicUniversType"
+		, "Bricks/Presentations/PresoBasicPalette"
 		, "Bricks/Presentations/utils"
 		, "utils/svg"
 		]
-	  , function( PresoTile, PresoBasicUniversMap, PresoBasicUniversType, AlxUtils
+	  , function( PresoTile
+				, PresoBasicUniversMap, PresoBasicUniversType
+				, PresoBasicPalette
+				, AlxUtils
 				, DragManager
 				) {
 			 // Presentation
@@ -16,6 +20,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.L_touches = []; this.D_touchClick = {};
 				 this.touchClickTimer = null;
 				 this.msClick = 100; this.msDblClick = 250;
+				 
+				 // Palette
+				 this.palette = new PresoBasicPalette();
 				 
 				 // Universe
 				 this.UniversTiles = [];
@@ -77,6 +84,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 				
 			 PresoTilesAlxAppsGateRoot.prototype = new PresoTile();
+			 PresoTilesAlxAppsGateRoot.prototype.getSvgCanvas = function() {return this.root;}
 			 // PresoTilesAlxAppsGateRoot.prototype.initPresoTile = PresoTilesAlxAppsGateRoot.prototype.init;
 			 PresoTilesAlxAppsGateRoot.prototype.init = function(brick, children) {
 				 PresoTile.prototype.init.apply(this,[brick, children]); //this.initPresoTile(brick, children);
@@ -107,7 +115,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						 delete this.D_touchClick[ this.L_touches[1].id ]
 						 
 						 // Callback
-						 this.CB_clic( {target: this.L_touches[0].target} );
+						 // this.CB_clic( {target: this.L_touches[0].target} );
+						 var evt = new MouseEvent('dblclick');
+						 evt.initMouseEvent('dblclick', true, true);
+						 var ptr = this.L_touches[3];
+						 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
+						 ptr.target.dispatchEvent(evt);
 						}
 					 }
 				}
@@ -116,12 +129,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 for(var i in this.D_touchClick) {
 					 ptr = this.D_touchClick[i];
 					 if(ptr.click) {
-						 // console.log('Click on', ptr.target);
 						 var evt = new MouseEvent('click');
 						 evt.initMouseEvent('click', true, true);
 						 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
-						 // evt.bubbling = true;
-						 // console.log(evt);
 						 ptr.target.dispatchEvent(evt);
 						} else {if(ptr.ms > ms-this.msDblClick) {D[i] = this.D_touchClick[i];}
 							   }
@@ -142,7 +152,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 // Manage double click
 				 if(e.touches.length === 0) {
 					 ptr = e.changedTouches.item(0);
-					 var obj = {ms:ms,evt:0,id:ptr.identifier,x:ptr.clientX,y:ptr.clientY};
+					 var obj = {ms:ms,evt:0,id:ptr.identifier,x:ptr.clientX,y:ptr.clientY,target:ptr.target};
 					 this.L_touches.push(obj);
 					 // console.log( this.L_touches );
 					 this.processL_touches(ms);
@@ -173,8 +183,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						this.root.TileRoot = this;
 						this.idMatrix = this.root.createSVGMatrix();
 						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'xlink' , 'http://www.w3.org/1999/xlink');
-						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'width' , '100%');
-						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'height', '100%');
+						// this.root.setAttribute('width' , '1000');
+						// this.root.setAttribute('height', '500');
+						// this.root.setAttribute('viewBox', '0 0 1000 500');
 
 					 this.pipoRoot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 					 this.groot = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -186,6 +197,17 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var scale = window.innerWidth / 1000;
 					 this.pipoRoot.setAttribute('transform', 'scale('+scale+','+scale+')');
 					 
+					 // Plug the palette
+					 this.palette.init();
+						 var pRoot = this.palette.Render();
+						 this.pipoRoot.appendChild( pRoot );
+						 pRoot.setAttribute( 'transform'
+										   , 'translate('+ (1000  - this.getTileSize()*this.palette.w/2) + 
+													  ','+ (- this.getTileSize()*this.palette.h/2) +
+													  ')');
+					 
+					 
+					 // Plug the universes
 					 var svg = this.root;
 					 this.svg_point = svg.createSVGPoint();
 					 this.mapTile.set_svg_point( this.svg_point );
@@ -195,8 +217,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 
 					 // DragManager
 					 DragManager.init(this.root);
-					 DragManager.initSubscribers_AddPtr();
-					 DragManager.initSubscribers_SubPtr();
 					 DragManager.Subscribe_AddPtr( 'AlxClient'
 												 , function(id, node, target) {
 													 // console.log('Adding a pointer', id);
@@ -215,6 +235,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.root.addEventListener	( 'touchend'  , function(e) {self.touchend(e);} , false);
 					 DragManager.addDraggable( this.groot
 											 , { eventNode	: this.root
+											   , pathNodes	: [{node:pRoot,goThrough:false}]
 											   , CB_zoom	: function() {
 													 var L_CB = [];
 													 self.ComputeSemanticZoom( self.idMatrix, L_CB);
@@ -253,7 +274,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									   + ')'
 								 );
 				}
-
 			 // Return the reference to the PresoTilesAlxAppsGateRoot constructor
 			 return PresoTilesAlxAppsGateRoot;
 			}

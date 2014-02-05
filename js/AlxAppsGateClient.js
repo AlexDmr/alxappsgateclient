@@ -1,12 +1,20 @@
-define( [ 'Bricks/HueLamp'
+define( [ 'Bricks/protoBricks'
+		, "Bricks/Presentations/PresoTilesAlxAppsGateRoot"
+		, 'Bricks/HueLamp'
 		, 'Bricks/SmartPlug'
 		, 'Bricks/UpnpMediaServer'
 		, 'Bricks/UpnpMediaRenderer'
-		, 'Bricks/protoBricks'
-		, "Bricks/Presentations/PresoTilesAlxAppsGateRoot"
+		, 'Bricks/Clock'
 		]
-	  , function(HueLamp, SmartPlug, UpnpMediaServer, UpnpMediaRenderer, Brick, Preso) { 
-			 var AlxClient = {nbBricks:0};
+	  , function( Brick, Preso
+	            , HueLamp
+				, SmartPlug
+				, UpnpMediaServer, UpnpMediaRenderer
+				, Clock
+				) { 
+			 var AlxClient = { nbBricks	: 0
+							 , devices	: {}
+							 };
 			 AlxClient.__proto__ = new Brick();
 			 AlxClient.devices = {};
 			 AlxClient.bricksMap = {
@@ -17,7 +25,7 @@ define( [ 'Bricks/HueLamp'
 				, 6		: SmartPlug
 				, 7		: null // HueLamp
 				, 20	: null // ???
-				, 21	: null // Horloge
+				, 21	: Clock // Horloge
 				, 'urn:schemas-upnp-org:device:MediaRenderer:1' : UpnpMediaRenderer
 				, 'urn:schemas-upnp-org:device:MediaServer:1'	: UpnpMediaServer
 				}
@@ -56,7 +64,6 @@ define( [ 'Bricks/HueLamp'
 						 var newBrick = new Constr(id, brick);
 						 newBrick.type = type;
 						 // console.log(this.presentations.length,"New brick", brick);
-						 pipo = this;
 						 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].integrateBrick(newBrick);}
 						} else {/*console.log("Unsupported brick type :", type, " for", brick);*/}
 					}

@@ -64,6 +64,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 // Find where to place the brick if it can be...
 				 var L; if(this.mapCategIdToTile[brick.type]) {L=this.mapCategIdToTile[brick.type].length;} else {L=0;}
 				 // console.log('New brick typed ', brick.type, 'mapped to ', L);
+				// Process categories
 				 for(var i=0;i<L;i++) {
 					 var parentTile  = this.mapCategIdToTile[brick.type][i].tile
 					   , parentBrick = this.mapCategIdToTile[brick.type][i].brick;
@@ -84,7 +85,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																			); 
 								}
 					}
-				 if(this.mapBrickIdToTile[brick.type]) {L=this.mapBrickIdToTile[brick.type].length;} else {L=0;}
+				// Process bricks id
+				 if(this.mapBrickIdToTile[brick.id]) {L=this.mapBrickIdToTile[brick.id].length;} else {L=0;}
 				 for(var i=0;i<L;i++) {
 					 var prevTile = this.mapBrickIdToTile[brick.id][i].tile,
 					     data     = this.mapBrickIdToTile[brick.id][i].data;
@@ -104,6 +106,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 // Group containing image and clip path
 					 this.gImage = document.createElementNS("http://www.w3.org/2000/svg", 'g');
 						this.gImage.setAttribute('transform', 'translate(-20,-20)');
+						this.gImage.style.display = 'none';
 
 					 // clipPath 
 					 this.clipPath = document.createElementNS("http://www.w3.org/2000/svg", 'clipPath');
@@ -149,6 +152,10 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 PresoTile.prototype.CB_Fade.apply(this,[dt,v0,v1]);;
 				 if(v1 === 1 && dt >= 1 && this.display) {this.gImage.style.display = 'none';}
 				 if(v1 === 0 && dt >= 1 && !this.display) {this.rect.style.display = 'none';}
+				}
+			 PresoBasicUnivers.prototype.adaptRender = function(scale, L_CB) {
+				 // console.log('PresoBasicUnivers::adaptRender',scale);
+				 return PresoTile.prototype.adaptRender.apply(this, [scale, L_CB]);
 				}
 
 			 // Return the reference to the PresoBasicUnivers constructor

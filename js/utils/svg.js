@@ -29,6 +29,12 @@ var DragManager = {
 		 
 		 this.mapTransform = {};
 		}
+	, initSubscribers : function() {
+		 DragManager.initSubscribers_AddPtr();
+		 DragManager.initSubscribers_SubPtr();
+		 DragManager.initSubscribers_StopDrag();
+		 DragManager.initSubscribers_Drag();
+		}
 	, get_uid			: function() {return 'ID_' + (this.id++);}
 	, indexOfIdNode		: function (id_node) {
 		 for (var i=0; i<this.TabDraggable.length; i++) {if (this.TabDraggable[i].id_node_str == id_node) {return i;}}
@@ -81,12 +87,15 @@ var DragManager = {
 		 return T;
 		}
 	, addDraggable		: function (node, conf) {
+		 conf = conf || {};
 		 eventNode = conf.eventNode || node;
+		 pathNodes = conf.pathNodes || [];
 		 // Is it still draggable?
 		 if(this.indexOfNode(node) >= 0) {return;}
 		 // If not, create the object in charge of managing its drag
 		 var obj_draggable = new Object();
 			obj_draggable.id_node_str = node.id;
+			obj_draggable.pathNodes	  = pathNodes;
 			obj_draggable.node        = node;
 			obj_draggable.uid		  = this.get_uid();
 			obj_draggable.CB_drag	  = conf.CB_drag || function() {};
@@ -150,7 +159,7 @@ var DragManager = {
 		 eventNode.addEventListener("touchstart", function(e) {DragManager.startDragTouch(e, node);}, false);
 		}
 	, removeDraggable	: function (node) {
-		 var i = this.indexOfNode(id_node_str);
+		 var i = this.indexOfNode(node);
 		 this.TabDraggable.splice(i, 1);
 		}
 	, startDragMouse	: function (e, node) {
@@ -172,6 +181,27 @@ var DragManager = {
 		 if( this.TabDragged_node.indexOf(node) >= 0
 		   &&this.TabDraggable[i].id_ptr2 != null
 		   ) {return;}
+		   
+		 // Do we come from the right path if anyone specified?
+		 if(this.TabDraggable[i].pathNodes.length) {
+			 var doDragThrough = undefined, doDragNotThrough = true;
+			 var ancestors = [], child = e.target;
+			 while(child) {ancestors.push(child); child = child.parentNode;}
+			 for(var n=0; n<this.TabDraggable[i].pathNodes.length; n++) {
+				 var parent	   = this.TabDraggable[i].pathNodes[n].node;
+				 var goThrough = this.TabDraggable[i].pathNodes[n].goThrough;
+				 if(goThrough) {
+					 if(doDragThrough === undefined) {doDragThrough = false;}
+					 if(ancestors.indexOf(parent) !== -1) {doDragThrough = true;}
+					} else	{if(ancestors.indexOf(parent) !== -1) {doDragNotThrough = false;}
+							}
+				}
+			 if(doDragThrough === undefined) {doDragThrough = true;}
+			 if(!doDragThrough || !doDragNotThrough) {
+				console.log(doDragThrough, doDragNotThrough, 'drag not allowed from here', ancestors, e.target); 
+				return;}
+			}
+		 
 		 // If not, start the drag
 		 // Compute coordinates of the point in the frame of the node
 		 // console.log("this.TabDraggable[i].id_ptr1 = " + this.TabDraggable[i].id_ptr1);
@@ -211,6 +241,7 @@ var DragManager = {
 		 this.TabDraggable[i].id_ptr2 = null;
 		 if(this.TabDraggable[i].id_ptr1 == null) {
 			 this.TabDragged_node.splice(this.TabDragged_node.indexOf(this.TabDraggable[i].node), 1);
+			 this.CallSubscribers_StopDrag( id_ptr, this.TabDraggable[i].node );
 			}
 		 // this.TabDraggable[i].id_ptr1 = null;
 		 this.CallSubscribers_SubPtr(id_ptr, e.target);
@@ -243,7 +274,7 @@ var DragManager = {
 		 for(var j=0; j<this.TabDraggable[i].Tab_depend.length; j++) {
 			 var index_child = this.indexOfNode( this.TabDraggable[i].Tab_depend[j] );
 			 var id_ptr = this.TabDraggable[index_child].id_ptr1;
-			 this.updateInteraction(id_ptr, px, py);
+			 this.updateInteraction(id_ptr, x, y /*px, py*/);
 			}
 		 /*if(id_ptr == this.TabDraggable[i].id_ptr1) {
 			  this.TabDraggable[i].pt1p.x = x;
@@ -288,16 +319,21 @@ var DragManager = {
 		}
 	, Drag : function (i, id_ptr, x, y) {
 		 // console.log("Drag with " + id_ptr);
-		 var obj = this.TabDraggable[i];
+		 var obj = this.TabDraggable[i], mat;
 			obj.pt1p.x = x; obj.pt1p.y = y;
-			obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentNode.getCTM().inverse() );
-		 var mat = obj.node.parentNode.getCTM().inverse().multiply( obj.node.getCTM() );;
+			if(obj.node.parentNode.getCTM()) {
+				 obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentNode.getCTM().inverse() );
+				 mat = obj.node.parentNode.getCTM().inverse().multiply( obj.node.getCTM() );
+				} else {mat = obj.node.getCTM();}
+						
+		 // var mat = obj.node.parentNode.getCTM().inverse().multiply( obj.node.getCTM() );;
 		 var e = obj.pt1p.x - mat.a*obj.pt1.x - mat.c*obj.pt1.y
 		   , f = obj.pt1p.y - mat.b*obj.pt1.x - mat.d*obj.pt1.y;
 		 this.TabDraggable[i] = obj;
 		 this.mapTransform[obj.uid] = {obj:obj,matrix:'matrix('+mat.a+','+mat.b+','+mat.c+','+mat.d+','+e+','+f+')'};
 		 this.updateRender();
 		 // obj.node.setAttribute('transform', 'matrix('+mat.a+','+mat.b+','+mat.c+','+mat.d+','+e+','+f+')');
+		 this.CallSubscribers_Drag(id_ptr, x, y);		 
 		}
 	, getCoordinate_relative_to : function (x, y, node) {
 		 var element = node, offsetX = 0, offsetY = 0, mx, my;
@@ -347,6 +383,10 @@ var DragManager = {
 // Generate_accessors
 utils.generateSubscribers(DragManager, 'AddPtr');
 utils.generateSubscribers(DragManager, 'SubPtr');
+utils.generateSubscribers(DragManager, 'StopDrag');
+utils.generateSubscribers(DragManager, 'Drag');
+
+DragManager.initSubscribers();
 
 return DragManager;
 }
