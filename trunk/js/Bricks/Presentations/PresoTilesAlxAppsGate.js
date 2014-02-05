@@ -1,7 +1,9 @@
 define( [ "Bricks/Presentations/protoPresentation"
+		, "utils/svgUtils"
+		, "utils/svgLine"
 		]
-	  , function(Presentation) {
-			 var dt = 0.1, size = 32, svg_point = null
+	  , function(Presentation, svgUtils, svgLine) {
+			 var dt = 0.1, size = 32, svg_point = null, uid = 0
 			   , L_toUnplugged = [], L_dragged = [];
 			 
 			 // Presentation
@@ -9,6 +11,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				}
 			 PresoTilesAlxAppsGate.prototype = new Presentation();
 			 PresoTilesAlxAppsGate.prototype.constructor = PresoTilesAlxAppsGate;
+			 PresoTilesAlxAppsGate.prototype.get_a_uid = function() {return 'UID_' + (uid++);}
 			 // Taking care of dragged node (to avoid unplugging them while dragging)
 			 PresoTilesAlxAppsGate.prototype.pushDragged = function( obj ) {
 				 var node = obj.target;
@@ -98,8 +101,33 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 this.root  = g; g.classList.add('TileRoot'); g.TileRoot = this;
 					 this.groot = gr;
 					 for(var i=0;i<this.children.length;i++) {this.primitivePlug(this.children[i]);}
-					 }
+					 
+					 this.grid = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+					 for(var i=0;i<=this.w*12/Math.max(this.w,this.h);i++) {// Create lines
+						 var line = new svgLine( {x1:i*size,y1:0,x2:i*size,y2:this.h*size*12/Math.max(this.w,this.h)} );
+						 this.grid.appendChild( line.getRoot() );
+						}
+					 for(var i=0;i<=this.h*12/Math.max(this.w,this.h);i++) {// Create lines
+						 var line = new svgLine( {x1:0,y1:i*size,x2:this.w*size*12/Math.max(this.w,this.h),y2:i*size} );
+						 this.grid.appendChild( line.getRoot() );
+						}
+					 // this.displayGrid(true);
+					 
+					 // Deal with drag and drop
+					 svgUtils.DD.DropZone( this.bgRect
+										 , { tags	: ['brick']
+										   , enter	: function(evt) {self.displayGrid(true );}
+										   , leave	: function(evt) {self.displayGrid(false);}
+										   , accept	: function(config) {/*console.log('Possible drop on', this);*/}
+										   , drop	: function(evt) {}
+										   } 
+										 );
+					}
 				 return this.root;
+				}
+			 PresoTilesAlxAppsGate.prototype.displayGrid = function(b) {
+				 if( b && this.grid.parentNode === null      ) {this.groot.appendChild( this.grid );}
+				 if(!b && this.grid.parentNode === this.groot) {this.groot.removeChild( this.grid );}
 				}
 			 PresoTilesAlxAppsGate.prototype.getInnerRoot = function() {return this.groot;}
 			 PresoTilesAlxAppsGate.prototype.primitivePlug = function(c) {
