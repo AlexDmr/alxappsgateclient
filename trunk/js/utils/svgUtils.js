@@ -4,14 +4,11 @@ define( [ "utils/svg"
 		, "utils/svgRect"
 		]
 	  , function(DragManager, utils, svgLine, svgRect) {
-			 var NsvgRect = null, lineH = null, lineV = null;
+			 var OsvgRect = null, lineH = null, lineV = null, OsvgPoint = null;
 			 
 			 // Define a singleton
 			 var svgUtils = {
-				  bbox : function(node) {
-					 
-					}
-				, ancestors : function(node) {
+				  ancestors : function(node) {
 					 var L = [];
 					 while(node.parentNode) {
 						 L.push( node.parentNode );
@@ -25,30 +22,65 @@ define( [ "utils/svg"
 						}
 					 return node
 					}
+				, isDisplayed : function(root, n) {
+					 while(n && n !== root) {
+						 if(n.style.display === 'none') {return false;}
+						 n = n.parentNode;
+						}
+					 return true;
+					}
+				, intersectionRect : function(R1x1,R1y1,R1x2,R1y2
+											 ,R2x1,R2y1,R2x2,R2y2) {
+					 return !( (R1x1 >= R2x2) || (R2x1 >= R1x2)
+					         ||(R1y1 >= R2y2) || (R2y1 >= R1y2) );
+					}
 				, DD : {
 					  L_dragged			: []
 					, L_dropZones		: []
 					, D_draggingPtr		: {}
+					, getDropZoneUnder	: function(n) {
+						 while(n && !n.AlxDropZone) {n = n.parentNode;}
+						 return n?n.AlxDropZone:null;
+						}
+					, removeDropZone : function(node) {
+						 var i = 0;
+						 while(i < this.L_dropZones.length) {
+							 if(this.L_dropZones[i].node === node) {
+								 var config = this.L_dropZones[i].config;
+								 node.removeEventListener('AlxDD_enter'		, config.enter		, false);
+								 node.removeEventListener('AlxDD_leave'		, config.leave		, false);
+								 node.removeEventListener('AlxDD_drop' 		, config.drop 		, false);
+								 node.removeEventListener('AlxDD_dragOver'	, config.dragOver	, false);
+								 this.L_dropZones.splice(i,1);
+								 break;
+								}
+							 i++;
+							}
+						 this.L_dropZones
+						}
 					, DropZone			: function(node, config) {
 						 // config contains possible attributes :
-						 //		- tags	 : an array of string
-						 //		- drop	 : a callback
-						 //		- enter	 : a callback
-						 //		- leave	 : a callback
-						 //		- accept : a callback
-						 config			= config		|| {};
-						 config.tags	= config.tags	|| [];
-						 config.accept	= config.accept	|| null;
-						 config.drop	= config.drop	|| null;
-						 config.enter	= config.enter	|| null;
-						 config.leave	= config.leave	|| null;
-						 config.cancel	= config.cancel	|| null;
+						 //		- tags	   : an array of string
+						 //		- drop	   : a callback
+						 //		- enter	   : a callback
+						 //		- leave	   : a callback
+						 //		- dragOver : a callback
+						 config			= config			|| {};
+						 config.tags	= config.tags		|| [];
+						 config.dragOver= config.dragOver	|| null;
+						 config.drop	= config.drop		|| null;
+						 config.enter	= config.enter		|| null;
+						 config.leave	= config.leave		|| null;
+						 config.cancel	= config.cancel		|| null;
 						 
-						 this.L_dropZones.push( {node:node,config:config} );
+						 var dz = {node:node,config:config};
+						 this.L_dropZones.push( dz );
+						 node.AlxDropZone = dz;
 						 
-						 node.AlxDropZone = true;
-						 node.addEventListener('AlxDD_enter', config.enter, false);
-						 node.addEventListener('AlxDD_leave', config.leave, false);
+						 node.addEventListener('AlxDD_enter'	, config.enter		, false);
+						 node.addEventListener('AlxDD_leave'	, config.leave		, false);
+						 node.addEventListener('AlxDD_drop' 	, config.drop 		, false);
+						 node.addEventListener('AlxDD_dragOver'	, config.dragOver	, false);
 						}
 					, DragAndDroppable	: function(node, config) {
 						 // config contains possible attributes :
@@ -79,11 +111,27 @@ define( [ "utils/svg"
 													}
 												, false );
 						}
+					, enrichConfigForEvent : function(config, event, x, y, n, clone) {
+						 OsvgPoint.x = x; OsvgPoint.y = y;
+						 var nPoint
+						   , dPoint = OsvgPoint.matrixTransform( clone.getCTM().inverse() );
+						 if(n) {
+							 nPoint	 = OsvgPoint.matrixTransform( n.getCTM().inverse() );
+							 event.x = nPoint.x;
+							 event.y = nPoint.y;
+							}
+						 event.xDrag  = dPoint.x;
+						 event.yDrag  = dPoint.y;
+						 event.xCanvas  = x;
+						 event.yCanvas  = y;
+						 event.config = config;
+						}
 					, start_DragAndDroppable : function(svg, node, e, config) {
 						 var self = this;
 						 
 						 // Create SVG rectangle if not already done
-						 if(NsvgRect === null) {NsvgRect = svg.createSVGRect(); NsvgRect.width = NsvgRect.height = 1;}
+						 if(OsvgRect  === null) {OsvgRect  = svg.createSVGRect (); OsvgRect.width = OsvgRect.height = 1;}
+						 if(OsvgPoint === null) {OsvgPoint = svg.createSVGPoint();}
 						 
 						 // Clone and drag
 						 var clone = node.cloneNode(true)
@@ -95,8 +143,8 @@ define( [ "utils/svg"
 						 this.L_dragged.push( clone );
 						 
 						 var idPtr = e.identifier===undefined?'mouse':e.identifier;
-						 this.D_draggingPtr[idPtr] = {nodeUnder:node};
-						 console.log(e, 'Pointer', idPtr, ':', this.D_draggingPtr[idPtr]);
+						 this.D_draggingPtr[idPtr] = {nodeUnder:node,config:config};
+						 // console.log(e, 'Pointer', idPtr, ':', this.D_draggingPtr[idPtr]);
 						 
 						 // Callbacks
 						 if(config.start) {config.start.apply(node, [config]);}
@@ -115,35 +163,52 @@ define( [ "utils/svg"
 							 DragManager.Subscribe_Drag	( 'svgUtils.DD'
 														, function(idPtr, x, y) {
 															 // Who is under the pointer ?
-															 NsvgRect.x = x ;//* window.devicePixelRatio;
-															 NsvgRect.y = y ;//* window.devicePixelRatio;
-															 var NL = svg.getIntersectionList(NsvgRect, null);
+															 OsvgRect.x = x ;//* window.devicePixelRatio;
+															 OsvgRect.y = y ;//* window.devicePixelRatio;
+															 var NL = svg.getIntersectionList(OsvgRect, null);
 															 var i;
+															 // if(NL.length>=2) {
+																// console.log("getIntersectionList");
+																// for(var z=0;z<NL.length;z++) {console.log(NL.item(z));} }
 															 for(i=NL.length-1; i>=0; i--) {
-																 if(NL.item(i) !== clone && NL.item(i).style.display !== 'none') {
+																 if(NL.item(i) !== clone && svgUtils.isDisplayed(svg, NL.item(i))) {
 																	 // Create and propagate custom over event
-																	 var n = NL.item(i);
-																	 while(n && !n.AlxDropZone) {n = n.parentNode;}
+																	 var dropZone = self.getDropZoneUnder( NL.item(i) )
+																	   , n = dropZone?dropZone.node:null;
 																	 if(self.D_draggingPtr[idPtr].nodeUnder !== n) {
 																		 if(self.D_draggingPtr[idPtr].nodeUnder) {
 																			 var event = new CustomEvent('AlxDD_leave', {bubbles:false,cancelable:false});
+																			 self.enrichConfigForEvent(config,event,x,y,n,clone);
 																			 self.D_draggingPtr[idPtr].nodeUnder.dispatchEvent(event);
-																			 // console.log('Leave', n);
 																			}
-																		 if(n) {
+																		 if (  n 
+																		    && utils.intersect	( self.D_draggingPtr[idPtr].config.tags
+																								, dropZone.config.tags
+																								).length
+																			) {
 																			 var event = new CustomEvent('AlxDD_enter', {bubbles:false,cancelable:false});
+																			 self.enrichConfigForEvent(config,event,x,y,n,clone);
 																			 n.dispatchEvent(event);
-																			 console.log('Enter', x, y, n);
-																			 
-																			}
+																			 // console.log('Enter', x, y, n);
+																			} else{n = null;}
+																			
 																		 self.D_draggingPtr[idPtr].nodeUnder = n;
 																		 // console.log('nodeUnder', n);
-																		}
+																		} else {// Trigger a AlxDD_dragOver event if there is a node
+																				if(n) {
+																					 var event = new CustomEvent( 'AlxDD_dragOver'
+																												, { bubbles		: false
+																												  , cancelable	: false } );
+																					 self.enrichConfigForEvent(config,event,x,y,n,clone);
+																					 n.dispatchEvent(event);
+																					}
+																			   }
 																	 break;
 																	}
 																}
 															 if(i === -1 && self.D_draggingPtr[idPtr].nodeUnder) {
 																 var event = new CustomEvent('AlxDD_leave', {bubbles:false,cancelable:false});
+																 self.enrichConfigForEvent(config,event,x,y,n,clone);
 																 self.D_draggingPtr[idPtr].nodeUnder.dispatchEvent(event);
 																 self.D_draggingPtr[idPtr].nodeUnder = null;
 																} 
@@ -153,9 +218,21 @@ define( [ "utils/svg"
 						 
 						 return clone;
 						}
-					, stop_DragAndDroppable : function(node) {
+					, stop_DragAndDroppable : function(idPtr, node) {
 						 var pos = this.L_dragged.indexOf(node);
 						 if(pos>=0) {
+							// Trigger a drop event ?
+							 var dropZone = this.getDropZoneUnder( this.D_draggingPtr[idPtr].nodeUnder );
+							 if(  dropZone
+							   && utils.intersect	( this.D_draggingPtr[idPtr].config.tags
+													, dropZone.config.tags
+													).length
+							   ) {var event;
+								  event = new CustomEvent('AlxDD_drop', {bubbles:false,cancelable:false,draggedNode:node,draggedObject:this.D_draggingPtr[idPtr]});
+									  event.config = this.D_draggingPtr[idPtr].config;
+									  this.D_draggingPtr[idPtr].nodeUnder.dispatchEvent(event);
+								 }
+							// Stop drag subscribers
 							 this.L_dragged.splice(pos,1);
 							 node.parentNode.removeChild( node );
 							 DragManager.removeDraggable(node);
@@ -169,15 +246,15 @@ define( [ "utils/svg"
 				};
 			 
 			 DragManager.Subscribe_StopDrag	( 'DD'
-											, function(id, node) {
-												 svgUtils.DD.stop_DragAndDroppable(node);
+											, function(idPtr, node) {
+												 svgUtils.DD.stop_DragAndDroppable(idPtr, node);
 												}
 											);
 			 
 			 // Debug getIntersectionList
 			 window.AlxDebug = function() {
 				 var svg = document.querySelector('svg');
-				 if(NsvgRect === null) {NsvgRect = svg.createSVGRect(); NsvgRect.width = NsvgRect.height = 1;}
+				 if(OsvgRect === null) {OsvgRect = svg.createSVGRect(); OsvgRect.width = OsvgRect.height = 1;}
 				 var debugRect = new svgRect( {x:0,y:0,width:0,height:0,style:{opacity:0.5,fill:'yellow',stroke:'yellow'}} );
 				 svg.appendChild( debugRect.getRoot() );
 				 if(lineH === null) {
@@ -190,8 +267,8 @@ define( [ "utils/svg"
 												   , y = e.clientY;
 												 lineH.configure( {x1:0,y1:y,x2:10000,y2:y} );
 												 lineV.configure( {x1:x,y1:0,x2:x,y2:10000} );
-												 NsvgRect.x = x; NsvgRect.y = y;
-												 var NL = svg.getIntersectionList(NsvgRect, null);
+												 OsvgRect.x = x; OsvgRect.y = y;
+												 var NL = svg.getIntersectionList(OsvgRect, null);
 												 for(i=0; i<NL.length; i++) {
 													 var n = NL.item(i);
 													 if(n.AlxDropZone && n.style.display !== 'none' && n !== lineH && n !== lineV && n !== debugRect.getRoot()) {

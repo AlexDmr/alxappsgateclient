@@ -217,6 +217,9 @@ var RRServer = {
 														self.comm.sendMessage(	{ method: "getDevices"
 																				, args	: [] }
 																			 , function(json) {
+																				 console.log("getDevices result : ---------------");
+																				 console.log(json);
+																				 console.log("-----------------------------------");
 																				 RRServer.updateBricksList("AppsGate", json);
 																				}
 																			 );

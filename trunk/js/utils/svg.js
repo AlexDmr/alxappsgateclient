@@ -198,7 +198,7 @@ var DragManager = {
 				}
 			 if(doDragThrough === undefined) {doDragThrough = true;}
 			 if(!doDragThrough || !doDragNotThrough) {
-				console.log(doDragThrough, doDragNotThrough, 'drag not allowed from here', ancestors, e.target); 
+				// console.log(doDragThrough, doDragNotThrough, 'drag not allowed from here', ancestors, e.target); 
 				return;}
 			}
 		 

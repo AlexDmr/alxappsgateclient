@@ -7,10 +7,24 @@ define( [ "Bricks/protoBricks"
 				 this.init();
 				 var self = this;
 				 this.id = id;
-				 this.clockValue = brick.clockValue;
+				 this.clockValue = parseInt( brick.clockValue[brick.clockValue.length-1].val );
 				 this.localClock = Date.now();
-				 this.flowRate   = brick.flowRate;
+				 this.flowRate   = parseFloat( brick.flowRate[brick.flowRate.length-1].val );
 				 this.resetTimer();
+				 
+				 this.call	( 'AppsGate'
+							, {method:"getDevice",args:[{value:'21106637055',type:'String'}]}
+							, function(data) {
+								  console.log("Clock received", data)
+								  var obj = JSON.parse( data.value );
+								  self.clockValue = parseInt  ( obj.clockValue );
+								  self.localClock = Date.now();
+								  self.flowRate   = parseFloat( obj.flowRate );
+								  self.resetTimer();
+								 }
+								);
+
+				 console.log('New Clock');
 				 
 				 socket.on(id, function(data) {self.update(data);});
 				 this.appendPresoFactory( 'PresoBasicClock'
@@ -37,20 +51,24 @@ define( [ "Bricks/protoBricks"
 				 this.CallSubscribers_clockValue( this.get_clockValue() );
 				 var mn = 60*1000 / this.flowRate;
 				 ms = Math.floor((now+mn)/mn)*mn - now;
-				 /*this.timer = setTimeout( function() {self.updateClock();}
-										, ms + 5 );*/
+				 // console.log("update in", ms, "ms");
+				 this.timer = setTimeout( function() {self.updateClock();}
+										, ms + 5 );
 				}
 			 Clock.prototype.update = function(data) {
+				 console.log( "Clock update :", data );
 				 switch(data.varName) {
 					 case 'ClockSet': // Arf... un coup ClockSet, un coup clockValue ...
 						this.clockValue = data.value;
 						this.localClock = Date.now();
+						this.resetTimer();
 						this.CallSubscribers_clockValue( this.get_clockValue() );
 					 break;
 					 case 'flowRate':
 						this.clockValue = this.get_clockValue();
 						this.localClock = Date.now();
 						this.flowRate   = data.value;
+						this.resetTimer();
 						this.CallSubscribers_flowRate( this.flowRate );
 					 break;
 					}

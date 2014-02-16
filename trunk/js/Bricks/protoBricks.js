@@ -13,6 +13,10 @@ define( function() {
 				 for(var i=0;i<this.children.length;i++) {this.appendChild(this.children[i]);}
 				}
 			 Brick.prototype.appendPresoFactory = function(name, constr, validity) {
+				 validity = validity || { pixelsMinDensity	: 0
+										, pixelsMaxDensity	: 999999999
+										, pixelsRatio		: 0
+										};
 				 if(!validity) {throw('Pas de domaine de validité définit pour ' + name);}
 				 this.presoFactories[name] = {name:name,constr:constr,validity:validity,UIs:[]};
 				}
@@ -27,7 +31,8 @@ define( function() {
 					 var factory = this.presoFactories[i];
 					 if (  factory.validity.pixelsMinDensity <= context.pixelsDensity
 						&& factory.validity.pixelsMaxDensity >= context.pixelsDensity
-						&& factory.validity.pixelsRatio === context.pixelsRatio
+						&& (  factory.validity.pixelsRatio === 0
+						   || factory.validity.pixelsRatio === context.pixelsRatio)
 						) {// This is the right factory!
 						   return this.getNewPresentation(factory.name);
 						  }
@@ -81,7 +86,7 @@ define( function() {
 					 this.children.push(c);
 					 c.appendParent(this);
 					 // Also plug presentations
-					 for(p in this.presentations) {console.log("append preso",p);this.presentations[p].appendChildFromBrick(c);}
+					 for(p in this.presentations) {/*console.log("append preso",p);*/this.presentations[p].appendChildFromBrick(c);}
 					}
 				}
 			 Brick.prototype.removeChild = function(c) {

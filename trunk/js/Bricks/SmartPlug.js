@@ -19,8 +19,6 @@ define( [ "Bricks/protoBricks"
 										  , pixelsMaxDensity : 999999999
 										  , pixelsRatio		 : 1 }
 										);
-				 // this.appendPresentations([new PresoBasicSmartPlug()]);
-				 // for(var p in this.presentations) {this.presentations[p].init(this);}
 				 return this;
 				};
 			 SmartPlug.prototype = new Brick();
