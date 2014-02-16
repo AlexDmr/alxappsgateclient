@@ -13,3 +13,8 @@ body {
 	-ms-user-select: none;
 	user-select: none;
 }
+
+svg rect.tile.selected {
+	stroke-width	: 5;
+	stroke-dasharray: 10, 2;
+}

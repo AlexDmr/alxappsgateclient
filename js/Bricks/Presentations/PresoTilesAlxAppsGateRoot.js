@@ -1,13 +1,10 @@
 define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
-		, "Bricks/Presentations/PresoBasicUniversMap"
-		, "Bricks/Presentations/PresoBasicUniversType"
-		, "Bricks/Presentations/PresoBasicPalette"
+		/*, "Bricks/Presentations/PresoBasicPalette"*/
 		, "Bricks/Presentations/utils"
 		, "utils/svg"
 		]
 	  , function( PresoTile
-				, PresoBasicUniversMap, PresoBasicUniversType
-				, PresoBasicPalette
+				/*, PresoBasicPalette*/
 				, AlxUtils
 				, DragManager
 				) {
@@ -22,14 +19,14 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.msClick = 100; this.msDblClick = 250;
 				 
 				 // Palette
-				 this.palette = new PresoBasicPalette();
+				 // this.palette = new PresoBasicPalette();
 				 
-				 // Universe
+				 /*/ Universe
 				 this.UniversTiles = [];
 				 this.mapTile  = new PresoBasicUniversMap (); this.UniversTiles.push(this.mapTile);
 				 this.typeTile = new PresoBasicUniversType(); this.UniversTiles.push(this.typeTile);
 				 for(var i=0;i<this.UniversTiles.length;i++) {this.UniversTiles[i].init(null,[]);}
-				 
+				 */
 				 // Interaction
 				 var self = this;
 				 this.CB_clic = function(e) {
@@ -88,11 +85,11 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 // PresoTilesAlxAppsGateRoot.prototype.initPresoTile = PresoTilesAlxAppsGateRoot.prototype.init;
 			 PresoTilesAlxAppsGateRoot.prototype.init = function(brick, children) {
 				 PresoTile.prototype.init.apply(this,[brick, children]); //this.initPresoTile(brick, children);
-				 for(var i=0;i<this.UniversTiles.length;i++) {this.appendChild(this.UniversTiles[i]);}
+				 // for(var i=0;i<this.UniversTiles.length;i++) {this.appendChild(this.UniversTiles[i]);}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.integrateBrick = function(brick) {
-				 console.log('PresoTilesAlxAppsGateRoot -> integrateBrick ->', brick.id);
-				 for(var i=0;i<this.UniversTiles.length;i++) {this.UniversTiles[i].integrateBrick(brick);}
+				 // console.log('PresoTilesAlxAppsGateRoot -> integrateBrick ->', brick.id);
+				 // for(var i=0;i<this.UniversTiles.length;i++) {this.UniversTiles[i].integrateBrick(brick);}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.getInnerRoot = function() {return this.groot;}
 			 PresoTilesAlxAppsGateRoot.prototype.processL_touches = function(ms) {
@@ -175,6 +172,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 // console.log( this.L_touches );
 					}
 				}
+			 PresoTilesAlxAppsGateRoot.prototype.primitivePlug = function(c) {
+				 var P = this.Render()
+				   , N = c.Render();
+				 if(c.brick === this.brick.palette) {
+					 this.pipoRoot.appendChild( N )
+					} else {this.groot.appendChild( N );}
+				}
 			 PresoTilesAlxAppsGateRoot.prototype.Render = function() {
 				 if(!this.root) {
 					 var self = this;
@@ -197,20 +201,23 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var scale = window.innerWidth / 1000;
 					 this.pipoRoot.setAttribute('transform', 'scale('+scale+','+scale+')');
 					 
-					 // Plug the palette
-					 this.palette.init();
+					 // Plug the palette under the pipoRoot node
+					 
+					 
+					 /*this.palette.init();
 						 var pRoot = this.palette.Render();
 						 this.pipoRoot.appendChild( pRoot );
 						 pRoot.setAttribute( 'transform'
 										   , 'translate('+ (1000  - this.getTileSize()*this.palette.w/2) + 
 													  ','+ (- this.getTileSize()*this.palette.h/2) +
 													  ')');
-					 
+					 */
 					 
 					 // Plug the universes
 					 var svg = this.root;
 					 this.svg_point = svg.createSVGPoint();
-					 this.mapTile.set_svg_point( this.svg_point );
+					 this.set_svg_point( this.svg_point );
+					 // this.mapTile.set_svg_point( this.svg_point );
 					 
 					 svg.addEventListener('dblclick', this.CB_clic, false);
 					 window.requestAnimFrame( function() {self.CB_clic( {target: svg} );} );
@@ -230,12 +237,18 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 self.UnplugTilesNoMoreDragged(id);
 													}
 												 );
+												 
+					// Render children
+					 this.appendDescendants();
 					 
+					// Manage D&D 
 					 this.root.addEventListener	( 'touchstart', function(e) {self.touchstart(e)}, false);
 					 this.root.addEventListener	( 'touchend'  , function(e) {self.touchend(e);} , false);
+					 console.log("Avoid dragging", this.getPresoBrickFromDescendant( this.brick.palette ).Render());
 					 DragManager.addDraggable( this.groot
 											 , { eventNode	: this.root
-											   , pathNodes	: [{node:pRoot,goThrough:false}]
+											   , pathNodes	: [ { node : this.getPresoBrickFromDescendant( this.brick.palette ).Render()
+																, goThrough : false } ]
 											   , CB_zoom	: function() {
 													 var L_CB = [];
 													 self.ComputeSemanticZoom( self.idMatrix, L_CB);

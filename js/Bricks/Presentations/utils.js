@@ -23,6 +23,11 @@ define( function() {
 						}
 					}
 				// --- Animation ---
+				, FormatNumberLength : function(num, length) {
+					 var r = "" + num;
+					 while (r.length < length) {r = "0" + r;}
+					 return r;
+					}
 				, L_CB		: []
 				, animate	: function(ms, CB) {
 					 var now = Date.now();

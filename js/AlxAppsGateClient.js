@@ -1,5 +1,7 @@
 define( [ 'Bricks/protoBricks'
 		, "Bricks/Presentations/PresoTilesAlxAppsGateRoot"
+		, "Bricks/Univers", "Bricks/Presentations/PresoBasicUniversMap", "Bricks/Presentations/PresoBasicUniversType"
+		, "Bricks/Palette"
 		, 'Bricks/HueLamp'
 		, 'Bricks/SmartPlug'
 		, 'Bricks/UpnpMediaServer'
@@ -7,16 +9,17 @@ define( [ 'Bricks/protoBricks'
 		, 'Bricks/Clock'
 		]
 	  , function( Brick, Preso
-	            , HueLamp
-				, SmartPlug
+				, Univers, PresoBasicUniversMap, PresoBasicUniversType
+	            , Palette
+				, HueLamp, SmartPlug
 				, UpnpMediaServer, UpnpMediaRenderer
 				, Clock
-				) { 
-			 var AlxClient = { nbBricks	: 0
-							 , devices	: {}
-							 };
-			 AlxClient.__proto__ = new Brick();
-			 AlxClient.devices = {};
+				) {
+			 var AlxClient = new Brick(); pipo = AlxClient;
+			 AlxClient.init();
+			 AlxClient.nbBricks = 0;
+			 AlxClient.devices	= {};
+
 			 AlxClient.bricksMap = {
 				  0		: null // Temperature
 				, 1		: null // Luminosité
@@ -31,23 +34,32 @@ define( [ 'Bricks/protoBricks'
 				}
 			 
 			 AlxClient.init = function() {
-				 this.presentations = []; this.presentations.push( new Preso() );
-				 // console.log('1');
-				 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].init(this);}
-				 // console.log('2');
-				 document.body.appendChild( this.presentations[0].Render() );
+				 // Plug the universes
+				 this.U_map = new Univers( 'U_map', {}
+										 , [ ['PresoBasicUniversMap' , PresoBasicUniversMap ] ] );
+				 this.U_cat = new Univers( 'U_cat', {}
+										 , [ ['PresoBasicUniversType', PresoBasicUniversType] ] );
+				 this.appendChild( this.U_map );
+				 this.appendChild( this.U_cat );
+				 this.Univers = [this.U_map, this.U_cat]
+				 
+				 // Init the palette for edition mode
+				 this.palette = new Palette();
+				 this.appendChild( this.palette );
 				 
 				 // Subscribe to socket.io
 				 socket.on('newDevice', function(data) {AlxClient.updateBrickList(data);});
 				 this.call( 'AlxServer'
 						  , {mtd:'getBricks', args:[]}
-						  , function(data) {
-								 // console.log("Received", data);
-								 if(data.success) {
-									 AlxClient.newBricksList(data.res);
-									}
+						  , function(data) {if(data.success) {
+												 AlxClient.newBricksList(data.res);
+												}
 								}
 						  );
+
+				 this.presentations = []; this.presentations.push( new Preso() );
+				 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].init(this);}
+				 document.body.appendChild( this.presentations[0].Render() );
 				}
 			 AlxClient.newBricksList = function(bricks) {
 				 // Re-init the device list
@@ -64,7 +76,12 @@ define( [ 'Bricks/protoBricks'
 						 var newBrick = new Constr(id, brick);
 						 newBrick.type = type;
 						 // console.log(this.presentations.length,"New brick", brick);
-						 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].integrateBrick(newBrick);}
+						 for(var p=0;p<this.presentations.length;p++) {
+							 this.presentations[p].integrateBrick(newBrick);
+							}
+						 for(var p=0;p<this.Univers.length;p++) {
+							 this.Univers[p].integrateBrick(newBrick);
+							}
 						} else {/*console.log("Unsupported brick type :", type, " for", brick);*/}
 					}
 				}

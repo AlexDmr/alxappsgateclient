@@ -4,11 +4,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		, "utils/svgRect"
 		, "utils/svgText"
 		, "Bricks/Presentations/utils"
+		, "Bricks/Space"
 		]
 	  , function( PresoTile
 				, svgAlx, svgUtils
 				, svgRect, svgText
-				, utils) {
+				, utils
+				, SpaceBrick ) {
 			 // Presentation
 			 var PresoBasicPalette = function() {
 				 
@@ -20,6 +22,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.displayPalette = false;
 				 this.x = 0; this.y = 0;
 				 this.w = this.h = 12;
+				 this.DropZone = false;
 				}
 			 PresoBasicPalette.prototype.Render = function() {
 				 var self = this;
@@ -33,7 +36,17 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 												  +')' );
 				 this.space = new svgRect( {transform: 'translate('+10+','+30+')'} );
 				 svgUtils.DD.DragAndDroppable( this.space.getRoot()
-											 , {tags : ['brick']}
+											 , { tags : ['brick']
+											   , size : {w:4,h:3}
+											   , start: function(config) {
+													 // Create a new Tile and register it so that it can be manipulated by drop zones
+													 var space = new SpaceBrick()
+													   , preso = space.getNewPresentation();
+													 preso.Render();
+													 config.brick = space;
+													 config.presentation = preso;
+													}
+											   }
 											 );
 				 this.groot.appendChild( this.space.getRoot() );
 				 

@@ -1,8 +1,9 @@
 define( [ "Bricks/Presentations/protoPresentation"
 		, "utils/svgUtils"
 		, "utils/svgLine"
+		, "utils/svgRect"
 		]
-	  , function(Presentation, svgUtils, svgLine) {
+	  , function(Presentation, svgUtils, svgLine, svgRect) {
 			 var dt = 0.1, size = 32, svg_point = null, uid = 0
 			   , L_toUnplugged = [], L_dragged = [];
 			 
@@ -18,22 +19,17 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 obj.L_nodes = [];
 				 while(node.parentNode) {obj.L_nodes.push(node); node=node.parentNode;}
 				 L_dragged.push(obj);
-				 // console.log("added to L_dragged :");
-				 // console.log(obj);
 				}
 			 PresoTilesAlxAppsGate.prototype.removeDragged = function( idPtr ) {
 				 for(var i=0; i<L_dragged.length; i++) {
 					 if(L_dragged[i].id === idPtr) {
 						 L_dragged.splice(i,1);
-						 // console.log("Removing dragged element, now :", L_dragged);
 						 break;
 						}
 					}
 				}
 			 PresoTilesAlxAppsGate.prototype.isDragging = function( node ) {
-				 // console.log("Is dragging", node);
 				 for(var i=0; i<L_dragged.length; i++) {
-					 // console.log( i, ":", L_dragged[i].L_nodes.indexOf(node), ':', L_dragged[i].L_nodes );
 					 if(L_dragged[i].L_nodes.indexOf(node) >= 0) {return L_dragged[i].id;}
 					}
 				 return null;
@@ -59,6 +55,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 // Init & co
 			 PresoTilesAlxAppsGate.prototype.init = function(brick) {
 				 Presentation.prototype.init.apply(this,[brick]);
+				 this.DropZone = true;
 				 // console.log("PresoTilesAlxAppsGate Init");
 				 this.x = this.y = 0;
 				 this.w = this.h = 12;
@@ -76,6 +73,36 @@ define( [ "Bricks/Presentations/protoPresentation"
 						, x2 : 0.5*dt*size + size*(this.w-dt)
 						, y2 : 0.5*dt*size + size*(this.h-dt) };
 				}
+			 PresoTilesAlxAppsGate.prototype.getFreeSpaceCoordsFor = function(x,y,w,h) {
+				 var intersect, child;
+				 // Try to place the rectangle so that bottom right corner does correspond to <x;y>
+				 var H = Math.floor((h+1)/2)
+				   , W = Math.floor((w+1)/2)
+				 for(var j=H;j>=-H;j--) { 	// Line
+					 for(var i=W;i>=-W;i--) {// Column
+						 // coords : <x-i;y-j>
+						 // Intersection with a child?
+						 intersect = false;
+						 for(var c=0;c<this.children.length;c++) {
+							 child = this.children[c];
+							 if( svgUtils.intersectionRect	( child.x, child.y, child.x+child.w, child.y+child.h
+															, x-i    , y-j    , x-i+w          , y-j+h              )
+							   && x-i >= 0 && x-i+w <= Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
+						       && y-j >= 0 && y-j+h <= Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
+							   ) {
+								  intersect = true;
+								  break;
+								 }
+							}
+						 if(  !intersect 
+						   && x-i >= 0 && x-i+w <= Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
+						   && y-j >= 0 && y-j+h <= Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
+						   ) {return {x:x-i,y:y-j};}
+						}
+					}
+				 console.log("No space");
+				 return null;
+				}
 			 PresoTilesAlxAppsGate.prototype.Render = function() {
 				 var self = this;
 				 if(!this.root) {
@@ -92,6 +119,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 this.gPreso = document.createElementNS("http://www.w3.org/2000/svg", 'g');
 					 var r  = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
 						 r.setAttribute('x', 0.5*dt*size)          ; r.setAttribute('y', 0.5*dt*size);
+						 r.setAttribute('rx', 6)          ; r.setAttribute('ry', 6);
 						 r.setAttribute('width' , size*(this.w-dt)); r.setAttribute('height', size*(this.h-dt));
 						 r.classList.add('tile');
 						 r.style.fill = this.color; r.style.stroke = "black";
@@ -114,12 +142,80 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 // this.displayGrid(true);
 					 
 					 // Deal with drag and drop
-					 svgUtils.DD.DropZone( this.bgRect
-										 , { tags	: ['brick']
-										   , enter	: function(evt) {self.displayGrid(true );}
-										   , leave	: function(evt) {self.displayGrid(false);}
-										   , accept	: function(config) {/*console.log('Possible drop on', this);*/}
-										   , drop	: function(evt) {}
+					 if(this.DropZone)
+					 svgUtils.DD.DropZone( this.root //this.bgRect
+										 , { tags		: ['brick']
+										   , enter		: function(evt) {
+															 //self.displayGrid(true );
+															 self.bgRect.classList.add('selected');
+															 var brick = evt.config.brick
+															   , preso = evt.config.presentation;
+															 // Plug the brick
+															 if(self.brick !== brick)
+																 self.appendChildFromBrick( brick
+																						  , function() {
+																								 // Set coordinates...
+																								 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
+																								 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
+																								 this.w = evt.config.size.w;
+																								 this.h = evt.config.size.h;
+																								 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
+																																		, Math.floor(svg_point.y/self.getTileSize())
+																																		, this.w
+																																		, this.h );
+																								 console.log( svg_point, coords );
+																								 this.DropZone = false;
+																								 if(coords) {
+																									 this.x = coords.x;
+																									 this.y = coords.y;
+																									 this.forceRender();
+																									} else {this.Render().style.display = 'none';}
+																								}
+																						  );
+															}
+										   , leave		: function(evt) {
+															 // self.displayGrid(false);
+															 self.bgRect.classList.remove('selected');
+															 var brick = evt.config.brick
+															   , preso = evt.config.presentation;
+															 // Unplug the brick
+															 self.removeChildFromBrick( brick );
+															}
+										   , dragOver	: function(evt) {
+															 // Resize the rectangle so that it fit into the cases
+															 // console.log("Place brick", brick, "at", evt.x, evt.y);
+															 var brick = evt.config.brick
+															   , preso = evt.config.presentation;
+															 // Change presentation coordinates
+															 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
+															 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
+															 var X = preso.x, Y = preso.y;
+															 preso.x = 100000; preso.y = 100000;
+															 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
+																									, Math.floor(svg_point.y/self.getTileSize())
+																									, preso.w
+																									, preso.h );
+															 preso.x = X; preso.y = Y;
+															 if(  coords 
+															   && ( preso.x !== coords.x || preso.y !== coords.y) ) {
+																 preso.x = coords.x;
+																 preso.y = coords.y;
+																 preso.Render().style.display = 'inherit';
+																 preso.Render().setAttribute ( 'transform'
+																							 , 'translate(' + preso.x*size
+																									 + ', ' + preso.y*size + ')' 
+																							 );
+																}
+															}
+										   , drop		: function(evt) {
+															 var brick = evt.config.brick
+															   , preso = evt.config.presentation;
+															 // self.displayGrid(false);
+															 self.bgRect.classList.remove('selected');
+															 preso.DropZone = true;
+															 preso.forceRender();
+															 // console.log('Drop on', self, 'with', evt);
+															}
 										   } 
 										 );
 					}
@@ -131,9 +227,8 @@ define( [ "Bricks/Presentations/protoPresentation"
 				}
 			 PresoTilesAlxAppsGate.prototype.getInnerRoot = function() {return this.groot;}
 			 PresoTilesAlxAppsGate.prototype.primitivePlug = function(c) {
-				 var P = this.Render(),
-				     N = c.Render(); pipo = c;
-				 // console.log(P, "\n", c, "\n", N);
+				 var P = this.Render()
+				   , N = c.Render();
 				 this.groot.appendChild( N );
 				}
 			 PresoTilesAlxAppsGate.prototype.getChildrenContext = function(w, h, MT) {
@@ -185,9 +280,9 @@ define( [ "Bricks/Presentations/protoPresentation"
 										 newPreso.CB_Fade(v,0,1,newPreso.root);
 										 if(v>=1) {
 											 if(self.isDragging(self.root) != null) {
-												 console.log("Do not unplugged", self);
+												 // console.log("Do not unplugged", self);
 												 self.pushTileToUnplug( self );
-												} else {console.log("Unplug", self);
+												} else {//console.log("Unplug", self);
 														self.brick.unPlugPresentation( self );
 													   }
 											}
@@ -220,12 +315,15 @@ define( [ "Bricks/Presentations/protoPresentation"
 					}
 				}
 			 PresoTilesAlxAppsGate.prototype.deletePrimitives = function() {
-				 console.log("PresoTilesAlxAppsGate::deletePrimitives", this);
+				 // console.log("PresoTilesAlxAppsGate::deletePrimitives", this);
 				 if(this.root) {
-					 this.root.parentNode.removeChild(this.root);this.root=null;
+					 if(this.root.parentNode) this.root.parentNode.removeChild(this.root);this.root=null;
 					 this.rect.parentNode.removeChild(this.rect);this.rect=null;
 					 this.gPreso.parentNode.removeChild(this.gPreso);this.gPreso=null;
 					 this.groot.parentNode.removeChild(this.groot);this.groot=null;
+					 
+					 if(this.DropZone)
+						svgUtils.DD.removeDropZone( this.root );
 					}
 				}
 

@@ -71,7 +71,7 @@ define( function() {
 						 if(fParams) {fParams.apply(preso, []);}
 						 this.appendChild(preso);
 						 return preso;
-						} else {console.log("\tchild preso",p,"is still plugged to",preso.parent);}
+						} else {/*console.log("\tchild preso",p,"is still plugged to",preso.parent);*/}
 					}
 				 // Last, if there is a factory...
 				 var preso = brick.getNewPresentation();
@@ -99,7 +99,7 @@ define( function() {
 				 return this.root;
 				}
 			 Presentation.prototype.deletePrimitives = function() {
-				 console.log("Presentation::deletePrimitives", this);
+				 // console.log("Presentation::deletePrimitives", this);
 				 if(this.root && this.rootparentNode) {
 					 this.root.parentNode.removeChild(this.root);
 					 this.root = null;
@@ -122,6 +122,18 @@ define( function() {
 			 Presentation.prototype.primitiveUnPlug = function(c) {
 				 if(c.root && c.root.parentNode) {c.root.parentNode.removeChild(c.root);}
 				}
+			 Presentation.prototype.appendDescendants = function() {
+				 if(this.brick) {
+					 var brick, preso;
+					 for(b=0; b<this.brick.children.length; b++) {
+						 brick = this.brick.children[b];
+						 preso = this.getPresoBrickFromDescendant(brick)
+						 if(preso === null) {preso = this.appendChildFromBrick( brick );}
+						 // if(preso) preso.appendDescendants();
+						}
+					}
+				}
+			 
 			 // Return the reference to the Presentation constructor
 			 return Presentation;
 			}
