@@ -3,6 +3,7 @@ html, body, svg {
 	padding: 0px;
 	width  : 100%;
 	height : 100%;
+	overflow: hidden;
 }
 
 body {
@@ -18,3 +19,19 @@ svg rect.tile.selected {
 	stroke-width	: 5;
 	stroke-dasharray: 10, 2;
 }
+
+svg .AlxTab.BrickUser 	{fill	: lightblue; stroke:black;}
+svg .BrickUser 			{stroke	: lightblue;}
+
+svg .AlxTab.BrickDevice	{fill	: yellow; stroke:black;}
+svg .BrickDevice			{stroke	: yellow;}
+
+svg .AlxTab.BrickService	{fill	: orange; stroke:black;}
+svg .BrickService		{stroke	: orange;}
+
+svg .AlxTab.BrickPlace	{fill	: lightgreen; stroke:black;}
+svg .BrickPlace 			{stroke	: lightgreen;}
+
+svg .AlxTab.BrickMixed	{fill	: grey; stroke:black;}
+svg .BrickMixed	 		{stroke	: grey;}
+

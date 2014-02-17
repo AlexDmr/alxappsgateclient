@@ -19,6 +19,8 @@ define( [ "Bricks/protoBricks"
 				 this.x = brick.w || this.y;
 				 this.x = brick.h || this.h;
 				 
+				 this.UniversAccess = {};
+				 
 				 return this;
 				};
 			 Palette.prototype = new Brick();
@@ -26,7 +28,13 @@ define( [ "Bricks/protoBricks"
 			 Palette.prototype.update = function(data) {
 				 console.log("Update Palette", this, "with", data);
 				}
-			
+			 Palette.prototype.addUniverAccess = function(objDescr, brickUnivers) {
+				 this.UniversAccess[objDescr.id] = {descr:objDescr, brick:brickUnivers};
+				 for(var i=0; i<this.presentations.length; i++) {
+					 this.presentations[i].addUniverAccess(objDescr, brickUnivers);
+					}
+				}
+			 
 			 return Palette;
 			}
 	  );
