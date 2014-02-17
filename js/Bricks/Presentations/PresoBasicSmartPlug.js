@@ -1,6 +1,7 @@
 define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
+		, "utils/svgText"
 		]
-	  , function(Presentation) {
+	  , function(Presentation, svgText) {
 			 // Presentation
 			 var PresoBasicSmartPlug = function() {
 				 //XXX this.init();
@@ -15,21 +16,24 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 Presentation.prototype.Render.apply(this, []) ;//this.RenderPresoTile();
 				 // Text for consumption
 				 if(!this.consoText) {
-					this.consoText = document.createElementNS("http://www.w3.org/2000/svg", 'text');
 					var coords = this.getPresoCoords();
-					this.consoText.setAttribute('x', coords.x2);
-					this.consoText.setAttribute('y', coords.y1);
-					this.consoText.style.textAnchor    = 'end';
-					this.consoText.style.baselineShift = '-1em';
-					this.consoText.textContent = this.brick.consumption[this.brick.consumption.length-1].val + 'W';
+					this.consoText = this.svgAlxConsoText = new svgText( {style:{textAnchor: 'middle'}} );
+					// this.consoText.fillSpace( {x:coords.x1,y:coords.y1,width:coords.x2-coords.x1,height:coords.y2-coords.y1}, 0.9 );
+					// this.consoText.set( this.brick.consumption[this.brick.consumption.length-1].val + 'W' );
+					this.gPreso.appendChild( this.consoText.getRoot() );
+					this.consoText = this.consoText.getRoot();
 					this.updateOnOff(this.brick.isOn());
+					this.consoText.addEventListener	( 'DOMNodeInsertedIntoDocument'
+													, function(e)	{self.svgAlxConsoText.set( '9999W' ).fillSpace( {x:coords.x1,y:coords.y1,width:coords.x2-coords.x1,height:coords.y2-coords.y1}, 0.9 );
+																	 self.svgAlxConsoText.set( self.brick.consumption[self.brick.consumption.length-1].val + 'W');
+																	}
+													, false );
 					this.root.addEventListener( 'click'
 											  , function(e) {self.toggle();
 															 e.preventDefault();
 															 e.stopPropagation();
 															}
 											  , false);
-					this.gPreso.appendChild(this.consoText);
 					}
 				 
 				 return this.root;

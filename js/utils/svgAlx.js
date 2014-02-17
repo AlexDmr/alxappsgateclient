@@ -45,6 +45,9 @@ define( [
 				 this.root.setAttribute('transform', 'matrix('+a+','+b+','+c+','+d+','+e+','+f+')' );
 				 return this;
 				}
+			 svgAlx.prototype.matrixId = function() {
+				 return this.matrixScalars(1,0,0,1,0,0);;
+				}
 			 svgAlx.prototype.matrix = function(M) {
 				 this.root.setAttribute('transform', 'matrix('+M.a+','+M.b+','+M.c+','+M.d+','+M.e+','+M.f+')' );
 				 return this;
@@ -59,8 +62,7 @@ define( [
 				   , DY		 = y + rect.y - bbox.y*S + (rect.height - S*bbox.height) / 2
 				   , cos	 = Math.cos(3.14159265*rotate/180)
 				   , sin	 = Math.sin(3.14159265*rotate/180);
-				 this.translate	( -(cos*DX - sin*DY)
-								, +(cos*DY + sin*DX) );
+				 this.translate	( DX, DY );
 				 this.scale(S,S);
 				 return this;
 				}

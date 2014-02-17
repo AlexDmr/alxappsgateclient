@@ -45,7 +45,10 @@ define( [ 'Bricks/protoBricks'
 				 
 				 // Init the palette for edition mode
 				 this.palette = new Palette();
-				 this.appendChild( this.palette );
+					this.appendChild( this.palette );
+					this.palette.addUniverAccess( {id:'map',name:'Plan',classes:'BrickPlace'}, this.U_map);
+					this.palette.addUniverAccess( {id:'cat',name:'Briques',classes:'BrickService'}, this.U_cat);
+					
 				 
 				 // Subscribe to socket.io
 				 socket.on('newDevice', function(data) {AlxClient.updateBrickList(data);});

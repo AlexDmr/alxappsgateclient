@@ -36,7 +36,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 Presentation.prototype.Render.apply(this, []) ;
 				 // Text for consumption
 				 if(!this.clockText) {
-					 this.clockText = new svgText( {style: {}} );
+					 this.clockText = new svgText( {style: {fontFamily: 'Consolas'}} );
 					 this.gPreso.appendChild(this.clockText.getRoot());
 					 self.updateClock( this.brick.get_clockValue() );
 					 var coords = this.getPresoCoords();
