@@ -1,7 +1,5 @@
 var socket = io.connect();
 var AlxClient = null;
-pipoNode = null;
-pipoL = null;
 
 require( [ "AlxAppsGateClient"
 		 , "domReady"

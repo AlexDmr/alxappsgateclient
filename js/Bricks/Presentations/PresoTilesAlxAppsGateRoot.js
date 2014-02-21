@@ -187,9 +187,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						this.root.TileRoot = this;
 						this.idMatrix = this.root.createSVGMatrix();
 						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'xlink' , 'http://www.w3.org/1999/xlink');
-						// this.root.setAttribute('width' , '1000');
-						// this.root.setAttribute('height', '500');
-						// this.root.setAttribute('viewBox', '0 0 1000 500');
 
 					 this.pipoRoot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 					 this.groot = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -201,23 +198,10 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var scale = window.innerWidth / 1000;
 					 this.pipoRoot.setAttribute('transform', 'scale('+scale+','+scale+')');
 					 
-					 // Plug the palette under the pipoRoot node
-					 
-					 
-					 /*this.palette.init();
-						 var pRoot = this.palette.Render();
-						 this.pipoRoot.appendChild( pRoot );
-						 pRoot.setAttribute( 'transform'
-										   , 'translate('+ (1000  - this.getTileSize()*this.palette.w/2) + 
-													  ','+ (- this.getTileSize()*this.palette.h/2) +
-													  ')');
-					 */
-					 
-					 // Plug the universes
+					 // Init some SVG...
 					 var svg = this.root;
 					 this.svg_point = svg.createSVGPoint();
 					 this.set_svg_point( this.svg_point );
-					 // this.mapTile.set_svg_point( this.svg_point );
 					 
 					 svg.addEventListener('dblclick', this.CB_clic, false);
 					 window.requestAnimFrame( function() {self.CB_clic( {target: svg} );} );

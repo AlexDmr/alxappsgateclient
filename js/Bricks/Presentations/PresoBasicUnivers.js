@@ -7,14 +7,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.w = this.h = 12;
 				 this.imgPath = 'images/lego.jpg';
 				 this.display = true;
-				 // Define some rooms...
-				 // this.mapPreso = {"PresoCategSmartPlug": PresoCategSmartPlug}
-				 this.mapData = {
-					  x : 7, y : 3
-					, w : 5, h : 5
-					, color: 'darkslategray', tile: this, name: 'Univers'
-					, children : []
-					}
 				}
 				
 			 PresoBasicUnivers.prototype = new PresoTile();
@@ -28,9 +20,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 // Plug rooms and spaces
 				 this.mapBrickIdToTile = {};
 				 this.mapCategIdToTile = {};
-				 this.buildMap(this.mapData, this);
+				 // this.buildMap(this.brick.getData(), this);
 				}
-			 PresoBasicUnivers.prototype.buildMap = function(data, tile) {
+			 PresoBasicUnivers.prototype.buildMap_OLD = function(data, tile) {
 				 // console.log(data.name || data.categId);
 				 if(!tile) {
 					 var tile = null;
@@ -60,6 +52,54 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 return tile;
 				}
 			 PresoBasicUnivers.prototype.integrateBrick = function(brick) {
+				 // console.log("PresoBasicUnivers::integrateBrick",this.brick);
+				 // Place the brick presentations at the right places
+				 // For categories
+				 var f_config = function() {this.x = x; this.y = y; this.w = w; this.h = h; this.color = color;}
+				   , parentBrick, data
+				   , preso, presoParent
+				   , pos, width, x, y, w, h, color = "red"
+				   , L;
+				 if(this.brick.mapCategIdToTile[brick.type]) {L=this.brick.mapCategIdToTile[brick.type].length;} else {L=0;}
+				 for(var i=0;i<L;i++) {
+					 parentBrick = this.brick.mapCategIdToTile[brick.type][i].brick;
+					 // console.log("\tCateg",brick.type);
+					 for(var p=0; p<parentBrick.presentations.length; p++) {
+						 presoParent = parentBrick.presentations[p];
+						 preso		 = presoParent.getPresoBrickFromDescendant(brick);
+						 if(preso === null) {
+							 console.error('Categ preso is null for', brick, "under", presoParent);
+							 continue;
+							}
+						 width = Math.floor( presoParent.innerMagnitude*presoParent.w / Math.max(presoParent.w, presoParent.h) );
+						 pos   = presoParent.children.indexOf(preso);
+						 x 	   = pos % width;
+						 y     = Math.floor(pos / width);
+						 w = h = 1; color = preso.color;
+						 f_config.apply(preso,[]);
+						 preso.forceRender();
+						}
+					}
+				 // For direct references
+				 if(this.brick.mapBrickIdToTile[brick.id]) {L=this.brick.mapBrickIdToTile[brick.id].length;} else {L=0;}
+				 for(var i=0;i<L;i++) {
+					 data		 = this.brick.mapBrickIdToTile[brick.id][i].data;
+						x = data.x; y = data.y; w = data.w; h = data.h; color = data.color;
+					 parentBrick = this.brick.mapBrickIdToTile[brick.id][i].parentBrick;
+					 console.log("Map", data, parentBrick);
+					 for(var p=0; p<parentBrick.presentations.length; p++) {
+						 presoParent = parentBrick.presentations[p];
+						 preso		 = presoParent.getPresoBrickFromDescendant(brick);
+						 if(preso === null) {
+							 console.error('Individual preso is null for', brick, "under", presoParent);
+							 continue;
+							}
+						 f_config.apply(preso,[]);
+						 preso.forceRender();
+						}
+					}
+				}
+			 PresoBasicUnivers.prototype.integrateBrick_OLD = function(brick) {
 				 // console.log("Integrating", brick);
 				 // Find where to place the brick if it can be...
 				 var L; if(this.mapCategIdToTile[brick.type]) {L=this.mapCategIdToTile[brick.type].length;} else {L=0;}
@@ -140,10 +180,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					}
 				 return this.root;
 				}
-			 // PresoBasicUnivers.prototype.adaptRender = function(scale, L_CB) {
-				 // var res = PresoTile.prototype.adaptRender.apply(this, [scale, L_CB]);
-				 // return res;
-				// }
 			 PresoBasicUnivers.prototype.CB_Fade = function(dt, v0, v1) {
 				 if(v0 === 1 && dt === 0) {this.gImage.style.display = 'inherit';}
 				 if(v0 === 0 && dt === 0) {this.rect.style.display = 'inherit';}

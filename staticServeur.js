@@ -64,6 +64,7 @@ var RRServer = {
 		}
 	// Messages exchange
 	, call: function(socket, command) {
+		 var self = this;
 		 switch(command.target) {
 			 case 'AppsGate' :
 				 if(this.comm)
@@ -125,14 +126,26 @@ var RRServer = {
 				if(this.HueLocation) {
 					var method	= command.msg.method,
 						  body	= command.msg.body,
-						  url	= command.msg.url;
-					this.request( { url		: this.HueLocation + url
+						   url	= command.msg.url,
+						    id	= command.msg.id;
+					this.request( { url		: url
 								  , method	: method
 								  , json	: true
 								  , body	: body
 								  }
 								, function (err, res, body) {
-									 socket.emit(command.msgId, {err:err,res:res,body:body});
+									 var update = {id:id}, key, val, Atmp;
+									 for(var a=0; a<body.length; a++) {
+										 if(body[a].success) {
+											 Atmp = Object.keys(body[a].success)[0].split('/');
+											 key  = Atmp[Atmp.length-1];
+											 val  = body[a].success[ Object.keys(body[a].success)[0] ];
+											 update[key] = val;
+											}
+										}
+									 self.updateBrick(update, Date.now());
+									 socket.emit(command.msgId, {body:update});
+									 self.broadcastToClients(id, update);
 									}
 								);
 					}
@@ -168,12 +181,39 @@ var RRServer = {
 	, UPnP_DeviceDetected : function(device) {
 		 var self = this;
 		 // for(var att in device) {console.log("\t"+att);}
-		 var newBrick = this.updateBrick( {id:'AlxUPnP->'+device.uuid, uuid:device.uuid, type:device.deviceType, device:device, name:device.friendlyName} );
+		 var ms = Date.now();
+		 var newBrick = this.updateBrick( {id:'AlxUPnP->'+device.uuid, uuid:device.uuid, type:device.deviceType, device:device, name:device.friendlyName}, ms );
 		 newBrick.origin = 'UPnP';
 		 console.log("Adding AlxUPnP->"+device.uuid+"\n" + device.deviceType + " " + device.friendlyName);
 		 device.friendlyName = device.friendlyName || 'NO DEVICE NAME...';
 		 if(device.friendlyName.indexOf("Philips hue") == 0) {	// Found Hue bridge
 			 this.HueLocation = "http://"+device.host+":"+device.port; console.log("Hue bridge at " + device.host + ":" + device.port);
+			 this.request( { url	: this.HueLocation + '/api/AlxAppsGate'
+						   , method	: 'GET'
+						   , json	: true
+						   }
+						 , function (err, res, body) {
+							 console.log("Hue state :",err, body);
+							 if(body.lights) {	// Ok we got the description
+								 for(var i in body.lights) {
+									 // Add the corresponding light
+									 var brick = { id			: 'HueLamp://'+device.host+":"+device.port+'/'+i
+												 , name			: body.lights[i].name
+												 , modelid		: body.lights[i].modelid
+												 , type			: 'AlxHueLamp'
+												 , origin		: 'Hue'
+												 , HueUser		: 'AlxAppsGate'
+												 , HueLocation	: self.HueLocation
+												 , HueId		: i
+												 }
+									 for(var a in body.lights[i].state) {brick[a] = body.lights[i].state[a];}
+									 self.updateBrick(brick, ms);
+									}
+								} else	{	// There is no such user probably...
+										 
+										}
+							}
+						 );
 			}
 		 if(device.friendlyName === "AppsGate set-top box") {
 			 console.log('--> Found the AppsGate server at ' + device.location);

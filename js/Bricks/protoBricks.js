@@ -4,6 +4,7 @@ define( function() {
 			 var Brick = function(children) {
 				}
 			 // Definition of the Brick class
+			 Brick.prototype.constructor = Brick;
 			 Brick.prototype.init = function(children) {
 				 this.children 		= children || [];
 				 this.parents		= [];
@@ -11,6 +12,7 @@ define( function() {
 				 this.presentations = [];
 				 this.presoFactories= {};
 				 for(var i=0;i<this.children.length;i++) {this.appendChild(this.children[i]);}
+				 return this;
 				}
 			 Brick.prototype.appendPresoFactory = function(name, constr, validity) {
 				 validity = validity || { pixelsMinDensity	: 0
@@ -54,7 +56,13 @@ define( function() {
 					 res.validity = fact.validity;
 					 res.factory  = fact;
 					}
-				 if(res) {res.isGoingToDisappear = false;}
+				 if(res) {
+					 res.isGoingToDisappear = false;
+					 // Plug to children presentations
+					 for(var c=0; c<this.children; c++) {
+						 res.appendChildFromBrick( this.children[c] );
+						}
+					}
 				 return res;
 				}
 			 Brick.prototype.call = function(target, json, CB) {
@@ -86,7 +94,7 @@ define( function() {
 					 this.children.push(c);
 					 c.appendParent(this);
 					 // Also plug presentations
-					 for(p in this.presentations) {/*console.log("append preso",p);*/this.presentations[p].appendChildFromBrick(c);}
+					 for(var p in this.presentations) {this.presentations[p].appendChildFromBrick(c);}
 					}
 				}
 			 Brick.prototype.removeChild = function(c) {
@@ -115,6 +123,14 @@ define( function() {
 					}
 				 this.presentations = newLP;
 				}
+			 Brick.prototype.toConsole = function(indent) {
+				 indent = indent || '';
+				 console.log(indent, this);
+				 for(var i=0; i<this.children.length; i++) {
+					 this.children[i].toConsole(indent+'  ');
+					}
+				}
+			 
 			 // Return the reference to the Brick constructor
 			 return Brick;
 			}

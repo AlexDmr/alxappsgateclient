@@ -4,7 +4,6 @@ define( [ "Bricks/protoBricks"
 	    ]
 	  , function(Brick, utils, PresoBasicClock) {
 			 var Clock = function(id, brick) {
-				 this.init();
 				 var self = this;
 				 this.id = id;
 				 this.clockValue = parseInt( brick.clockValue[brick.clockValue.length-1].val );
@@ -27,12 +26,6 @@ define( [ "Bricks/protoBricks"
 				 console.log('New Clock');
 				 
 				 socket.on(id, function(data) {self.update(data);});
-				 this.appendPresoFactory( 'PresoBasicClock'
-										, PresoBasicClock
-										, { pixelsMinDensity : 0
-										  , pixelsMaxDensity : 999999999
-										  , pixelsRatio		 : 1 }
-										);
 				 return this;
 				};
 			 Clock.prototype = new Brick();
@@ -41,6 +34,12 @@ define( [ "Bricks/protoBricks"
 				 Brick.prototype.init.apply(this, []);
 				 this.initSubscribers_clockValue();
 				 this.initSubscribers_flowRate();
+				 this.appendPresoFactory( 'PresoBasicClock'
+										, PresoBasicClock
+										, { pixelsMinDensity : 0
+										  , pixelsMaxDensity : 999999999
+										  , pixelsRatio		 : 1 }
+										);
 				}
 			 Clock.prototype.resetTimer = function() {
 				 if(this.timer) {clearTimeout(this.timer);}

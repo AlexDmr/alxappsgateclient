@@ -43,6 +43,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									   , Y = Math.easeInOutQuad(obj.dt,Y1,Y2-Y1,1);
 									 self.svgAlxgroot.matrixScalars(1,0,0,1,X,55);
 									 self.svgAlxTopMenu.matrixScalars(1,0,0,1,0,Y);
+									 if(obj.dt === 0) {
+										 self.svgAlxgroot.getRoot().style.display = self.svgAlxTopMenu.getRoot().style.display = 'inherit';
+										}
+									 if(!b && obj.dt >= 1) {
+										 self.svgAlxgroot.getRoot().style.display = self.svgAlxTopMenu.getRoot().style.display = 'none';
+										}
 									}
 							  );
 				}
@@ -78,7 +84,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 												   , size : {w:4,h:3}
 												   , start: function(config) {
 														 // Create a new Tile and register it so that it can be manipulated by drop zones
-														 var space = new SpaceBrick()
+														 var space = new SpaceBrick().init()
 														   , preso = space.getNewPresentation();
 														 preso.Render();
 														 config.brick = space;
@@ -122,7 +128,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 var tabRoot = new svgGroup( {} );
 				 tabRoot.getRoot().addEventListener( 'DOMNodeInsertedIntoDocument'
 					, function(e) 	{var bbox = text.getBBox();
-									 console.log( bbox );
+									 // console.log( bbox );
 									 var Y1 = tabNum?self.tabsList[tabNum-1].Y2:10
 									   , Y2 = Y1 + bbox.width + 6;
 									 self.tabsList[tabNum].Y2 = Y2 + 5;
@@ -136,19 +142,33 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 tabRoot.appendChild( text );
 				 this.svgAlxgroot.appendChild( tabRoot );
 				
-				 self.tabsList.push	( { tabRoot : tabRoot
-									  , poly    : poly
-									  , text    : text
-									  , Y2      : 0
-									  } );
+				 var objTab = { tabRoot : tabRoot
+							  , poly    : poly
+							  , text    : text
+							  , Y2      : 0
+							  };
+				 self.tabsList.push	( objTab );
 				 
-				 return tabRoot;
+				 return objTab;
 				}
 			 PresoPaletteOrthozoomTabs.prototype.addUniverAccess = function(objDescr, univers) {
-				 var svgG = this.addTab(objDescr.name, objDescr.classes);
-				 return svgG;
+				 var objTab = this.addTab(objDescr.name, objDescr.classes);
+				 objTab.objDescr = objDescr;
+				 objTab.brick	 = univers;
+				 return objTab;
 				}
 			 PresoPaletteOrthozoomTabs.prototype.adaptRender = function(scale, L_CB) {}
+			 PresoPaletteOrthozoomTabs.prototype.primitivePlug = function(child) {
+				 this.Render();
+				 for(var i=0; i<this.tabsList.length; i++) {
+					 if(this.tabsList[i].brick === child.brick) {
+						 this.tabsList[i].tabRoot.root.appendChild( child.Render() );
+						 child.Render().setAttribute('transform', '');
+						 break;
+						}
+					}
+				}
+				
 			 // Return the reference to the PresoPaletteOrthozoomTabs constructor
 			 return PresoPaletteOrthozoomTabs;
 			}
