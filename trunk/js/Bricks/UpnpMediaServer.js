@@ -3,17 +3,19 @@ define( [ "Bricks/protoBricks"
 	    ]
 	  , function(Brick, PresoMediaServer) {
 			 var UpnpMediaServer = function(id, brick) {
-				 this.init();
+				 return this;
+				};
+			 UpnpMediaServer.prototype = new Brick();
+			 UpnpMediaServer.prototype.constructor = UpnpMediaServer;
+			 UpnpMediaServer.prototype.init = function(children) {
+				 Brick.prototype.init.apply(this, [children]);
 				 this.appendPresoFactory( 'PresoMediaServer'
 										, PresoMediaServer
 										, { pixelsMinDensity : 0
 										  , pixelsMaxDensity : 999999999
 										  , pixelsRatio		 : 1 }
 										);
-				 return this;
-				};
-			 UpnpMediaServer.prototype = new Brick();
-			 UpnpMediaServer.prototype.constructor = UpnpMediaServer;
+				}
 				
 			 return UpnpMediaServer;
 			}

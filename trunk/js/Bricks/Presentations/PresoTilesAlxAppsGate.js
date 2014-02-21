@@ -57,15 +57,23 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 Presentation.prototype.init.apply(this,[brick]);
 				 this.DropZone = true;
 				 // console.log("PresoTilesAlxAppsGate Init");
-				 this.x = this.y = 0;
-				 this.w = this.h = 12;
+				 if(brick && brick.tile) {
+					 // console.log("Affecting data", this);
+					 this.x		= brick.tile.x;
+					 this.y		= brick.tile.y;
+					 this.w		= brick.tile.w;
+					 this.h		= brick.tile.h;
+					 this.color	= brick.tile.color;
+					} else {this.x		= this.y = 0;
+							this.w		= this.h = 12;
+							this.color	= 'cyan';}
 				 this.innerMagnitude = 12;
-				 this.color = 'cyan';
 				 this.display = true;
 				 this.scaleToDisplayChildren = 0.5;
 				 this.validity = { pixelsMinDensity : 0
 								 , pixelsMaxDensity : 999999999
 								 , pixelsRatio		 : this.w / this.h };
+				 if(this.root) this.forceRender();
 				}
 			 PresoTilesAlxAppsGate.prototype.getPresoCoords = function() {
 				 return { x1 : 0.5*dt*size
@@ -210,11 +218,16 @@ define( [ "Bricks/Presentations/protoPresentation"
 										   , drop		: function(evt) {
 															 var brick = evt.config.brick
 															   , preso = evt.config.presentation;
-															 // self.displayGrid(false);
 															 self.bgRect.classList.remove('selected');
-															 preso.DropZone = true;
-															 preso.forceRender();
-															 // console.log('Drop on', self, 'with', evt);
+															 preso.AlxGrosDebug = true;
+															 preso.parent.removeChild( preso );
+															 brick.tile = { x : preso.x, y : preso.y
+																		  , w : preso.w, h : preso.h
+																		  , color : preso.color};
+															 self.brick.appendChild( brick );
+															 preso = self.getPresoBrickFromDescendant( brick );
+															 // preso.DropZone = true;
+															 // preso.forceRender();
 															}
 										   } 
 										 );
@@ -274,6 +287,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 						 this.isGoingToDisappear = true;
 						 newPreso.x = this.x; newPreso.y = this.y
 						 newPreso.w = this.w; newPreso.h = this.h;
+						 newPreso.forceRender();
 						 this.parent.appendChild( newPreso );
 						 L_CB.push( function(v) {
 										 self.CB_Fade(v,1,0,self.root);
@@ -317,10 +331,10 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoTilesAlxAppsGate.prototype.deletePrimitives = function() {
 				 // console.log("PresoTilesAlxAppsGate::deletePrimitives", this);
 				 if(this.root) {
-					 if(this.root.parentNode) this.root.parentNode.removeChild(this.root);this.root=null;
-					 this.rect.parentNode.removeChild(this.rect);this.rect=null;
-					 this.gPreso.parentNode.removeChild(this.gPreso);this.gPreso=null;
-					 this.groot.parentNode.removeChild(this.groot);this.groot=null;
+					 if(this.root.parentNode  ) this.root.parentNode.removeChild  (this.root)  ;this.root  = null;
+					 if(this.rect.parentNode  ) this.rect.parentNode.removeChild  (this.rect)  ;this.rect  = null;
+					 if(this.gPreso.parentNode) this.gPreso.parentNode.removeChild(this.gPreso);this.gPreso= null;
+					 if(this.groot.parentNode ) this.groot.parentNode.removeChild (this.groot) ;this.groot = null;
 					 
 					 if(this.DropZone)
 						svgUtils.DD.removeDropZone( this.root );

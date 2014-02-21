@@ -54,11 +54,10 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 			 PresoBasicClock.prototype.deletePrimitives = function() {
 				 Presentation.prototype.deletePrimitives.apply(this, []);
-				 if(this.consoText) {this.consoText.parentNode.removeChild( this.consoText );
-									 this.consoText = null;
+				 if(this.clockText) {if(this.clockText.parentNode) this.clockText.parentNode.removeChild( this.clockText );
+									 this.clockText = null;
 									}
 				}
-			 // PresoBasicClock.prototype.
 			 
 			 // Return the reference to the PresoBasicClock constructor
 			 return PresoBasicClock;

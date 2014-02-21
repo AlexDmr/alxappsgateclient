@@ -57,27 +57,39 @@ define( function() {
 				 return rep;
 				}
 			 Presentation.prototype.appendChildFromBrick = function(brick, fParams, constrName) {
-				 // If a presentation constructor has been specified...
-				 if(constrName) {
-					 var preso = brick.getNewPresentation(constrName);
-					 if(preso) {fParams.apply(preso, []);
+				 // Stop here if there is still an existing presentation plugged to this and brick
+				 var preExistingPreso = false;
+				 for(var i=0; i<this.children.length; i++) {
+					 if(this.children[i].brick === brick) {preExistingPreso = true; break;}
+					}
+				 
+				 if(!preExistingPreso) {
+					 // If a presentation constructor has been specified...
+					 if(constrName) {
+						 var preso = brick.getNewPresentation(constrName);
+						 if(preso) {fParams.apply(preso, []);
+									this.appendChild(preso);
+									return preso;}
+						}
+					 // If there is an available existing presentation
+					 for(var p in brick.presentations) {
+						 var preso = brick.presentations[p];
+						 if(preso.parent === null) {
+							 preso.init(brick, []);
+							 if(fParams) {fParams.apply(preso, []);}
+							 this.appendChild(preso);
+							 return preso;
+							} else {/*console.log("\tchild preso",p,"is still plugged to",preso.parent);*/}
+						}
+					 // Last, if there is a factory...
+					 var preso = brick.getNewPresentation();
+					 if(preso) {if(fParams) {fParams.apply(preso, []);}
 								this.appendChild(preso);
+								// Recursive plug
+								preso.appendDescendants();
 								return preso;}
 					}
-				 // If there is an available existing presentation
-				 for(var p in brick.presentations) {
-					 var preso = brick.presentations[p];
-					 if(preso.parent === null) {
-						 if(fParams) {fParams.apply(preso, []);}
-						 this.appendChild(preso);
-						 return preso;
-						} else {/*console.log("\tchild preso",p,"is still plugged to",preso.parent);*/}
-					}
-				 // Last, if there is a factory...
-				 var preso = brick.getNewPresentation();
-				 if(preso) {if(fParams) {fParams.apply(preso, []);}
-							this.appendChild(preso);
-							return preso;}
+					
 				 return null;
 				}
 			 Presentation.prototype.removeChildFromBrick = function(brick) {
@@ -125,11 +137,11 @@ define( function() {
 			 Presentation.prototype.appendDescendants = function() {
 				 if(this.brick) {
 					 var brick, preso;
-					 for(b=0; b<this.brick.children.length; b++) {
+					 for(var b=0; b<this.brick.children.length; b++) {
 						 brick = this.brick.children[b];
 						 preso = this.getPresoBrickFromDescendant(brick)
 						 if(preso === null) {preso = this.appendChildFromBrick( brick );}
-						 // if(preso) preso.appendDescendants();
+						 if(preso) preso.appendDescendants();
 						}
 					}
 				}

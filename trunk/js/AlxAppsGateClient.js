@@ -4,16 +4,19 @@ define( [ 'Bricks/protoBricks'
 		, "Bricks/Palette"
 		, 'Bricks/HueLamp'
 		, 'Bricks/SmartPlug'
-		, 'Bricks/UpnpMediaServer'
-		, 'Bricks/UpnpMediaRenderer'
+		, 'Bricks/UpnpMediaServer', 'Bricks/UpnpMediaRenderer'
+		, 'Bricks/AlxHueLamp'
 		, 'Bricks/Clock'
+		, 'Bricks/CategSmartPlug'
 		]
 	  , function( Brick, Preso
 				, Univers, PresoBasicUniversMap, PresoBasicUniversType
 	            , Palette
 				, HueLamp, SmartPlug
 				, UpnpMediaServer, UpnpMediaRenderer
+				, AlxHueLamp
 				, Clock
+				, CategSmartPlug
 				) {
 			 var AlxClient = new Brick(); pipo = AlxClient;
 			 AlxClient.init();
@@ -31,14 +34,52 @@ define( [ 'Bricks/protoBricks'
 				, 21	: Clock // Horloge
 				, 'urn:schemas-upnp-org:device:MediaRenderer:1' : UpnpMediaRenderer
 				, 'urn:schemas-upnp-org:device:MediaServer:1'	: UpnpMediaServer
+				, 'AlxHueLamp'	: AlxHueLamp
 				}
 			 
 			 AlxClient.init = function() {
+				 // Categories
+				 this.brickCategories = [];
+				 var categ_SP = new CategSmartPlug(); this.brickCategories.push(categ_SP);
+				 for(var i=0;i<this.brickCategories.length;i++) {this.brickCategories[i].init(null,[]);}
+
 				 // Plug the universes
 				 this.U_map = new Univers( 'U_map', {}
 										 , [ ['PresoBasicUniversMap' , PresoBasicUniversMap ] ] );
+				 this.U_map.setData({ x : 0, y : 3
+									, w : 5, h : 5
+									, color: 'cyan', brick: this.U_map, name: 'Plan'
+									, children : [
+										  { x:7,y:0,w:5,h:5,color:'blue',name:'Cuisine'
+										  , children : [
+												{x:0,y:10,w:2,h:2,brickId:'capteurContact1'}
+												]
+										  }
+										, { x:3,y:5,w:9,h:7,color:'chocolate',name:'Salon'
+										  , children : [
+												  {x:10,y:6,w:2,h:2,brickId:'ENO87cdd8'} // Porte fenêtre
+												, {x:6,y:7,w:2,h:2,brickId:'ENO878052'}	// Spöka
+												]
+										  }
+										]
+									} );
 				 this.U_cat = new Univers( 'U_cat', {}
 										 , [ ['PresoBasicUniversType', PresoBasicUniversType] ] );
+				 this.U_cat.setData({ x : 7, y : 3
+									, w : 5, h : 5
+									, color: 'darkslategray', brick: this.U_cat, name: 'Catégories'
+									, children : [
+										  { x:0,y:0,w:3,h:3,color:'blue',name:'Prises pilotable',categId:'6',brick:categ_SP}
+										, { x:3,y:0,w:3,h:3,color:'blue',name:'Thermomètres',categId:'0'}
+										, { x:6,y:0,w:3,h:3,color:'blue',name:'Luminomètres',categId:'1'}
+										, { x:9,y:0,w:3,h:3,color:'blue',name:'Lampes Hue',categId:'7'}
+										, { x:0,y:3,w:3,h:3,color:'blue',name:'Prises pilotable',categId:'urn:schemas-upnp-org:device:MediaServer:1'}
+										, { x:3,y:3,w:3,h:3,color:'blue',name:'Prises pilotable',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
+										, { x:6,y:3,w:3,h:3,color:'green',name:'Alx Hue Lamps',categId:'AlxHueLamp'}
+										, { x:9,y:9,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
+										]
+									} );
+
 				 this.appendChild( this.U_map );
 				 this.appendChild( this.U_cat );
 				 this.Univers = [this.U_map, this.U_cat]
@@ -63,6 +104,7 @@ define( [ 'Bricks/protoBricks'
 				 this.presentations = []; this.presentations.push( new Preso() );
 				 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].init(this);}
 				 document.body.appendChild( this.presentations[0].Render() );
+				 // this.presentations[0].appendDescendants();
 				}
 			 AlxClient.newBricksList = function(bricks) {
 				 // Re-init the device list
@@ -78,6 +120,7 @@ define( [ 'Bricks/protoBricks'
 						 var Constr	  = this.bricksMap[type];
 						 var newBrick = new Constr(id, brick);
 						 newBrick.type = type;
+						 newBrick.init();
 						 // console.log(this.presentations.length,"New brick", brick);
 						 for(var p=0;p<this.presentations.length;p++) {
 							 this.presentations[p].integrateBrick(newBrick);

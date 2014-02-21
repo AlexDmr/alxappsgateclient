@@ -4,7 +4,12 @@ define( [ "Bricks/protoBricks"
 	    ]
 	  , function(Brick, PresoMediaRenderer, PresoMediaRenderer2) {
 			 var UpnpMediaRenderer = function(id, brick) {
-				 this.init();
+				 return this;
+				};
+			 UpnpMediaRenderer.prototype = new Brick();
+			 UpnpMediaRenderer.prototype.constructor = UpnpMediaRenderer;
+			 UpnpMediaRenderer.prototype.init = function(children) {
+				 Brick.prototype.init.apply(this, [children]);
 				 this.appendPresoFactory( 'PresoMediaRenderer'
 										, PresoMediaRenderer
 										, { pixelsMinDensity : 0
@@ -17,11 +22,7 @@ define( [ "Bricks/protoBricks"
 										  , pixelsMaxDensity : 2
 										  , pixelsRatio		 : 1 }
 										);
-				 return this;
-				};
-			 UpnpMediaRenderer.prototype = new Brick();
-			 UpnpMediaRenderer.prototype.constructor = UpnpMediaRenderer;
-
+				}
 			 return UpnpMediaRenderer;
 			}
 	  );

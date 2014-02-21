@@ -3,9 +3,8 @@ define( [ "Bricks/protoBricks"
 	    ]
 	  , function(Brick, PresoBasicSmartPlug) {
 			 var SmartPlug = function(id, brick) {
-				 this.init();
 				 this.DataSubscribers = [];
-				 this.OnOff 		= [];
+				 this.OnOff 		  = [];
 					for(var i=0;i<brick.plugState.length;i++) {
 						 this.OnOff.push({ms:brick.plugState[i].ms,val:brick.plugState[i].val === 'true'})
 						}
@@ -13,16 +12,19 @@ define( [ "Bricks/protoBricks"
 				 var self = this;
 				 this.id = id;
 				 socket.on(id, function(data) {self.update(data);});
+				 return this;
+				};
+			 SmartPlug.prototype = new Brick();
+			 SmartPlug.prototype.constructor = SmartPlug;
+			 SmartPlug.prototype.init = function(children) {
+				 Brick.prototype.init.apply(this, [children]);
 				 this.appendPresoFactory( 'PresoBasicSmartPlug'
 										, PresoBasicSmartPlug
 										, { pixelsMinDensity : 0
 										  , pixelsMaxDensity : 999999999
 										  , pixelsRatio		 : 1 }
 										);
-				 return this;
-				};
-			 SmartPlug.prototype = new Brick();
-			 SmartPlug.prototype.constructor = SmartPlug;
+				}
 			 SmartPlug.prototype.isOn = function() {return this.OnOff[this.OnOff.length-1].val}
 			 SmartPlug.prototype.UnSubscribeToData = function(CB) {
 				 var pos = this.DataSubscribers.indexOf(CB);

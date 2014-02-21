@@ -33,6 +33,7 @@ define( [ "Bricks/protoBricks"
 				 for(var i=0; i<this.presentations.length; i++) {
 					 this.presentations[i].addUniverAccess(objDescr, brickUnivers);
 					}
+				 this.appendChild( brickUnivers );
 				}
 			 
 			 return Palette;
