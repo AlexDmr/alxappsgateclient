@@ -2,11 +2,14 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		/*, "Bricks/Presentations/PresoBasicPalette"*/
 		, "Bricks/Presentations/utils"
 		, "utils/svg"
+		, "utils/svgUtils"
+		, "utils/svgAlx"
 		]
 	  , function( PresoTile
 				/*, PresoBasicPalette*/
 				, AlxUtils
 				, DragManager
+				, svgUtils, svgAlx
 				) {
 			 // Presentation
 			 var PresoTilesAlxAppsGateRoot = function() {
@@ -16,7 +19,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 // Touches for intertaction
 				 this.L_touches = []; this.D_touchClick = {};
 				 this.touchClickTimer = null;
-				 this.msClick = 100; this.msDblClick = 250;
+				 this.msClick = 130; this.msDblClick = 300;
+				 this.msLongPress = 300;
+				 this.A_longPress = {};
 				 
 				 // Palette
 				 // this.palette = new PresoBasicPalette();
@@ -86,10 +91,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoTilesAlxAppsGateRoot.prototype.init = function(brick, children) {
 				 PresoTile.prototype.init.apply(this,[brick, children]); //this.initPresoTile(brick, children);
 				 // for(var i=0;i<this.UniversTiles.length;i++) {this.appendChild(this.UniversTiles[i]);}
-				}
-			 PresoTilesAlxAppsGateRoot.prototype.integrateBrick = function(brick) {
-				 // console.log('PresoTilesAlxAppsGateRoot -> integrateBrick ->', brick.id);
-				 // for(var i=0;i<this.UniversTiles.length;i++) {this.UniversTiles[i].integrateBrick(brick);}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.getInnerRoot = function() {return this.groot;}
 			 PresoTilesAlxAppsGateRoot.prototype.processL_touches = function(ms) {
@@ -179,15 +180,46 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.pipoRoot.appendChild( N )
 					} else {this.groot.appendChild( N );}
 				}
+			 PresoTilesAlxAppsGateRoot.prototype.initSemanticZoom = function() {
+				 var self = this;
+				 window.requestAnimFrame( function() {self.CB_clic( {target: self.root} );} );			 
+				}
 			 PresoTilesAlxAppsGateRoot.prototype.Render = function() {
 				 if(!this.root) {
 					 var self = this;
 					 this.root  = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+						svgAlx.prototype.init( this.root );
 						this.root.classList.add('TileRoot');
 						this.root.TileRoot = this;
 						this.idMatrix = this.root.createSVGMatrix();
 						this.root.setAttributeNS('http://www.w3.org/2000/svg', 'xlink' , 'http://www.w3.org/1999/xlink');
 
+					 // Filter
+					 var filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+					 filter.setAttribute('id', 'dropShadow');
+						var feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+							feGaussianBlur.setAttribute('in', "SourceAlpha");
+							feGaussianBlur.setAttribute('stdDeviation', "2");
+							filter.appendChild( feGaussianBlur );
+						var feOffset = document.createElementNS("http://www.w3.org/2000/svg", "feOffset");
+							feOffset.setAttribute('dx', 5); feOffset.setAttribute('dy', 5); feOffset.setAttribute('result', 'offsetblur');
+							filter.appendChild( feOffset );
+						var feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+							feFlood.setAttribute('flood-color', 'offsetblur');
+							filter.appendChild( feFlood );
+						var feComposite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+							feComposite.setAttribute('in2', 'offsetblur'); feComposite.setAttribute('operator', 'in');
+							filter.appendChild( feComposite );
+						var feMerge = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+							filter.appendChild( feMerge );
+							var feMergeNode1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+							feMerge.appendChild( feMergeNode1 );
+							var feMergeNode2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+							feMergeNode2.setAttribute('in', 'SourceGraphic');
+							feMerge.appendChild( feMergeNode2 );
+						this.root.appendChild( filter );
+					 
+					 // Scene graph
 					 this.pipoRoot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 					 this.groot = document.createElementNS("http://www.w3.org/2000/svg", "g");
 						this.groot.classList.add('rootInternal');
@@ -204,7 +236,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.set_svg_point( this.svg_point );
 					 
 					 svg.addEventListener('dblclick', this.CB_clic, false);
-					 window.requestAnimFrame( function() {self.CB_clic( {target: svg} );} );
 					 
 					 // DragManager
 					 DragManager.init(this.root);
@@ -225,6 +256,32 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					// Render children
 					 this.appendDescendants();
 					 
+					// Manage the long press event
+					 this.root.addEventListener( 'longPress' , function(e) {
+																 var node = e.target;
+																 while(node && typeof node.TileRoot === 'undefined') {node = node.parentNode;}
+																 if(node) {// Edit node
+																	 var tile = node.TileRoot;
+																	 self.editTile( tile );
+																	}
+																}
+															 , false);
+					 this.root.addEventListener( 'mousedown' , function(e) {self.longPressStart('mouse',e.clientX,e.clientY,e.target);}, false);
+					 this.root.addEventListener( 'mousemove' , function(e) {self.longPressMove('mouse',e.clientX,e.clientY);}, false);
+					 this.root.addEventListener( 'mouseup'   , function(e) {self.longPressStop('mouse');}, false);
+					 this.root.addEventListener( 'touchstart', function(e) {for(var i=0; i<e.changedTouches.length; i++) {
+																				var ptr = e.changedTouches.item(i);
+																				self.longPressStart(ptr.identifier, ptr.clientX, ptr.clientY, ptr.target); }
+																		   }, false);
+					 this.root.addEventListener( 'touchmove' , function(e) {for(var i=0; i<e.changedTouches.length; i++) {
+																				var ptr = e.changedTouches.item(i);
+																				self.longPressMove(ptr.identifier, ptr.clientX, ptr.clientY); }
+																		   }, false);
+					 this.root.addEventListener( 'touchend'  , function(e) {for(var i=0; i<e.changedTouches.length; i++) {
+																				var ptr = e.changedTouches.item(i);
+																				self.longPressStop(ptr.identifier); }
+																		   }, false);
+					
 					// Manage D&D 
 					 this.root.addEventListener	( 'touchstart', function(e) {self.touchstart(e)}, false);
 					 this.root.addEventListener	( 'touchend'  , function(e) {self.touchend(e);} , false);
@@ -271,6 +328,40 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									   + ')'
 								 );
 				}
+			 
+			 // Long press
+			 PresoTilesAlxAppsGateRoot.prototype.longPressStart = function(id, x, y, target) {
+				 var self = this;
+				 timeout = setTimeout( function() {var evt = new MouseEvent('longPress');
+												   evt.initMouseEvent('longPress', true, true);
+												   evt.clientX = x; evt.clientY = y;
+												   target.dispatchEvent(evt);
+												   self.longPressStop(id, x, y);
+												  }
+									 , this.msLongPress);
+				 this.A_longPress[id] = {x:x,y:y,timeout:timeout};
+				}
+			 PresoTilesAlxAppsGateRoot.prototype.longPressMove = function(id, x, y) {
+				 if( this.A_longPress[id] ) {
+					 var P  = this.A_longPress[id]
+					   , dx = x - P.x
+					   , dy = y - P.y
+					   , d2 = dx*dx+dy*dy;
+					 if(d2 > 200) {
+						 clearTimeout(P.timeout);
+						 delete this.A_longPress[id];
+						}
+					}
+				}
+			 PresoTilesAlxAppsGateRoot.prototype.longPressStop = function(id) {
+				 if( this.A_longPress[id] ) {clearTimeout(this.A_longPress[id].timeout);
+											 delete this.A_longPress[id];}
+				}
+			 PresoTilesAlxAppsGateRoot.prototype.editTile = function(tile) {
+				 console.log('Edit node', tile.brick.name, tile);
+				 this.brick.editTile( tile );
+				}
+				
 			 // Return the reference to the PresoTilesAlxAppsGateRoot constructor
 			 return PresoTilesAlxAppsGateRoot;
 			}

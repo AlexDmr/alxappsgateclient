@@ -10,6 +10,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 				
 			 PresoBasicUniversType.prototype = new PresoTileUnivers();
+			 PresoBasicUniversType.prototype.constructor = PresoBasicUniversType;
 
 			 // Return the reference to the PresoTilesAlxAppsGateRoot constructor
 			 return PresoBasicUniversType;

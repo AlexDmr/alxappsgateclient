@@ -6,21 +6,23 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		, "utils/svgText"
 		, "utils/svgImage"
 		, "utils/svgGroup"
-		, "utils/svgButton"
+		, "utils/svgButton", "utils/svgEntry"
+		, "utils/svgUtils"
 		, "Bricks/Presentations/utils"
 		, "Bricks/Space"
 		]
 	  , function( PresoTile
 				, svgAlx, svgUtils
 				, svgRect, svgPoly, svgText, svgImage, svgGroup
-				, svgButton
+				, svgButton, svgEntry
+				, svgUtils
 				, utils
 				, SpaceBrick ) {
 			 // Presentation
 			 var PresoPaletteOrthozoomTabs = function() {
 				 // Init tabs
 				 this.tabsList = [];
-				 this.displayPalette = false;
+				 this.displayPalette = this.displayTileEdition = this.feedBackEdition = false;
 				}
 				
 			 PresoPaletteOrthozoomTabs.prototype = new PresoTile();
@@ -29,9 +31,50 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.displayPalette = false;
 				 this.DropZone = false;
 				}
+			 PresoPaletteOrthozoomTabs.prototype.isEditing = function() {
+				 return this.displayPalette || this.displayTileEdition;
+				}
+			 PresoPaletteOrthozoomTabs.prototype.FeedBackEdition = function(OnOff) {
+				 if(this.feedBackEdition === OnOff) {return}
+				 this.feedBackEdition = OnOff;
+				 if(OnOff) {
+					 document.addEventListener('click', this.blocClick, true);
+					 var L = this.L_bricks_dropShadowFilter = document.querySelectorAll('.Brick.dropShadowFilter');
+					 for(var i=0; i<L.length; i++) {
+						 L.item(i).removeAttribute('filter');
+						}
+					} else  {document.removeEventListener('click', this.blocClick, true);
+							 var L = this.L_bricks_dropShadowFilter;
+							 for(var i=0; i<L.length; i++) {
+								 L.item(i).setAttribute('filter', 'url(#dropShadow)');
+								}
+							}
+				}
+			 PresoPaletteOrthozoomTabs.prototype.toggleTileEdition = function(b) {
+				 var self = this;
+				 if(b) {this.editedTile.root.classList.add('selected');
+					   } else {this.editedTile.root.classList.remove('selected');}
+				 if(b === this.displayTileEdition) {return}
+				 var b = b || (this.displayTileEdition = !this.displayTileEdition);
+				 this.displayTileEdition = b;
+				 this.FeedBackEdition(this.isEditing());
+				 
+				 // Animate the top and right menus...
+				 var X1 = b?50:-200
+				   , X2 = -150 - X1;
+				 utils.animate( 1000
+							  , function(obj) {
+									 var X = Math.easeInOutQuad(obj.dt,X1,X2-X1,1);
+									 self.panelTile.Edition.matrixScalars(1,0,0,1,X,55);
+									 if(obj.dt === 0) {self.panelTile.Edition.getRoot().style.display = 'inherit';}
+									 if(!b && obj.dt >= 1) {self.panelTile.Edition.getRoot().style.display = 'none';}
+									}
+							  );
+				}
 			 PresoPaletteOrthozoomTabs.prototype.toggle = function() {
 				 var self = this;
 				 var b = this.displayPalette = !this.displayPalette;
+				 this.FeedBackEdition(this.isEditing());
 				 // Animate the top and right menus...
 				 var X1 = b?70:-150
 				   , X2 = -80 - X1
@@ -55,6 +98,16 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoPaletteOrthozoomTabs.prototype.Render = function() {
 				 if(!this.root) {
 					 var self = this;
+					 // Feedback for clic interuption
+					 if(this.blocClick) {
+						 document.removeEventListener('click', this.blocClick, true);
+						}
+					 this.blocClick = function(e) {
+						 if(svgUtils.ancestors(e.target).indexOf(self.root) === -1)
+							e.stopPropagation();
+						}
+
+					 // SVG structure
 					 this.svgAlxRoot = new svgGroup( {class: 'paletteRoot'} );
 						// Internal structure for top menu
 						 this.svgAlxTopMenu = new svgGroup();
@@ -96,15 +149,18 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 for(var i in UA) {this.addUniverAccess(UA[i].descr, UA[i].brick);}
 					 
 					// Polygon for the button
-					 this.polyButton = new svgRect( { x:-5,y:-45,width:100,height:100,rx:50,ry:50
+					 this.polyButton = new svgRect( { x:-30,y:-60,width:150,height:150,rx:75,ry:75
 													, style: {fill:'lightyellow',stroke:'black'} } );
 					 this.svgAlxRoot.appendChild( this.polyButton );
 					// Image for the button
-					 this.imageButton = new svgImage( {width:50,height:50} ).load('images/parameters.png');
+					 this.imageButton = new svgImage( {width:75,height:75,transform:'translate(-25,0)'} ).load('images/parameters.png');
 					 this.svgAlxRoot.appendChild( this.imageButton );
 					 this.imageButton.getRoot().addEventListener( 'click'
 						, function() {self.toggle();}
 						, false );
+						
+					 this.root.addEventListener('longPress', function(e) {e.stopPropagation();}, false);
+					 this.root.addEventListener('dblclick' , function(e) {e.stopPropagation();}, false);
 					}
 				 
 				 return this.root;
@@ -126,6 +182,18 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											} ); poly.getRoot().classList.add('AlxTab');
 				 
 				 var tabRoot = new svgGroup( {} );
+				 
+				 tabRoot.root.addEventListener( 'click', function(e) {self.selectTab(tabRoot.root);}, false);
+				 tabRoot.appendChild( poly );
+				 tabRoot.appendChild( text );
+				
+				 var objTab = { tabRoot : tabRoot
+							  , poly    : poly
+							  , text    : text
+							  , Y2      : 0
+							  };
+				 self.tabsList.push	( objTab );
+				 
 				 tabRoot.getRoot().addEventListener( 'DOMNodeInsertedIntoDocument'
 					, function(e) 	{var bbox = text.getBBox();
 									 // console.log( bbox );
@@ -136,19 +204,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									 text.matrixId().rotate(-90).translate(-Y2+3, -3);
 									}
 					, false );
-				 
-				 tabRoot.root.addEventListener( 'click', function(e) {self.selectTab(tabRoot.root);}, false);
-				 tabRoot.appendChild( poly );
-				 tabRoot.appendChild( text );
 				 this.svgAlxgroot.appendChild( tabRoot );
-				
-				 var objTab = { tabRoot : tabRoot
-							  , poly    : poly
-							  , text    : text
-							  , Y2      : 0
-							  };
-				 self.tabsList.push	( objTab );
-				 
+					
 				 return objTab;
 				}
 			 PresoPaletteOrthozoomTabs.prototype.addUniverAccess = function(objDescr, univers) {
@@ -158,6 +215,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 return objTab;
 				}
 			 PresoPaletteOrthozoomTabs.prototype.adaptRender = function(scale, L_CB) {}
+			 PresoPaletteOrthozoomTabs.prototype.primitiveUnPlug = function(child) {
+				 for(var i=0; i<this.tabsList.length; i++) {
+					 if(this.tabsList[i].brick === child.brick) {
+						 if(child.root)
+							this.tabsList[i].tabRoot.root.removeChild( child.root );
+						 break;
+						}
+					}
+				}
 			 PresoPaletteOrthozoomTabs.prototype.primitivePlug = function(child) {
 				 this.Render();
 				 for(var i=0; i<this.tabsList.length; i++) {
@@ -166,6 +232,71 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						 child.Render().setAttribute('transform', '');
 						 break;
 						}
+					}
+				}
+			 PresoPaletteOrthozoomTabs.prototype.editTile = function(tile) {
+				 var self = this;
+				 // Feedback for the selected tile
+				 if(this.editedTile) {
+					 this.editedTile.root.classList.remove('selected');
+					}
+				 this.editedTile = tile;
+				 // Creation of the edition palette if required
+				 if(this.root) {
+					 if(!this.panelTile) {
+						 this.panelTile = {};
+						 this.panelTile.Edition = new svgGroup( { transform: 'translate(50,0)'
+																, class: 'TileEdition' } );
+						 this.panelTile.bgRect  = new svgRect(	{ x:0 , y:0, width:250, height:window.innerHeight * 1000 / window.innerWidth
+																, class: 'background'
+																} );
+						 this.panelTile.labelName = new svgText ().set( 'Nom : ' ).translate(3,30);
+						 this.panelTile.entryName = new svgEntry().set( tile.brick.tile.name );
+						 this.panelTile.Edition.appendChild( this.panelTile.bgRect );
+						 this.panelTile.Edition.appendChild( this.panelTile.labelName );
+						 this.panelTile.Edition.appendChild( this.panelTile.entryName );
+						 this.svgAlxRoot.appendChild( this.panelTile.Edition );
+						 this.panelTile.entryName.rightTo(this.panelTile.labelName);
+						 
+						 // Buttons
+						 this.btOK = new svgButton( { bg	  : {style: {fill: 'lightgreen', stroke: 'black'}}
+												    , content : {value:'Valider',style:{fontFamily: 'Consolas'}}
+												    }
+												  ).command( function() {
+																 console.log("Valider");
+																 self.editedTile.brick.tile.name = self.panelTile.entryName.get();
+																 self.editedTile.brick.setName( self.editedTile.brick.tile.name );
+																 self.toggleTileEdition(false);
+																 self.editedTile.root.classList.remove('selected');
+																 self.editedTile = null;
+																} );
+						 this.btCA = new svgButton( { bg	  : {style: {fill: '#F99', stroke: 'black'}}
+												    , content : {value:'Annuler',style:{fontFamily: 'Consolas'}}
+												    }
+												  ).command( function() {
+																 console.log("Annuler");
+																 self.editedTile.root.classList.remove('selected');
+																 self.toggleTileEdition(false);
+																 self.editedTile.root.classList.remove('selected');
+																 self.editedTile = null;
+																} );
+						 this.panelTile.Edition.appendChild( this.btOK.translate(50, 300) );
+						 this.panelTile.Edition.appendChild( this.btCA.translate(150, 300) );
+						 
+						 
+						}
+					 // set up the edition panel
+					 // Name
+					 this.panelTile.entryName.set( tile.brick.tile.name );
+					 // size (depend wether it is a brick or a group)
+					 if(tile.brick.isSpace) {
+						 console.log("A space is under edition, we can change width and height");
+						}
+					 if(tile.brick.isBrick) {
+						 console.log("A space is under edition, we can change width and height");
+						}
+					 
+					 this.toggleTileEdition(true);
 					}
 				}
 				

@@ -134,6 +134,7 @@ var RRServer = {
 								  , body	: body
 								  }
 								, function (err, res, body) {
+									 if(err) {console.error(err); return;}
 									 var update = {id:id}, key, val, Atmp;
 									 for(var a=0; a<body.length; a++) {
 										 if(body[a].success) {
@@ -155,7 +156,11 @@ var RRServer = {
 			}
 		}
 	// Initialisation
-	, init		: function(port) {
+	, init		: function(port, params) {
+		 if(params.AppsGateServerIP && params.AppsGateServerPORT) {
+			 this.AppsGateServerConnection = { IP	: params.AppsGateServerIP
+											 , PORT : params.AppsGateServerPORT };
+			}
 		 this.app	= this.express().use(this.express.static(__dirname))
 									.use(this.express.bodyParser())
 									.listen(port) ;
@@ -177,6 +182,45 @@ var RRServer = {
 								  , function(data) {RRServer.call(socket, data);} );
 						}
 					);
+		 // Direct connection to AppsGate server if specified
+		 if(this.AppsGateServerConnection) {
+			 this.appsGate_ws_ad = 'ws://'+this.AppsGateServerConnection.IP+':'+this.AppsGateServerConnection.PORT;
+			 console.log('----> Direct connection to AppsGate Server', this.appsGate_ws_ad);
+			 this.ConnectToAppsGateServer();
+			}
+		}
+	, ConnectToAppsGateServer : function() {
+		var self = this;
+		self.comm = new self.CommM(self.appsGate_ws_ad);
+		self.comm.initialize({});
+		self.comm.subscribe ( 'newDevice', null
+							, function(json) {
+								 if(typeof json.newDevice === "string") {json.newDevice = JSON.parse(json.newDevice);}
+								 var brick = RRServer.updateBrick(json.newDevice, (new Date()).getTime());
+								 brick.origin = "AppsGate";
+								 RRServer.broadcastToClients('newDevice', json);
+								}
+							);
+		self.comm.subscribe ( 'objectId', null
+							, function(json) {
+								 var update = {id: json.objectId};
+								 update[json.varName] = json.value;
+								 var ms = (new Date()).getTime();
+								 RRServer.updateBrick(update, ms);
+								 update.ms = ms;
+								 RRServer.broadcastToClients(update.id, update);
+								}
+							);
+		console.log("Sending message getDevices\n");
+		self.comm.sendMessage(	{ method: "getDevices"
+								, args	: [] }
+							 , function(json) {
+								 console.log("getDevices result : ---------------");
+								 console.log(json);
+								 console.log("-----------------------------------");
+								 RRServer.updateBricksList("AppsGate", json);
+								}
+							 );
 		}
 	, UPnP_DeviceDetected : function(device) {
 		 var self = this;
@@ -215,7 +259,7 @@ var RRServer = {
 							}
 						 );
 			}
-		 if(device.friendlyName === "AppsGate set-top box") {
+		 if(device.friendlyName === "AppsGate set-top box" && !this.AppsGateServerConnection) {
 			 console.log('--> Found the AppsGate server at ' + device.location);
 			 for(var service_name in device.services) {
 				 var service = device.services[service_name];
@@ -225,44 +269,16 @@ var RRServer = {
 										, {}
 										, function(err, buf) {
 											if (err) {
-												 console.log("got err when performing action: " + err + " => " + buf);
-												} else {//console.log("Success :\n\terr : "+err+"\n\tbuf : "+buf);
+												 console.log("got err when performing action: ", err, " => ", buf);
+												} else {//console.log("Success :\n", buf);
 														var parser = new self.DOMParser();
 														var xmlDoc = parser.parseFromString(buf,"text/xml");
 														// console.log(xmlDoc);
 														var node_ad = xmlDoc.getElementsByTagName("serverWebsocket").item(0);
-														// console.log("Detected AppsGate address is " + node_ad);
+														console.log("Detected AppsGate address is " + node_ad);
 														self.appsGate_ws_ad = node_ad.childNodes.item(0).toString();
 														if(self.appsGate_ws_ad.substr(0,4) === "http") {self.appsGate_ws_ad = "ws"+self.appsGate_ws_ad.substring(4);}
-														self.comm = new self.CommM(self.appsGate_ws_ad);
-														self.comm.initialize({});
-														self.comm.subscribe ( 'newDevice', null
-																			, function(json) {
-																				 if(typeof json.newDevice === "string") {json.newDevice = JSON.parse(json.newDevice);}
-																				 var brick = RRServer.updateBrick(json.newDevice, (new Date()).getTime());
-																				 brick.origin = "AppsGate";
-																				 RRServer.broadcastToClients('newDevice', json);
-																				}
-																			);
-														self.comm.subscribe ( 'objectId', null
-																			, function(json) {
-																				 var update = {id: json.objectId};
-																				 update[json.varName] = json.value;
-																				 var ms = (new Date()).getTime();
-																				 RRServer.updateBrick(update, ms);
-																				 update.ms = ms;
-																				 RRServer.broadcastToClients(update.id, update);
-																				}
-																			);
-														self.comm.sendMessage(	{ method: "getDevices"
-																				, args	: [] }
-																			 , function(json) {
-																				 console.log("getDevices result : ---------------");
-																				 console.log(json);
-																				 console.log("-----------------------------------");
-																				 RRServer.updateBricksList("AppsGate", json);
-																				}
-																			 );
+														self.ConnectToAppsGateServer();
 													   }
 											}
 										);
@@ -272,6 +288,12 @@ var RRServer = {
 		}
 };
 
-var port = process.env.PORT || 8080;
+var params = {}, p;
+for(var i=2; i<process.argv.length; i++) {
+	p = process.argv[i].split(':');
+	params[p[0]] = p[1];
+}
+
+var port = params.port || 8080;
 console.log("Listening on port " + port);
-RRServer.init( port );
+RRServer.init( port, params );

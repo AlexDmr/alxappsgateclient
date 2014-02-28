@@ -6,6 +6,7 @@ define( [ "Bricks/protoBricks"
 				 brick = brick || {};
 				 this.id = id;
 				 if(id) socket.on(id, function(data) {self.update(data);});
+				 this.isSpace = true;
 				 return this;
 				};
 			 SpaceBrick.prototype = new Brick();

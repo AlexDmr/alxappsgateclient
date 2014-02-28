@@ -4,13 +4,6 @@ define( [ "Bricks/protoBricks"
 	  , function(Brick, PresoPaletteOrthozoomTabs) {
 			 var Palette = function(id, brick) {
 				 brick = brick || {};
-				 this.init();
-				 this.appendPresoFactory( 'PresoPaletteOrthozoomTabs'
-										, PresoPaletteOrthozoomTabs
-										, { pixelsMinDensity : 0
-										  , pixelsMaxDensity : 999999999
-										  , pixelsRatio		 : 0 }
-										);
 				 this.id = id;
 				 if(id) socket.on(id, function(data) {self.update(data);});
 				 
@@ -25,6 +18,15 @@ define( [ "Bricks/protoBricks"
 				};
 			 Palette.prototype = new Brick();
 			 Palette.prototype.constructor = Palette;
+			 Palette.prototype.init = function(children) {
+				 Brick.prototype.init.apply(this, [children]);
+				 this.appendPresoFactory( 'PresoPaletteOrthozoomTabs'
+										, PresoPaletteOrthozoomTabs
+										, { pixelsMinDensity : 0
+										  , pixelsMaxDensity : 999999999
+										  , pixelsRatio		 : 0 }
+										);
+				}
 			 Palette.prototype.update = function(data) {
 				 console.log("Update Palette", this, "with", data);
 				}
@@ -35,7 +37,12 @@ define( [ "Bricks/protoBricks"
 					}
 				 this.appendChild( brickUnivers );
 				}
-			 
+			 Palette.prototype.editTile = function(tile) {
+				 for(var i=0; i<this.presentations.length; i++) {
+					 this.presentations[i].editTile( tile );
+					}
+				}
+				
 			 return Palette;
 			}
 	  );

@@ -1,3 +1,4 @@
+var pipoClock;
 define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		, "utils/svgText"
 		, "Bricks/Presentations/utils"
@@ -22,6 +23,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 												console.log("Clock flowRate :", rate);
 											   }
 										  );
+				 pipoClock = this;
 				}
 			 PresoBasicClock.prototype.updateClock = function(ms) {
 				 if(this.clockText) {
@@ -36,17 +38,21 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 Presentation.prototype.Render.apply(this, []) ;
 				 // Text for consumption
 				 if(!this.clockText) {
-					 this.clockText = new svgText( {style: {fontFamily: 'Consolas'}} );
+					 this.clockText = new svgText( {style: {fontFamily: 'Consolas', textAnchor: 'left', stroke: 'none'}} );
 					 this.gPreso.appendChild(this.clockText.getRoot());
 					 self.updateClock( this.brick.get_clockValue() );
 					 var coords = this.getPresoCoords();
 					 this.clockText.getRoot().addEventListener(
 							  'DOMNodeInsertedIntoDocument'
-							, function(e) 	{self.clockText.fillSpace( { x		: coords.x1
+							, function(e) 	{var prev = self.clockText.get();
+											 self.clockText.set('00:00');
+											 self.clockText.fillSpace( { x		: coords.x1
 																	   , y		: coords.y1
 																	   , width	: coords.x2 - coords.x1
 																	   , height	: coords.y2 - coords.y1 }
-																	 , 0.9); }
+																	 , 0.7);
+											 self.clockText.set(prev);
+											}
 							, false );
 					}
 				 

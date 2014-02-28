@@ -1,9 +1,12 @@
 define( [ "Bricks/Presentations/protoPresentation"
 		, "utils/svgUtils"
+		, "utils/svgGroup"
 		, "utils/svgLine"
 		, "utils/svgRect"
+		, "utils/svgText"
 		]
-	  , function(Presentation, svgUtils, svgLine, svgRect) {
+	  , function( Presentation, svgUtils
+	            , svgGroup, svgLine, svgRect, svgText) {
 			 var dt = 0.1, size = 32, svg_point = null, uid = 0
 			   , L_toUnplugged = [], L_dragged = [];
 			 
@@ -84,8 +87,8 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoTilesAlxAppsGate.prototype.getFreeSpaceCoordsFor = function(x,y,w,h) {
 				 var intersect, child;
 				 // Try to place the rectangle so that bottom right corner does correspond to <x;y>
-				 var H = Math.floor((h+1)/2)
-				   , W = Math.floor((w+1)/2)
+				 var H = Math.floor((h+0)/2)
+				   , W = Math.floor((w+0)/2)
 				 for(var j=H;j>=-H;j--) { 	// Line
 					 for(var i=W;i>=-W;i--) {// Column
 						 // coords : <x-i;y-j>
@@ -111,10 +114,46 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 console.log("No space");
 				 return null;
 				}
+			 PresoTilesAlxAppsGate.prototype.appendChild = function(c) {
+				 Presentation.prototype.appendChild.apply(this, [c]);
+				 if(this.svgG) this.svgG.appendChild( this.svgFgRect );
+				 return this;
+				}
+			 PresoTilesAlxAppsGate.prototype.removeChild = function(c) {
+				 Presentation.prototype.removeChild.apply(this, [c]);
+				 if(this.svgG && this.children.length === 0) this.svgG.removeChild( this.svgFgRect );
+				 return this;
+				}
+			 PresoTilesAlxAppsGate.prototype.setName = function(name) {
+				 if(this.svgName) {this.svgName.set(name);}
+				}
 			 PresoTilesAlxAppsGate.prototype.Render = function() {
 				 var self = this;
 				 if(!this.root) {
+					 this.svgG = new svgGroup( {class: (this.brick&&this.brick.tile)?this.brick.tile.class:''}
+											 ).translate(this.x*size, this.y*(11+size));
+					 var g = this.svgG.getRoot();
+					 var scale = (Math.max(this.w,this.h)-2*dt)/this.innerMagnitude
+					   , titleHeight;
+					 if(!(this.brick.tile && this.brick.tile.brickId)) {titleHeight = 11;} else {titleHeight = 0;}
+					 this.svgGR = new svgGroup( {class : 'rootInternal'} ).translate(dt*size, titleHeight+dt*size).scale(scale,scale);
+					 var gr = this.svgGR.getRoot();
+					 this.svgGPreso = new svgGroup( {class: 'bgPreso'} );
+					 this.gPreso = this.svgGPreso.getRoot();
+					 this.x = this.x || 1;
+					 this.x = this.y || 1;
+					 this.w = this.w || 1;
+					 this.h = this.h || 1;
+					 this.svgBgRect = new svgRect( { x:0.5*dt*size, y:0.5*dt*size, rx:6, ry:6
+												   , width:size*(this.w-dt), height:(titleHeight+size)*(this.h-dt)
+												   , class:'tile' } );
+					 this.svgFgRect = new svgRect( { x:1.5*dt*size, y:titleHeight+1.5*dt*size
+												   , width:size*(this.w-3*dt), height:(titleHeight+size)*(this.h-0.5-dt)
+												   , class:'fgRect' } );
+					 var r = this.svgBgRect.getRoot();
+					/* XXX OLD STYLE
 					 var g  = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+						 g.setAttribute('class', (this.brick&&this.brick.tile)?this.brick.tile.class:'');
 						 g.setAttribute('transform', 'translate(' + this.x*size
 														   + ', ' + this.y*size + ')');
 					 var gr = document.createElementNS("http://www.w3.org/2000/svg", 'g');
@@ -125,15 +164,22 @@ define( [ "Bricks/Presentations/protoPresentation"
 															+', '+ dt*size
 															+') scale('+scale+','+scale+')');
 					 this.gPreso = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+					 this.gPreso.classList.add('bgPreso');
 					 var r  = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
 						 r.setAttribute('x', 0.5*dt*size)          ; r.setAttribute('y', 0.5*dt*size);
 						 r.setAttribute('rx', 6)          ; r.setAttribute('ry', 6);
 						 r.setAttribute('width' , size*(this.w-dt)); r.setAttribute('height', size*(this.h-dt));
 						 r.classList.add('tile');
-						 r.style.fill = this.color; r.style.stroke = "black";
+						 // r.style.fill = this.color; r.style.stroke = "black";
 						 this.bgRect = r;
+					 */
 					 this.gPreso.appendChild(r); g.appendChild(this.gPreso); g.appendChild(gr);
-					 this.rect = r;
+					 if(!(this.brick.tile && this.brick.tile.brickId)) {
+						 this.svgName = new svgText({class:'title'}).translate(3,titleHeight).set( this.brick?this.brick.getName():'' );
+						 this.svgGPreso.appendChild( this.svgName );
+						 if(this.children.length) this.svgG.appendChild( this.svgFgRect );
+						}
+					 this.rect = this.bgRect = r;
 					 this.root  = g; g.classList.add('TileRoot'); g.TileRoot = this;
 					 this.groot = gr;
 					 for(var i=0;i<this.children.length;i++) {this.primitivePlug(this.children[i]);}
@@ -159,27 +205,25 @@ define( [ "Bricks/Presentations/protoPresentation"
 															 var brick = evt.config.brick
 															   , preso = evt.config.presentation;
 															 // Plug the brick
-															 if(self.brick !== brick)
-																 self.appendChildFromBrick( brick
-																						  , function() {
-																								 // Set coordinates...
-																								 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
-																								 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
-																								 this.w = evt.config.size.w;
-																								 this.h = evt.config.size.h;
-																								 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
-																																		, Math.floor(svg_point.y/self.getTileSize())
-																																		, this.w
-																																		, this.h );
-																								 console.log( svg_point, coords );
-																								 this.DropZone = false;
-																								 if(coords) {
-																									 this.x = coords.x;
-																									 this.y = coords.y;
-																									 this.forceRender();
-																									} else {this.Render().style.display = 'none';}
-																								}
-																						  );
+															 // if(self.brick !== brick)
+															 if(self.brick !== brick && self.brick.ancestors().indexOf(brick) === -1) {
+																 self.appendChild( preso );
+																 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
+																 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
+																 preso.w = evt.config.size.w;
+																 preso.h = evt.config.size.h;
+																 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
+																										, Math.floor(svg_point.y/self.getTileSize())
+																										, preso.w
+																										, preso.h );
+																 // console.log( svg_point, coords );
+																 preso.DropZone = false;
+																 if(coords) {
+																	 preso.x = coords.x;
+																	 preso.y = coords.y;
+																	 preso.forceRender();
+																	} else {preso.Render().style.display = 'none';}
+																}
 															}
 										   , leave		: function(evt) {
 															 // self.displayGrid(false);
@@ -187,7 +231,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 															 var brick = evt.config.brick
 															   , preso = evt.config.presentation;
 															 // Unplug the brick
-															 self.removeChildFromBrick( brick );
+															 self.removeChild( preso );
 															}
 										   , dragOver	: function(evt) {
 															 // Resize the rectangle so that it fit into the cases
@@ -199,11 +243,12 @@ define( [ "Bricks/Presentations/protoPresentation"
 															 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
 															 var X = preso.x, Y = preso.y;
 															 preso.x = 100000; preso.y = 100000;
-															 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
-																									, Math.floor(svg_point.y/self.getTileSize())
+															 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/( 0+self.getTileSize()))
+																									, Math.floor(svg_point.y/(11+self.getTileSize()))
 																									, preso.w
 																									, preso.h );
 															 preso.x = X; preso.y = Y;
+															 if(!coords) {console.log("No place...");}
 															 if(  coords 
 															   && ( preso.x !== coords.x || preso.y !== coords.y) ) {
 																 preso.x = coords.x;
@@ -211,7 +256,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 																 preso.Render().style.display = 'inherit';
 																 preso.Render().setAttribute ( 'transform'
 																							 , 'translate(' + preso.x*size
-																									 + ', ' + preso.y*size + ')' 
+																									 + ', ' + preso.y*(11+size) + ')' 
 																							 );
 																}
 															}
@@ -220,12 +265,17 @@ define( [ "Bricks/Presentations/protoPresentation"
 															   , preso = evt.config.presentation;
 															 self.bgRect.classList.remove('selected');
 															 preso.AlxGrosDebug = true;
-															 preso.parent.removeChild( preso );
 															 brick.tile = { x : preso.x, y : preso.y
 																		  , w : preso.w, h : preso.h
 																		  , color : preso.color};
-															 self.brick.appendChild( brick );
-															 preso = self.getPresoBrickFromDescendant( brick );
+															 if(self.brick.children.indexOf(brick) === -1) {
+																 console.log("Plug", brick, "under", self.brick);
+																 if(preso.parent) preso.parent.removeChild( preso );
+																 brick.unPlugPresentation( preso );
+																 self.brick.appendChild( brick );
+																 preso = self.getPresoBrickFromDescendant( brick );
+																} else	{
+																		}
 															 // preso.DropZone = true;
 															 // preso.forceRender();
 															}
@@ -306,35 +356,35 @@ define( [ "Bricks/Presentations/protoPresentation"
 					}
 				if(scale < this.scaleToDisplayChildren) {
 					 if(this.display) {this.display = false;
-									   L_CB.push( function(v) {self.CB_Fade(v,1,0);} );
+									   L_CB.push( function(v) {if(self.svgFgRect.root.parentNode) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,0,1,self.svgFgRect.root]);
+															   self.CB_Fade(v,1,0);} );
 									   res = true;
 									  } else {res = false;}
 					} else 	{if(!this.display) {this.display = true;
-												L_CB.push( function(v) {self.CB_Fade(v,0,1);} );
+												L_CB.push( function(v) {if(self.svgFgRect.root.parentNode) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,1,0,self.svgFgRect.root]);
+																		self.CB_Fade(v,0,1);} );
 											   }
 							 res = true;
 							}
 				 return res;
 				}
 			 PresoTilesAlxAppsGate.prototype.CB_Fade = function(dt, v0, v1, node) {
-				 if(!node) {node = this.getInnerRoot();}
+				 node = node || this.getInnerRoot();
 				 if(v0 === 0 && dt === 0) {
-					 // console.log('display', this);
 					 node.style.display = 'inherit';
 					}
 				 node.style.opacity = Math.easeInOutQuad(dt, v0, v1-v0, 1);
 				 if(v1 === 0 && dt >= 1) {
-					 // console.log('Hide', this);
-					 if(!this.display) node.style.display = 'none';
+					 if(/*!this.display*/node.style.display !== 'none') node.style.display = 'none';
 					}
 				}
 			 PresoTilesAlxAppsGate.prototype.deletePrimitives = function() {
 				 // console.log("PresoTilesAlxAppsGate::deletePrimitives", this);
 				 if(this.root) {
 					 if(this.root.parentNode  ) this.root.parentNode.removeChild  (this.root)  ;this.root  = null;
-					 if(this.rect.parentNode  ) this.rect.parentNode.removeChild  (this.rect)  ;this.rect  = null;
-					 if(this.gPreso.parentNode) this.gPreso.parentNode.removeChild(this.gPreso);this.gPreso= null;
-					 if(this.groot.parentNode ) this.groot.parentNode.removeChild (this.groot) ;this.groot = null;
+					 if(this.rect && this.rect.parentNode  ) this.rect.parentNode.removeChild  (this.rect)  ;this.rect  = null;
+					 if(this.gPreso && this.gPreso.parentNode) this.gPreso.parentNode.removeChild(this.gPreso);this.gPreso= null;
+					 if(this.groot && this.groot.parentNode ) this.groot.parentNode.removeChild (this.groot) ;this.groot = null;
 					 
 					 if(this.DropZone)
 						svgUtils.DD.removeDropZone( this.root );

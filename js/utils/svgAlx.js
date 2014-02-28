@@ -1,8 +1,12 @@
 define( [ 
 		]
 	  , function(svgUtils) {
+			 var svgPoint = null;
 			 var svgAlx = function(conf) {
 				 this.root = null;
+				}
+			 svgAlx.prototype.init = function(svgCanvas) {
+				 svgPoint = svgCanvas.createSVGPoint();
 				}
 			 svgAlx.prototype.getRoot = function()	{return this.root;}
 			 svgAlx.prototype.configure = function(conf, obj) {
@@ -20,11 +24,13 @@ define( [
 				 return this;
 				}
 			 svgAlx.prototype.appendChild = function(svgA) {
-				 this.root.appendChild( svgA.getRoot() );
+				 if(svgA.getRoot().parentNode === null)
+					this.root.appendChild( svgA.getRoot() );
 				 return this;
 				}
 			 svgAlx.prototype.removeChild = function(svgA) {
-				 this.root.removeChild( svgA.getRoot() );
+				 if(svgA.getRoot().parentNode === this.root)
+					this.root.removeChild( svgA.getRoot() );
 				 return this;
 				}
 			 svgAlx.prototype.getBBox = function() {return this.root.getBBox();}
@@ -52,18 +58,19 @@ define( [
 				 this.root.setAttribute('transform', 'matrix('+M.a+','+M.b+','+M.c+','+M.d+','+M.e+','+M.f+')' );
 				 return this;
 				}
-			 
-			 svgAlx.prototype.fillSpace = function(rect, scale, rotate, x, y) {
-				 rotate = rotate || 0; x = x || 0; y = y || 0;
-				 this.root.setAttribute('transform', rotate?'rotate('+rotate+')':'');
+			 svgAlx.prototype.fillSpace = function(rect, scale) {
 				 var bbox    = this.root.getBBox()
 				   , S		 = scale * Math.min(rect.width/bbox.width, rect.height/bbox.height)
-				   , DX		 = x + rect.x - bbox.x*S + (rect.width  - S*bbox.width ) / 2
-				   , DY		 = y + rect.y - bbox.y*S + (rect.height - S*bbox.height) / 2
-				   , cos	 = Math.cos(3.14159265*rotate/180)
-				   , sin	 = Math.sin(3.14159265*rotate/180);
-				 this.translate	( DX, DY );
-				 this.scale(S,S);
+				   , DX		 = rect.x - bbox.x + (rect.width  - S*bbox.width ) / 2
+				   , DY		 = rect.y - bbox.y + (rect.height - S*bbox.height) / 2;
+				 this.translate(DX, DY).scale(S,S);
+				 return this;
+				}
+			 svgAlx.prototype.rightTo = function(svgE) {
+				 var bbox = svgE.getBBox(), bbox2 = this.getBBox();
+				 svgPoint.x = bbox.x+bbox.width-bbox2.x; svgPoint.y = bbox.y;
+				 svgPoint = svgPoint.matrixTransform( svgE.getRoot().parentNode.getCTM().inverse().multiply(svgE.getRoot().getCTM()) );
+				 this.matrixId().translate(svgPoint.x, svgPoint.y);
 				 return this;
 				}
 			 

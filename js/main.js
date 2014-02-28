@@ -3,6 +3,7 @@ var AlxClient = null;
 
 require( [ "AlxAppsGateClient"
 		 , "domReady"
+		 , "classList"
 		 ]
 	   , function(apps, domReady) {
 			 console.log("Now AppsGate is loaded");

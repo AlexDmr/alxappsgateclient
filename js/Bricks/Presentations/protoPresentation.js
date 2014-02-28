@@ -145,7 +145,8 @@ define( function() {
 						}
 					}
 				}
-			 
+			 Presentation.prototype.setName = function(name) {}
+
 			 // Return the reference to the Presentation constructor
 			 return Presentation;
 			}
