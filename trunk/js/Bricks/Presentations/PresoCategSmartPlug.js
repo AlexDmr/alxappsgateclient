@@ -12,7 +12,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoCategSmartPlug.prototype.Render = function() {
 				 var self = this;
 				 Presentation.prototype.Render.apply(this, []) ;
-				 this.bgRect.style.fill = 'red';
+				 // this.bgRect.style.fill = 'red';
 				 // Text for consumption
 				 if(!this.consoText) {
 					this.consoText = document.createElementNS("http://www.w3.org/2000/svg", 'text');

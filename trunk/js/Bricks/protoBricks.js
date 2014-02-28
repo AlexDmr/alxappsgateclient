@@ -1,7 +1,10 @@
-define( function() {
+define( [ "Bricks/Presentations/utils"
+	    ]
+	  , function(utils) {
 			 // Define the Brick constructor
 			 var msgId = 0;
 			 var Brick = function(children) {
+				 this.name = '';
 				}
 			 // Definition of the Brick class
 			 Brick.prototype.constructor = Brick;
@@ -27,14 +30,42 @@ define( function() {
 				 var parent = preso.parent;
 				 if(parent) {parent.removeChild(preso);}
 				}
+			 Brick.prototype.changePresentationsWithContext = function(context, brick) {
+				 var preso;
+				 brick = brick || this;
+				 for(var p=0; p<this.presentations.length; p++) {
+					 preso = this.presentations[p].getPresoBrickFromDescendant( brick );
+					 brick.changePresentationWithContext(preso, context);
+					}
+				}
+			 Brick.prototype.changePresentationWithContext = function(preso, context) {
+				 var newPreso      = this.getNewPresentationWithContext(context)
+				   , presoParent   = preso.parent
+				   , presoChildren = preso.children.slice();
+				 if(newPreso === null) {console.error("There is no presentation for", this, "adapted to context", context); return;}
+				 this.unPlugPresentation(preso);
+				 for(var i=0; i<presoChildren.length; i++) {
+					 presoChildren[i].brick.unPlugPresentation( presoChildren[i] );
+					 newPreso.appendChild( presoChildren[i] );
+					}
+				 presoParent.appendChild( newPreso );
+				 newPreso.appendDescendants();
+				 newPreso.forceRender();
+				}
 			 Brick.prototype.getNewPresentationWithContext = function(context) {
+				 context 				= context				|| {};
+				 context.tags			= context.tags 			|| [];
+				 context.pixelsDensity	= context.pixelsDensity || 1;
+				 context.pixelsRatio	= context.pixelsRatio	|| 1;
 				 // Context contains informations such as ratio and pixels
 				 for(var i in this.presoFactories) {
 					 var factory = this.presoFactories[i];
+					 factory.validity.tags = factory.validity.tags || []
 					 if (  factory.validity.pixelsMinDensity <= context.pixelsDensity
 						&& factory.validity.pixelsMaxDensity >= context.pixelsDensity
 						&& (  factory.validity.pixelsRatio === 0
 						   || factory.validity.pixelsRatio === context.pixelsRatio)
+						&& utils.intersect(factory.validity.tags, context.tags).length === context.tags.length
 						) {// This is the right factory!
 						   return this.getNewPresentation(factory.name);
 						  }
@@ -129,6 +160,22 @@ define( function() {
 				 for(var i=0; i<this.children.length; i++) {
 					 this.children[i].toConsole(indent+'  ');
 					}
+				}
+			 Brick.prototype.ancestors = function() {
+				 var Lrep = [], L = this.parents.slice()
+				   , p;
+				 while(L.length) {
+					 p = L.pop();
+					 Lrep.push(p);
+					 for(var i=0;i<p.parents;i++) {L.push(p.parents[i]);}
+					}
+				 return Lrep;
+				}
+			 Brick.prototype.getName = function(    ) {return this.name;}
+			 Brick.prototype.setName = function(name) {
+				 this.name = name;
+				 for(var i=0; i<this.presentations.length; i++) {this.presentations[i].setName(name);}
+				 return this;
 				}
 			 
 			 // Return the reference to the Brick constructor

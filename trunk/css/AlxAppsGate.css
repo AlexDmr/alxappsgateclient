@@ -1,3 +1,4 @@
+/* Some tricks to make things right */
 html, body, svg {
 	margin : 0px;
 	padding: 0px;
@@ -6,7 +7,16 @@ html, body, svg {
 	overflow: hidden;
 }
 
-body {
+body	{
+	-webkit-touch-callout: inherit;
+	-webkit-user-select: inherit;
+	-khtml-user-select: inherit;
+	-moz-user-select: inherit;
+	-ms-user-select: inherit;
+	user-select: inherit;
+}
+
+svg.noUserSelect {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -15,10 +25,49 @@ body {
 	user-select: none;
 }
 
+/* About SVG */
+svg * {
+	 vector-effect	: non-scaling-stroke;
+	}
 svg rect.tile.selected {
-	stroke-width	: 5;
+	stroke-width	: 5px;
 	stroke-dasharray: 10, 2;
 }
+svg g.TileRoot.selected > g.bgPreso > rect.tile {
+	stroke-width	: 5px;
+}
+
+svg g.TileRoot > g.bgPreso > text.title {
+	stroke		: none;
+	font-size	: 10px;
+}
+
+svg g.TileRoot > rect.fgRect {
+	fill	: grey;
+}
+
+/* About tiles */
+svg g.TileRoot > g.bgPreso > rect.tile {
+	stroke-width : 2;
+	fill: white;
+	stroke: black;
+}
+
+svg g.TileRoot.BrickPlace  g.bgPreso > rect.tile {
+	stroke	: lightgreen;
+}
+
+svg g.TileRoot.BrickDevice  g.bgPreso > rect.tile {
+	stroke	: #CC0;
+}
+
+svg g.TileRoot.BrickService  g.bgPreso > rect.tile {
+	stroke	: orange;
+}
+
+
+/* Other things... */
+svg .AlxTab				{fill	: lightgrey; stroke:black;}
 
 svg .AlxTab.BrickUser 	{fill	: lightblue; stroke:black;}
 svg .BrickUser 			{stroke	: lightblue;}
@@ -35,3 +84,50 @@ svg .BrickPlace 			{stroke	: lightgreen;}
 svg .AlxTab.BrickMixed	{fill	: grey; stroke:black;}
 svg .BrickMixed	 		{stroke	: grey;}
 
+svg text.svgText			{fill	: black;}
+svg g.svgEntry > rect		{fill	: white;
+						 stroke	: black;
+						}
+						
+svg g.TileEdition rect.background {
+	fill		: #CCC;
+	stroke		: black;
+	stroke-width: 4px;
+}
+
+/* Modal */
+div.AlxModal {
+	background	: black;
+	opacity 	: 0.75;
+	width		: 100%;
+	height		: 100%;
+	position	: absolute;
+	top			: 0px;
+	left		: 0px;
+}
+
+div.AlxModal input.name {
+	position	: absolute;
+	left		: 10%;
+	top			: 25%;
+	width		: 80%;
+	font-size	: 32px;
+}
+
+div.AlxModal input.OK {
+	position	: absolute;
+	bottom		: 45%;
+	right		: 200px;
+	width		: 80px;
+	height		: 40px;
+	background	: #7F7;
+}
+
+div.AlxModal input.Cancel {
+	position	: absolute;
+	bottom		: 45%;
+	right		: 100px;
+	width		: 80px;
+	height		: 40px;
+	background	: #F77;
+}

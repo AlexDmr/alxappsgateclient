@@ -8,7 +8,8 @@ define( [ "utils/svgAlx"
 				, svgGroup, svgText, svgRect ) {
 			 var svgButton = function(config) {
 				 var self = this;
-				 this.Aroot = new svgGroup();
+				 this.Aroot = new svgGroup({class: 'svgButton'});
+					this.Aroot.root.setAttribute('filter', "url(#dropShadow)");
 					this.Arect		= new svgRect(config.bg);
 					this.Acontent	= new svgText(config.content).set(config.content.value);
 					this.Aroot.appendChild(this.Arect);
