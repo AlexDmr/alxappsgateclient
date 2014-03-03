@@ -114,7 +114,7 @@ div.AlxModal input.name {
 	font-size	: 32px;
 }
 
-div.AlxModal input.OK {
+div.AlxModal .OK {
 	position	: absolute;
 	bottom		: 45%;
 	right		: 200px;
@@ -123,7 +123,7 @@ div.AlxModal input.OK {
 	background	: #7F7;
 }
 
-div.AlxModal input.Cancel {
+div.AlxModal .Cancel {
 	position	: absolute;
 	bottom		: 45%;
 	right		: 100px;

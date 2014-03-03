@@ -25,7 +25,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 // For categories
 				 var f_config = function() {this.x = x; this.y = y; this.w = w; this.h = h; this.color = color;}
 				   , parentBrick, data
-				   , preso, presoParent
+				   , Lpreso, preso, presoParent, L_hasBeenUsed = []
 				   , pos, width, x, y, w, h, color = "red"
 				   , L;
 				 if(this.brick.mapCategIdToTile[brick.type]) {L=this.brick.mapCategIdToTile[brick.type].length;} else {L=0;}
@@ -50,6 +50,9 @@ define( [ "Bricks/Presentations/protoPresentation"
 					}
 				 // For direct references
 				 if(this.brick.mapBrickIdToTile[brick.id]) {L=this.brick.mapBrickIdToTile[brick.id].length;} else {L=0;}
+				 /*if(brick.getName() === 'petit fantôme Spöka') {
+					 console.log('petit fantôme Spöka');
+					}*/
 				 for(var i=0;i<L;i++) {
 					 data		 = this.brick.mapBrickIdToTile[brick.id][i].data;
 						x = data.x; y = data.y; w = data.w; h = data.h; color = data.color;
@@ -57,7 +60,16 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 // console.log("Map", data, parentBrick);
 					 for(var p=0; p<parentBrick.presentations.length; p++) {
 						 presoParent = parentBrick.presentations[p];
-						 preso		 = presoParent.getPresoBrickFromDescendant(brick);
+						 Lpreso		 = presoParent.getAllPresoBrickFromDescendant(brick);
+						 preso = null;
+						 for(var j=0; j<Lpreso.length; j++) {
+							 if(!Lpreso[j].hasBeenUsed) {
+								 preso = Lpreso[j];
+								 preso.hasBeenUsed = true;
+								 L_hasBeenUsed.push(preso);
+								 break;
+								}
+							}
 						 if(preso === null) {
 							 console.error('Individual preso is null for', brick, "under", presoParent);
 							 continue;
@@ -66,9 +78,13 @@ define( [ "Bricks/Presentations/protoPresentation"
 						 preso.forceRender();
 						}
 					}
+				 // Clear markage for L_hasBeenUsed
+				 for(var i=0; i<L_hasBeenUsed.length; i++) {
+					 delete L_hasBeenUsed[i].hasBeenUsed;
+					}
 				}
 			 PresoBasicUnivers.prototype.layoutDescendants = function() {
-				 console.log("Univers", this.imgPath);
+				 // console.log("Univers", this.imgPath);
 				 var D = this.getDescendants(this), data, L2clean = [];
 				 for(var i=0; i<D.length; i++) {
 					 data = this.brick.D_bricks[ D[i].brick.localBrickId ];

@@ -47,6 +47,15 @@ define( function() {
 					 c.setParent(null);
 					}
 				}
+			 Presentation.prototype.getAllPresoBrickFromDescendant = function(brick) {
+				 if(this.brick === brick) {return [this];}
+				 var Lrep = [], L;
+				 for(var i=0; i<this.children.length; i++) {
+					 L = this.children[i].getAllPresoBrickFromDescendant(brick);
+					 for(var j=0; j<L.length; j++) {Lrep.push(L[j]);}
+					}
+				 return Lrep;
+				}
 			 Presentation.prototype.getPresoBrickFromDescendant = function(brick) {
 				 if(this.brick === brick) {return this;}
 				 var rep = null;
@@ -58,11 +67,14 @@ define( function() {
 				}
 			 Presentation.prototype.appendChildFromBrick = function(brick, fParams, constrName) {
 				 // Stop here if there is still an existing presentation plugged to this and brick
-				 var preExistingPreso = false;
+				 var preExistingPreso = false, nb = 0;
 				 for(var i=0; i<this.children.length; i++) {
-					 if(this.children[i].brick === brick) {preExistingPreso = true; break;}
+					 if(this.children[i].brick === brick) {nb++;}
 					}
-				 
+				 if(nb >= this.brick.containsChild(brick)) {
+					 preExistingPreso = true;
+					 console.error('Attention, trying to plug more presentations than necessery...', nb, brick);
+					}
 				 if(!preExistingPreso) {
 					 // If a presentation constructor has been specified...
 					 if(constrName) {
