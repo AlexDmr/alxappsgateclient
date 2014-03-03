@@ -18,7 +18,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					this.root.classList.add('PresoBasicSmartPlug');
 					this.root.classList.add('Brick'); this.root.classList.add('BrickDevice');
 					this.root.classList.add('dropShadowFilter');
-					this.root.setAttribute('filter', 'url(#dropShadow)');
+					// this.root.setAttribute('filter', 'url(#dropShadow)');
 					var coords = this.getPresoCoords();
 					// Create the ovals
 					var WIDTH	= this.w*this.getTileSize()

@@ -137,11 +137,14 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 this.svgBgRect = new svgRect( { x:0.5*dt*size, y:0.5*dt*size, rx:6, ry:6
 												   , width:size*(this.w-dt), height:(titleHeight+size)*(this.h-dt)
 												   , class:'tile' } );
+					 this.svgBgRectShadow = new svgRect( { x:0.5*dt*size, y:0.5*dt*size, rx:6, ry:6
+												   , width:size*(this.w-dt), height:(titleHeight+size)*(this.h-dt)
+												   , class:'shadow' } ).translate(dt*size, dt*size);
 					 this.svgFgRect = new svgRect( { x:1.5*dt*size, y:titleHeight+1.5*dt*size
 												   , width:size*(this.w-3*dt), height:(titleHeight+size)*(this.h-0.5-dt)
 												   , class:'fgRect' } );
 						var r = this.svgBgRect.getRoot();
-					 this.gPreso.appendChild(r); g.appendChild(this.gPreso); g.appendChild(gr);
+					 this.gPreso.appendChild(this.svgBgRectShadow.getRoot()); this.gPreso.appendChild(r); g.appendChild(this.gPreso); g.appendChild(gr);
 					 if(this.brick.isSpace) {
 						 this.svgName = new svgText({class:'title'}).translate(3,titleHeight).set( this.brick?this.brick.getName():'' );
 						 this.svgGPreso.appendChild( this.svgName );

@@ -130,9 +130,11 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoBasicUnivers.prototype.Render = function() {
 				 PresoTile.prototype.Render.apply(this,[]);
 				 if(!this.svg_image) {
+					 this.root.classList.add('Univers');
 					 this.svgG.removeChild( this.svgFgRect );
 					 // Group containing image and clip path
 					 this.gImage = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+						this.gImage.classList.add('gImage');
 						this.gImage.setAttribute('transform', 'translate(-20,-20)');
 						this.gImage.style.display = 'none';
 
@@ -158,9 +160,9 @@ define( [ "Bricks/Presentations/protoPresentation"
 						circleDisplay.setAttribute('cx', imgSize/2);//'100');
 						circleDisplay.setAttribute('cy', imgSize/2);//'100');
 						circleDisplay.setAttribute('r', imgSize/2);//'100');
-						circleDisplay.style.fill = 'none';
-						circleDisplay.style.stroke = 'black';
-						circleDisplay.style.strokeWidth = '4';
+						// circleDisplay.style.fill = 'none';
+						// circleDisplay.style.stroke = 'black';
+						// circleDisplay.style.strokeWidth = '4';
 					 
 					 this.root.appendChild( this.gImage );
 					 this.gImage.appendChild( this.clipPath );
