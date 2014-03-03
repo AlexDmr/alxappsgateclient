@@ -44,8 +44,11 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							  'DOMNodeInsertedIntoDocument'
 							, function(e) 	{var prev = self.clockText.get();
 											 self.clockText.set('00:00');
+											 var bbox = self.clockText.getBBox()
+											   ,    s = 0.8 * (coords.x2-coords.x1) / bbox.width;
 											 self.clockText.matrixId().translate( (coords.x2+coords.x1)/2
-																				, 0 );
+																				, (coords.y2+coords.y1)/2
+																				).scale(s,s)
 											 /*self.clockText.fillSpace( { x		: coords.x1
 																	   , y		: coords.y1
 																	   , width	: coords.x2 - coords.x1
@@ -60,7 +63,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 			 PresoBasicClock.prototype.deletePrimitives = function() {
 				 Presentation.prototype.deletePrimitives.apply(this, []);
-				 if(this.clockText) {if(this.clockText.parentNode) this.clockText.parentNode.removeChild( this.clockText );
+				 if(this.clockText) {if(this.clockText.parentElement) this.clockText.parentElement.removeChild( this.clockText );
 									 this.clockText = null;
 									}
 				}

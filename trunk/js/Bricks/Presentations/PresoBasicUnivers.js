@@ -123,7 +123,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoBasicUnivers.prototype.deletePrimitives = function() {
 				 PresoTile.prototype.deletePrimitives.apply(this, []);
 				 if(this.svg_image) {
-					 if(this.svg_image.parentNode) {this.svg_image.parentNode.removeChild( this.svg_image );}
+					 if(this.svg_image.parentElement) {this.svg_image.parentElement.removeChild( this.svg_image );}
 					 delete this.svg_image;
 					}
 				}

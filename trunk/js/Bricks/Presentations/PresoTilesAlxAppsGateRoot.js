@@ -56,9 +56,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 										}
 									 
 									 // console.log("Click!", e);
-									 var M1 = self.groot.parentNode.getCTM().inverse().multiply(self.groot.getCTM());
+									 var M1 = self.groot.parentElement.getCTM().inverse().multiply(self.groot.getCTM());
 									 var r = e.target;
-									 while(r && !r.classList.contains('TileRoot')) {r = r.parentNode;}
+									 while(r && !r.classList.contains('TileRoot')) {r = r.parentElement;}
 									 var bbox = r.TileRoot.getPresoCoords();
 									 // console.log( bbox );
 									 self.svg_point.x = (bbox.x2-bbox.x1)/2;
@@ -72,7 +72,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									 // var M2 = r.getCTM().inverse().multiply(M1);
 									 // var M2 = r.getCTM().translate(dx-w/2,dy-h/2).inverse().multiply(M1);
 									 var M2 = r.getCTM().translate(dx-w/2,dy-h/2).inverse().multiply(self.groot.getCTM());
-									 // var M2 = r.parentNode.getCTM().inverse().multiply(r.getCTM()).translate(dx-w/2,dy-h/2).inverse().multiply(self.groot.getCTM());
+									 // var M2 = r.parentElement.getCTM().inverse().multiply(r.getCTM()).translate(dx-w/2,dy-h/2).inverse().multiply(self.groot.getCTM());
 									 
 									 var ms = Date.now(); //(new Date()).getTime();
 									 window.requestAnimFrame( function(time) {
@@ -259,7 +259,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					// Manage the long press event
 					 this.root.addEventListener( 'longPress' , function(e) {
 																 var node = e.target;
-																 while(node && typeof node.TileRoot === 'undefined') {node = node.parentNode;}
+																 console.log('longPress on', node);
+																 while(node && !node.TileRoot) {
+																	 console.log(node, node.parentElement);
+																	 node = node.parentElement;
+																	}
+																 console.log("\tnode <-", node);
 																 if(node) {// Edit node
 																	 var tile = node.TileRoot;
 																	 self.editTile( tile );

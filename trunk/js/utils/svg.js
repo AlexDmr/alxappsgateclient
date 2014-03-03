@@ -53,9 +53,9 @@ var DragManager = {
 		}
 	, getAncestors		: function (node) {
 		 var T_rep = new Array();
-		 while(node.parentNode) {
-			 T_rep.push( node.parentNode );
-			 node = node.parentNode;
+		 while(node.parentElement) {
+			 T_rep.push( node.parentElement );
+			 node = node.parentElement;
 			}
 		 return T_rep;
 		}
@@ -186,7 +186,7 @@ var DragManager = {
 		 if(this.TabDraggable[i].pathNodes.length) {
 			 var doDragThrough = undefined, doDragNotThrough = true;
 			 var ancestors = [], child = e.target;
-			 while(child) {ancestors.push(child); child = child.parentNode;}
+			 while(child) {ancestors.push(child); child = child.parentElement;}
 			 for(var n=0; n<this.TabDraggable[i].pathNodes.length; n++) {
 				 var parent	   = this.TabDraggable[i].pathNodes[n].node;
 				 var goThrough = this.TabDraggable[i].pathNodes[n].goThrough;
@@ -286,9 +286,9 @@ var DragManager = {
 		 var obj = this.TabDraggable[i];
 		 if(id_ptr == this.TabDraggable[i].id_ptr1) {
 			 obj.pt1p.x = x; obj.pt1p.y = y;
-			 obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentNode.getCTM().inverse() );
+			 obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentElement.getCTM().inverse() );
 			} else {obj.pt2p.x = x; obj.pt2p.y = y;
-					obj.pt2p = obj.pt2p.matrixTransform( obj.node.parentNode.getCTM().inverse() );
+					obj.pt2p = obj.pt2p.matrixTransform( obj.node.parentElement.getCTM().inverse() );
 				   }
 		 // console.log("RotoZoom");
 		 /*console.log("RotoZoom <" + this.TabDraggable[i].pt1p.x + ';' + this.TabDraggable[i].pt1p.y + '>'
@@ -321,12 +321,12 @@ var DragManager = {
 		 // console.log("Drag with " + id_ptr);
 		 var obj = this.TabDraggable[i], mat;
 			obj.pt1p.x = x; obj.pt1p.y = y;
-			if(obj.node.parentNode.getCTM()) {
-				 obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentNode.getCTM().inverse() );
-				 mat = obj.node.parentNode.getCTM().inverse().multiply( obj.node.getCTM() );
+			if(obj.node.parentElement.getCTM()) {
+				 obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentElement.getCTM().inverse() );
+				 mat = obj.node.parentElement.getCTM().inverse().multiply( obj.node.getCTM() );
 				} else {mat = obj.node.getCTM();}
 						
-		 // var mat = obj.node.parentNode.getCTM().inverse().multiply( obj.node.getCTM() );;
+		 // var mat = obj.node.parentElement.getCTM().inverse().multiply( obj.node.getCTM() );;
 		 var e = obj.pt1p.x - mat.a*obj.pt1.x - mat.c*obj.pt1.y
 		   , f = obj.pt1p.y - mat.b*obj.pt1.x - mat.d*obj.pt1.y;
 		 this.TabDraggable[i] = obj;

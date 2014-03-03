@@ -43,7 +43,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var txt = new svgText( { style: {} } ).set(brick.name || brick.id);
 					 g.appendChild(txt);
 					 dataList.g.appendChild( g );
-					 this.RecursiveListRePlacement( this.groot );
+					 // console.log(this.groot);
+					 if(this.groot) this.RecursiveListRePlacement( this.groot );
+					 // console.log("yeahh");
 					 svgUtils.DD.DragAndDroppable( txt.getRoot()
 								 , { tags : ['brick']
 								   , size : {w:1,h:1}
@@ -85,7 +87,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 return this.root;
 				}
 			 PresoListUnivers.prototype.RecursiveListRePlacement = function(root) {
-				 var L = root.children, c, dec = 10, pos = 1;
+				 var L = root.childNodes, c, dec = 10, pos = 1;
 				 for(var i=0; i<L.length; i++) {
 					 c = L.item(i);
 					 if(c.tagName !== 'g') continue;
