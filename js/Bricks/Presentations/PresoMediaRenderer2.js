@@ -15,7 +15,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						 var size = this.getTileSize();
 						 this.svgImg.setAttribute('width' , this.w*size);
 						 this.svgImg.setAttribute('height', this.h*size);
-					 var parent = this.bgRect.parentNode;
+					 var parent = this.bgRect.parentElement;
 					 parent.removeChild( this.bgRect );
 					 parent.appendChild( this.svgImg );
 					}
@@ -25,7 +25,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 console.log("Deleting primitives of", this);
 				 Presentation.prototype.deletePrimitives.apply(this,[]);
 				 if(this.svgImg) {
-					 if(this.svgImg.parentNode) {this.svgImg.parentNode.removeChild(this.svgImg);}
+					 if(this.svgImg.parentElement) {this.svgImg.parentElement.removeChild(this.svgImg);}
 					 this.svgImg = null;
 					}
 				}

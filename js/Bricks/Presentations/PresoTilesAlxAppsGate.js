@@ -20,7 +20,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoTilesAlxAppsGate.prototype.pushDragged = function( obj ) {
 				 var node = obj.target;
 				 obj.L_nodes = [];
-				 while(node.parentNode) {obj.L_nodes.push(node); node=node.parentNode;}
+				 while(node.parentElement) {obj.L_nodes.push(node); node=node.parentElement;}
 				 L_dragged.push(obj);
 				}
 			 PresoTilesAlxAppsGate.prototype.removeDragged = function( idPtr ) {
@@ -324,12 +324,12 @@ define( [ "Bricks/Presentations/protoPresentation"
 					}
 				if(scale < this.scaleToDisplayChildren) {
 					 if(this.display) {this.display = false;
-									   L_CB.push( function(v) {if(self.svgFgRect.root.parentNode) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,0,1,self.svgFgRect.root]);
+									   L_CB.push( function(v) {if(self.svgFgRect.root.parentElement) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,0,1,self.svgFgRect.root]);
 															   self.CB_Fade(v,1,0);} );
 									   res = true;
 									  } else {res = false;}
 					} else 	{if(!this.display) {this.display = true;
-												L_CB.push( function(v) {if(self.svgFgRect.root.parentNode) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,1,0,self.svgFgRect.root]);
+												L_CB.push( function(v) {if(self.svgFgRect.root.parentElement) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,1,0,self.svgFgRect.root]);
 																		self.CB_Fade(v,0,1);} );
 											   }
 							 res = true;
@@ -349,10 +349,10 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoTilesAlxAppsGate.prototype.deletePrimitives = function() {
 				 // console.log("PresoTilesAlxAppsGate::deletePrimitives", this);
 				 if(this.root) {
-					 if(this.root.parentNode  ) this.root.parentNode.removeChild  (this.root)  ;this.root  = null;
-					 if(this.rect && this.rect.parentNode  ) this.rect.parentNode.removeChild  (this.rect)  ;this.rect  = null;
-					 if(this.gPreso && this.gPreso.parentNode) this.gPreso.parentNode.removeChild(this.gPreso);this.gPreso= null;
-					 if(this.groot && this.groot.parentNode ) this.groot.parentNode.removeChild (this.groot) ;this.groot = null;
+					 if(this.root.parentElement  ) this.root.parentElement.removeChild  (this.root)  ;this.root  = null;
+					 if(this.rect && this.rect.parentElement  ) this.rect.parentElement.removeChild  (this.rect)  ;this.rect  = null;
+					 if(this.gPreso && this.gPreso.parentElement) this.gPreso.parentElement.removeChild(this.gPreso);this.gPreso= null;
+					 if(this.groot && this.groot.parentElement ) this.groot.parentElement.removeChild (this.groot) ;this.groot = null;
 					 
 					 if(this.DropZone)
 						svgUtils.DD.removeDropZone( this.root );

@@ -73,7 +73,7 @@ define( function() {
 					}
 				 if(nb >= this.brick.containsChild(brick)) {
 					 preExistingPreso = true;
-					 console.error('Attention, trying to plug more presentations than necessery...', nb, brick);
+					 console.log('Attention, trying to plug more presentations than necessery...', nb, brick);
 					}
 				 if(!preExistingPreso) {
 					 // If a presentation constructor has been specified...
@@ -124,8 +124,8 @@ define( function() {
 				}
 			 Presentation.prototype.deletePrimitives = function() {
 				 // console.log("Presentation::deletePrimitives", this);
-				 if(this.root && this.rootparentNode) {
-					 this.root.parentNode.removeChild(this.root);
+				 if(this.root && this.root.parentElement) {
+					 this.root.parentElement.removeChild(this.root);
 					 this.root = null;
 					}
 				}
@@ -141,10 +141,10 @@ define( function() {
 				 // console.log("Primitive plug ", this.root, " ->", c.root);
 				 var P = this.Render(),
 				     N = c.Render();
-				 if(N.parentNode === null) {P.appendChild(N);}
+				 if(N.parentElement === null) {P.appendChild(N);}
 				}
 			 Presentation.prototype.primitiveUnPlug = function(c) {
-				 if(c.root && c.root.parentNode) {c.root.parentNode.removeChild(c.root);}
+				 if(c.root && c.root.parentElement) {c.root.parentElement.removeChild(c.root);}
 				}
 			 Presentation.prototype.appendDescendants = function() {
 				 if(this.brick) {

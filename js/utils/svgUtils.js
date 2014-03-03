@@ -10,22 +10,22 @@ define( [ "utils/svg"
 			 var svgUtils = {
 				  ancestors : function(node) {
 					 var L = [];
-					 while(node.parentNode) {
-						 L.push( node.parentNode );
-						 node = node.parentNode;
+					 while(node.parentElement) {
+						 L.push( node.parentElement );
+						 node = node.parentElement;
 						}
 					 return L;
 					}
 				, getSvgCanvas : function(node) {
 					 while(node && node.tagName !== 'svg') {
-						 node = node.parentNode;
+						 node = node.parentElement;
 						}
 					 return node
 					}
 				, isDisplayed : function(root, n) {
 					 while(n && n !== root) {
 						 if(n.style.display === 'none') {return false;}
-						 n = n.parentNode;
+						 n = n.parentElement;
 						}
 					 return true;
 					}
@@ -39,7 +39,7 @@ define( [ "utils/svg"
 					, L_dropZones		: []
 					, D_draggingPtr		: {}
 					, getDropZoneUnder	: function(n) {
-						 while(n && !n.AlxDropZone) {n = n.parentNode;}
+						 while(n && !n.AlxDropZone) {n = n.parentElement;}
 						 return n?n.AlxDropZone:null;
 						}
 					, removeDropZone : function(node) {
@@ -234,7 +234,7 @@ define( [ "utils/svg"
 								 }
 							// Stop drag subscribers
 							 this.L_dragged.splice(pos,1);
-							 node.parentNode.removeChild( node );
+							 node.parentElement.removeChild( node );
 							 DragManager.removeDraggable(node);
 							 if(this.L_dragged.length === 0) {
 								 DragManager.UnSubscribe_Drag('svgUtils.DD');

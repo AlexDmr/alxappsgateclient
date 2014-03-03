@@ -53,6 +53,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							}
 				}
 			 PresoPaletteOrthozoomTabs.prototype.toggleTileEdition = function(b) {
+				 console.log('toggleTileEdition');
 				 var self = this;
 				 if(b) {this.editedTile.root.classList.add('selected');
 					   } else {this.editedTile.root.classList.remove('selected');}
@@ -168,7 +169,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 return this.root;
 				}
 			 PresoPaletteOrthozoomTabs.prototype.selectTab = function(root) {
-				 var p = root.parentNode
+				 var p = root.parentElement;
 				 p.removeChild(root);
 				 p.appendChild(root);
 				}

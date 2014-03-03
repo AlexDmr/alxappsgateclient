@@ -37,10 +37,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					this.consoText = this.consoText.getRoot();
 					this.consoText.addEventListener	( 'DOMNodeInsertedIntoDocument'
 													, function(coords) {return function(e) {
-														 /*if(self.w === 1 && self.h === 1 && self.brick.id === 'ENO87cdd8') {
-															 console.log("XXX Paye ton debug");
-															}*/
-														 self.svgAlxConsoText.set( '9999W' ).fillSpace( {x:coords.x1,y:(coords.y1+coords.y2)/2,width:coords.x2-coords.x1,height:(coords.y2-coords.y1)/2}, 0.9 );
+														 self.svgAlxConsoText.set( '9999W' )
+														 var bbox = self.svgAlxConsoText.getBBox()
+														   ,    s = 0.8 * (coords.x2-coords.x1) / bbox.width;
+														 self.svgAlxConsoText.matrixId().translate( (coords.x2+coords.x1)/2
+																								  , coords.y2 - 10*s
+																								  ).scale(s,s);
 														 self.svgAlxConsoText.set( self.brick.consumption[self.brick.consumption.length-1].val + 'W');
 														 self.updateOnOff(self.brick.isOn()); };
 														}(coords)
@@ -57,7 +59,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 			 PresoBasicSmartPlug.prototype.deletePrimitives = function() {
 				 Presentation.prototype.deletePrimitives.apply(this, []);
-				 if(this.consoText) {this.consoText.parentNode.removeChild( this.consoText );
+				 if(this.consoText) {this.consoText.parentElement.removeChild( this.consoText );
 									 this.consoText = null;
 									}
 				}

@@ -27,7 +27,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 			 PresoCategSmartPlug.prototype.deletePrimitives = function() {
 				 Presentation.prototype.deletePrimitives.apply(this, []);
-				 if(this.consoText) {this.consoText.parentNode.removeChild( this.consoText );
+				 if(this.consoText) {this.consoText.parentElement.removeChild( this.consoText );
 									 this.consoText = null;
 									}
 				}
