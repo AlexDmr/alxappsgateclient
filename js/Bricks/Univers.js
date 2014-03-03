@@ -3,10 +3,10 @@ define( [ "Bricks/protoBricks"
 		, "Bricks/Space"
 	    ]
 	  , function(Brick, PresoTilesAlxAppsGate, SpaceBrick) {
-			 var UniversBrick = function(id, brick, L_presoFactories) {
+			 var UniversBrick = function(id, L_presoFactories) {
 				 var TF, context;
-				 brick = brick || {};
 				 this.init();
+				 this.isSpace = true;
 				 for(var fDescr in L_presoFactories) {
 					 TF = L_presoFactories[fDescr];
 					 context = TF[2] || {};
@@ -19,24 +19,17 @@ define( [ "Bricks/protoBricks"
 				 this.id = id;
 				 if(id) socket.on(id, function(data) {self.update(data);});
 				 
-				 this.x = brick.x || this.x;
-				 this.x = brick.y || this.x;
-				 this.x = brick.w || this.y;
-				 this.x = brick.h || this.h;
-				 
-				 this.mapBrickIdToTile = {};
-				 this.mapCategIdToTile = {};
-
-				 this.dataMap = { x : 7, y : 3
-								, w : 5, h : 5
-								, color: 'darkslategray', brick: this, name: 'Univers'
-								, children : []
-								};
+				 this.mapBrickIdToTile	= {};
+				 this.mapCategIdToTile	= {};
+				 this.D_bricks			= {}
 				 
 				 return this;
 				};
 			 UniversBrick.prototype = new Brick();
 			 UniversBrick.prototype.constructor = UniversBrick;
+			 UniversBrick.prototype.layoutDescendants = function() {
+				 for(var p=0; p<this.presentations.length; p++) {this.presentations[p].layoutDescendants();}
+				}
 			 UniversBrick.prototype.update = function(data) {
 				 console.log("Update UniversBrick", this, "with", data);
 				}
@@ -86,20 +79,22 @@ define( [ "Bricks/protoBricks"
 						 this.mapCategIdToTile[data.categId].push( {data: data, brick: data.brick} );
 						}
 					 if(data.brickId) {
+						 delete brick.isSpace;
+						 brick.id = data.brickId;
 						 if(!this.mapBrickIdToTile[data.brickId]) {this.mapBrickIdToTile[data.brickId] = [];}
 						 this.mapBrickIdToTile[data.brickId].push( {data: data, brick: brick, parentBrick: parentBrick} );
 						}
 					}
-				 brick.tile = {};
-				 brick.tile.x = data.x; brick.tile.y = data.y; 
-				 brick.tile.w = data.w; brick.tile.h = data.h; 
-				 brick.tile.color = data.color || 'white';
-				 brick.tile.name = data.name;
-				 brick.tile.categId = data.categId;
-				 brick.tile.brickId = data.brickId;
-				 brick.tile.class   = data.class || ''
-				 brick.setName( data.name || 'NONAME' );
-				 
+				 if(!data.brickId) {
+					 var objData = {x:data.x,y:data.y,w:data.w,h:data.h,color:data.color,class:data.class,brick:brick,parentBrick:parentBrick};
+					 this.D_bricks[brick.localBrickId] = data;
+					 /*brick.tile = {};
+					 brick.tile.x = data.x; brick.tile.y = data.y; 
+					 brick.tile.w = data.w; brick.tile.h = data.h; 
+					 brick.tile.color = data.color || 'white';
+					 brick.tile.class   = data.class || ''*/
+					 brick.setName( data.name || 'NONAME' );
+					}
 				 if(data.children) {
 					 for(var i=0; i<data.children.length; i++) {
 						 var brickChild = this.buildMap(data.children[i], null, brick);

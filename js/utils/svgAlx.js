@@ -59,11 +59,28 @@ define( [
 				 return this;
 				}
 			 svgAlx.prototype.fillSpace = function(rect, scale) {
-				 var bbox    = this.root.getBBox()
-				   , S		 = scale * Math.min(rect.width/bbox.width, rect.height/bbox.height)
-				   , DX		 = rect.x - bbox.x + (rect.width  - S*bbox.width ) / 2
-				   , DY		 = rect.y - bbox.y + (rect.height - S*bbox.height) / 2;
-				 this.translate(DX, DY).scale(S,S);
+				// Compute scale
+				 var bbox    = this.getBBox();
+				 svgPoint.x  = svgPoint.y = 0;
+				 var svgPointO   = svgPoint.matrixTransform( this.root.parentNode.getCTM().inverse().multiply(this.root.getCTM()) );
+				 svgPoint.x  = bbox.width; svgPoint.y = bbox.height;
+				 var svgPointWH  = svgPoint.matrixTransform( this.root.parentNode.getCTM().inverse().multiply(this.root.getCTM()) );
+				 bbox.width  = svgPointWH.x - svgPointO.x;
+				 bbox.height = svgPointWH.y - svgPointO.y;
+				 var S		 = scale * Math.min(rect.width/bbox.width, rect.height/bbox.height);
+				 this.scale(S,S);
+				// Compute translation
+				 svgPoint.x  = svgPoint.y = 0;
+				 svgPointO   = svgPoint.matrixTransform( this.root.parentNode.getCTM().inverse().multiply(this.root.getCTM()) );
+				 svgPoint.x  = bbox.width; svgPoint.y = bbox.height;
+				 svgPointWH  = svgPoint.matrixTransform( this.root.parentNode.getCTM().inverse().multiply(this.root.getCTM()) );
+				 bbox.width  = svgPointWH.x - svgPointO.x;
+				 bbox.height = svgPointWH.y - svgPointO.y;
+				 svgPoint.x  = bbox.x; svgPoint.y = bbox.y;
+				 svgPointO   = svgPoint.matrixTransform( this.root.parentNode.getCTM().inverse().multiply(this.root.getCTM()) );
+				 var DX		 = rect.x - svgPoint.x/S + (rect.width  - bbox.width ) / 2
+				   , DY		 = rect.y - svgPoint.y/S + (rect.height - bbox.height) / 2;
+				 this.translate(DX, DY);
 				 return this;
 				}
 			 svgAlx.prototype.rightTo = function(svgE) {

@@ -2,13 +2,14 @@ define( [ "Bricks/Presentations/utils"
 	    ]
 	  , function(utils) {
 			 // Define the Brick constructor
-			 var msgId = 0;
+			 var msgId = 0, localBrickId = 0;
 			 var Brick = function(children) {
 				 this.name = '';
 				}
 			 // Definition of the Brick class
 			 Brick.prototype.constructor = Brick;
 			 Brick.prototype.init = function(children) {
+				 this.localBrickId	= localBrickId++;
 				 this.children 		= children || [];
 				 this.parents		= [];
 				 this.children		= [];
@@ -27,8 +28,18 @@ define( [ "Bricks/Presentations/utils"
 				}
 			 Brick.prototype.unPlugPresentation = function(preso) {
 				 if(preso.factory) {preso.factory.UIs.push(preso);}
-				 var parent = preso.parent;
+				 var parent = preso.parent, pos = this.presentations.indexOf(preso);
 				 if(parent) {parent.removeChild(preso);}
+				 if(pos >= 0) {this.presentations.splice(pos,1);}
+				}
+			 Brick.prototype.configPresoHavingParentBrick = function(brick, f) {
+				 var preso;
+				 for(var p=0; p<this.presentations.length; p++) {
+					 preso = this.presentations[p];
+					 if(preso.parent && preso.parent.brick === brick) {
+						 f.apply(preso,[]);
+						}
+					}
 				}
 			 Brick.prototype.changePresentationsWithContext = function(context, brick) {
 				 var preso;
@@ -108,33 +119,45 @@ define( [ "Bricks/Presentations/utils"
 				 socket.emit('call', {target:target, msg:json, msgId:msgId} );
 				}
 			 Brick.prototype.appendParent = function(p) {
-				 if(this.parents.indexOf(p) == -1) {
+				 if(!this.isAppeningParent) {
+					 this.isAppeningParent = true;
 					 this.parents.push(p);
 					 p.appendChild(this);
+					 this.isAppeningParent = false;
 					}
 				}
 			 Brick.prototype.removeParent = function(p) {
-				 var pos = this.parents.indexOf(p)
-				 if(pos !== -1) {
-					 this.parents.splice(pos,1);
-					 p.removeChild(this);
+				 if(!this.removingParent) {
+					 this.removingParent = true;
+					 var pos = this.parents.indexOf(p)
+					 if(pos !== -1) {
+						 this.parents.splice(pos,1);
+						 p.removeChild(this);
+						}
+					 this.removingParent = false;
 					}
 				}
 			 Brick.prototype.appendChild = function(c) {
-				 if(this.children.indexOf(c) == -1) {
+				 if(!this.isAppeningChild) {
+					 this.isAppeningChild = true;
 					 this.children.push(c);
 					 c.appendParent(this);
 					 // Also plug presentations
 					 for(var p in this.presentations) {this.presentations[p].appendChildFromBrick(c);}
+					 this.isAppeningChild = false;
 					}
 				}
 			 Brick.prototype.removeChild = function(c) {
-				 var pos = this.children.indexOf(c)
-				 if(pos !== -1) {
-					 this.children.splice(pos,1);
-					 c.removeParent(this);
-					 // Also unplug presentations
-					 for(p in this.presentations) {this.presentations[p].removeChildFromBrick(c);}
+				 if(!this.removingChild) {
+					 this.removingChild = true;
+					 var pos = this.children.indexOf(c)
+					 if(pos !== -1) {
+						 this.children.splice(pos,1);
+						 c.removeParent(this);
+						 // Also unplug presentations
+						 for(p in this.presentations) {this.presentations[p].removeChildFromBrick(c);}
+						}
+					 this.removingChild = false;
 					}
 				}
 			 Brick.prototype.appendPresentations = function(LP) {
@@ -177,7 +200,11 @@ define( [ "Bricks/Presentations/utils"
 				 for(var i=0; i<this.presentations.length; i++) {this.presentations[i].setName(name);}
 				 return this;
 				}
-			 
+			 Brick.prototype.containsChild = function(child) {
+				 var nb = 0;
+				 for(var i=0; i<this.children; i++) {if(this.children[i] === child) {nb++;}}
+				 return nb;
+				}
 			 // Return the reference to the Brick constructor
 			 return Brick;
 			}

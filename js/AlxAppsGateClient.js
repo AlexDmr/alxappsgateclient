@@ -53,7 +53,7 @@ define( [ 'Bricks/protoBricks'
 				 for(var i=0;i<this.brickCategories.length;i++) {this.brickCategories[i].init(null,[]);}
 
 				 // Plug the universes
-				 this.U_map = new Univers( 'U_map', {}
+				 this.U_map = new Univers( 'U_map'
 										 , [ ['PresoBasicUniversMap' , PresoBasicUniversMap]
   										   , ['PresoListUnivers'     , PresoListUnivers    , {tags:['orthozoom']} ] 
 										   ] );
@@ -63,19 +63,21 @@ define( [ 'Bricks/protoBricks'
 									, children : [
 										  { x:7,y:0,w:5,h:5,color:'blue',name:'Cuisine'
 										  , children : [
-												{x:0,y:10,w:2,h:2,brickId:'capteurContact1',name:'pipo capteur de contact'}
+												  {x:0,y:10,w:2,h:2,brickId:'capteurContact1',name:'pipo capteur de contact'}
+												, {x:6,y:5,w:2,h:2,brickId:'ENO878052',name:'petit fantôme Spöka'}	// Spöka
 												]
 										  }
 										, { x:3,y:5,w:9,h:6,color:'chocolate',name:'Salon'
 										  , children : [
-												  {x:10,y:5,w:2,h:2,brickId:'ENO87cdd8',name:'prise porte fenêtre'} // Porte fenêtre
+												  {x:10,y:5,w:1,h:1,brickId:'ENO87cdd8',name:'prise porte fenêtre'} // Porte fenêtre
 												, {x:6,y:6,w:2,h:2,brickId:'ENO878052',name:'petit fantôme Spöka'}	// Spöka
+												, {x:6,y:0,w:2,h:2,brickId:'ENO878052',name:'petit fantôme Spöka'}	// Spöka
 												]
 										  }
 										, { x:0,y:9,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
 										] 
 									} );
-				 this.U_cat = new Univers( 'U_cat', {}
+				 this.U_cat = new Univers( 'U_cat'
 										 , [ ['PresoBasicUniversType', PresoBasicUniversType]
   										   , ['PresoListUnivers'     , PresoListUnivers     , {tags:['orthozoom']}]
 										   ] );
@@ -90,7 +92,7 @@ define( [ 'Bricks/protoBricks'
 										, { x:0,y:2,w:3,h:2,color:'blue',name:'Serveurs de médias',categId:'urn:schemas-upnp-org:device:MediaServer:1'}
 										, { x:3,y:2,w:3,h:2,color:'blue',name:'Lecteurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
 										, { x:6,y:3,w:3,h:3,color:'green',name:'Alx Hue Lamps',categId:'AlxHueLamp'}
-										, { x:9,y:9,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
+										// , { x:9,y:9,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
 										]
 									} );
 
@@ -108,13 +110,6 @@ define( [ 'Bricks/protoBricks'
 				 
 				 // Subscribe to socket.io
 				 socket.on('newDevice', function(data) {AlxClient.updateBrickList(data);});
-				 // this.call( 'AlxServer'
-						  // , {mtd:'getBricks', args:[]}
-						  // , function(data) {if(data.success) {
-												 // AlxClient.newBricksList(data.res);
-												// }
-								// }
-						  // );
 
 				 this.presentations = []; this.presentations.push( new Preso() );
 				 for(var p=0;p<this.presentations.length;p++) {this.presentations[p].init(this);}
@@ -123,22 +118,26 @@ define( [ 'Bricks/protoBricks'
 				 // Change presentations for palette
 				 this.palette.changePresentationsWithContext( {tags:['orthozoom']}, this.U_map);
 				 this.palette.changePresentationsWithContext( {tags:['orthozoom']}, this.U_cat);
+				 for(var i=0; i<this.Univers.length; i++) {
+					 this.Univers[i].layoutDescendants();
+					}
 				 
 				 // Call the server for the tree structure
-				 this.call( 'AppsGate'
+				 setTimeout(function() {
+				 self.call( 'AppsGate'
 						  , {method:'getTreeDescription', args:[]}
 						  , function(data) {
 								 console.log(data);
 								 var json = JSON.parse(data.value), root = json
 								   , id, newUnivers, Udata;
-								 console.log("getTreeDescription", json);
+								 console.log("getTreeDescription <=", json);
 								 for(var i=0; i<json.children.length; i++) {
 									 id = json.children[i];
 									 if(json[id].type === 'HABITAT_CURRENT') {
 										 for(var u=0; u<json[id].children.length; u++) {
 											 Udata = json[id].children[u];
 											 // Children are the universes
-											 newUnivers = new Univers( Udata.type, {}
+											 newUnivers = new Univers( Udata.type
 													  , [ ['PresoBasicUniversMap', PresoBasicUniversType]
 													    , ['PresoListUnivers'    , PresoListUnivers     , {tags:['orthozoom']}]
 														] );
@@ -162,19 +161,21 @@ define( [ 'Bricks/protoBricks'
 											 if(!Uname[json[id][Udata].type]) {Uname[json[id][Udata].type] = json[id][Udata].type;}
 											 self.palette.addUniverAccess( {id:'U_'+u,name:Uname[json[id][Udata].type],classes:json[id][Udata].type}, newUnivers);
 											 self.palette.changePresentationsWithContext( {tags:['orthozoom']}, newUnivers);
+											 newUnivers.layoutDescendants();
 											}
 										 self.call( 'AlxServer'
 												  , {mtd:'getBricks', args:[]}
 												  , function(data) {if(data.success) {
 																		 AlxClient.newBricksList(data.res);
-																		 for(var p=0;p<self.presentations.length;p++) {self.presentations[p].initSemanticZoom();}
+																		 // for(var p=0;p<self.presentations.length;p++) {self.presentations[p].initSemanticZoom();}
 																		}
 														}
 												  );
 										}
 									}
 								}
-						  );
+						  )
+						}, 5000); // End setTimeout
 				}
 			 AlxClient.newBricksList = function(bricks) {
 				 // Re-init the device list

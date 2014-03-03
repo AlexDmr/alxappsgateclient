@@ -19,7 +19,7 @@ define( function() {
 				 this.parent		= null;
 				 var prevBrick = this.brick;
 				 this.brick = brick; 
-				 if(prevBrick != brick) brick.appendPresentations([this]);
+				 brick.appendPresentations([this]);
 				 for(var i=0;i<this.children.length;i++) {this.appendChild(this.children[i]);}
 				}
 			 // Definition of the Presentation class
@@ -146,6 +146,15 @@ define( function() {
 					}
 				}
 			 Presentation.prototype.setName = function(name) {}
+			 Presentation.prototype.getDescendants = function() {
+				 var L = [this], L_rep = [], n;
+				 while(L.length) {
+					 n = L[0];
+					 L_rep.push( L.splice(0,1)[0] );
+					 for(var i=0; i<n.children.length; i++) {L.push( n.children[i] );}
+					}
+				 return L_rep;
+				}
 
 			 // Return the reference to the Presentation constructor
 			 return Presentation;

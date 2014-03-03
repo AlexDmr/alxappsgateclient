@@ -4,8 +4,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 	  , function(PresoTile, PresoTileUnivers) {
 			 // Presentation
 			 var PresoBasicUniversMap = function() {
-				 this.x = this.y = 0;
-				 this.w = this.h = 12;
+				 PresoTileUnivers.prototype.constructor.apply(this,[]);
 				 this.imgPath = 'images/carte.jpg';
 				}
 				

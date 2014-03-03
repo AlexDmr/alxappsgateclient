@@ -1,10 +1,9 @@
 define( [ "Bricks/Presentations/protoPresentation"
 		, "Bricks/Presentations/PresoTilesAlxAppsGate"
+		, "utils/svgUtils"
 		]
-	  , function(Presentation, PresoTile) {
+	  , function(Presentation, PresoTile, svgUtils) {
 			 var PresoBasicUnivers = function() {
-				 this.x = this.y = 0;
-				 this.w = this.h = 12;
 				 this.imgPath = 'images/lego.jpg';
 				 this.display = true;
 				}
@@ -68,6 +67,50 @@ define( [ "Bricks/Presentations/protoPresentation"
 						}
 					}
 				}
+			 PresoBasicUnivers.prototype.layoutDescendants = function() {
+				 console.log("Univers", this.imgPath);
+				 var D = this.getDescendants(this), data, L2clean = [];
+				 for(var i=0; i<D.length; i++) {
+					 data = this.brick.D_bricks[ D[i].brick.localBrickId ];
+					 if(!data) {	// Try the reference to brickId
+						 var refs = this.brick.mapBrickIdToTile[ D[i].brick.id ]
+						   , parentBrick = D[i].parent.brick;
+						 // Look for the ref that does correspond to parent brick of D[i]
+						 if(refs) {
+							 for(var r=0; r<refs.length; r++) {
+								 if(refs[r].parentBrick === parentBrick && !refs[r].used) {
+									 data = refs[r].data;
+									 refs[r].used = true; L2clean.push(refs[r]);
+									 break;
+									}
+								}
+							}
+						}
+					 if(data) {
+						 D[i].x = data.x;
+						 D[i].y = data.y;
+						 D[i].w = data.w;
+						 D[i].h = data.h;
+						 D[i].color = data.color || D[i].color;
+						 D[i].class = data.class || D[i].class;
+						 D[i].forceRender();
+						 // console.log("forceRender", D[i]);
+						} else {
+								console.error('A brick is plugged into univers but not referenced in the description data...');}
+					 // console.log("\t", D[i].brick, data);
+					}
+				 // Cleanup marking...
+				 for(var i=0; i<L2clean.length; i++) {
+					 delete L2clean[i].used;
+					}
+				}
+			 PresoBasicUnivers.prototype.deletePrimitives = function() {
+				 PresoTile.prototype.deletePrimitives.apply(this, []);
+				 if(this.svg_image) {
+					 if(this.svg_image.parentNode) {this.svg_image.parentNode.removeChild( this.svg_image );}
+					 delete this.svg_image;
+					}
+				}
 			 PresoBasicUnivers.prototype.Render = function() {
 				 PresoTile.prototype.Render.apply(this,[]);
 				 if(!this.svg_image) {
@@ -101,7 +144,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 						circleDisplay.setAttribute('r', imgSize/2);//'100');
 						circleDisplay.style.fill = 'none';
 						circleDisplay.style.stroke = 'black';
-						circleDisplay.style.strokeWidth = '10';
+						circleDisplay.style.strokeWidth = '4';
 					 
 					 this.root.appendChild( this.gImage );
 					 this.gImage.appendChild( this.clipPath );
@@ -127,7 +170,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 return Presentation.prototype.appendChild.apply(this, [c]);
 				}
 			 PresoBasicUnivers.prototype.removeChild = function(c) {
-				 return Presentation.prototype.appendChild.apply(this, [c]);
+				 return Presentation.prototype.removeChild.apply(this, [c]);
 				}
 
 			 // Return the reference to the PresoBasicUnivers constructor
