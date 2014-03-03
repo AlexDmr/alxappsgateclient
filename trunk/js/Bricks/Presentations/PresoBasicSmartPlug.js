@@ -6,9 +6,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 	  , function(Presentation, svgGroup, svgText, svgOval) {
 			 // Presentation
 			 var PresoBasicSmartPlug = function() {
-				 //XXX this.init();
-				 this.x = this.y = 0;
-				 this.w = this.h = 1;
 				}
 				
 			 PresoBasicSmartPlug.prototype = new Presentation();
@@ -19,7 +16,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 // Text for consumption
 				 if(!this.consoText) {
 					this.root.classList.add('PresoBasicSmartPlug');
-					this.root.classList.add('Brick'); this.root.classList.add('dropShadowFilter');
+					this.root.classList.add('Brick'); this.root.classList.add('BrickDevice');
+					this.root.classList.add('dropShadowFilter');
 					this.root.setAttribute('filter', 'url(#dropShadow)');
 					var coords = this.getPresoCoords();
 					// Create the ovals
@@ -38,10 +36,14 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					this.gPreso.appendChild( this.consoText.getRoot() );
 					this.consoText = this.consoText.getRoot();
 					this.consoText.addEventListener	( 'DOMNodeInsertedIntoDocument'
-													, function(e)	{self.svgAlxConsoText.set( '9999W' ).fillSpace( {x:coords.x1,y:(coords.y1+coords.y2)/2,width:coords.x2-coords.x1,height:(coords.y2-coords.y1)/2}, 0.9 );
-																	 self.svgAlxConsoText.set( self.brick.consumption[self.brick.consumption.length-1].val + 'W');
-																	 self.updateOnOff(self.brick.isOn());
-																	}
+													, function(coords) {return function(e) {
+														 if(self.w === 1 && self.h === 1 && self.brick.id === 'ENO87cdd8') {
+															 console.log("XXX Paye ton debug");
+															}
+														 self.svgAlxConsoText.set( '9999W' ).fillSpace( {x:coords.x1,y:(coords.y1+coords.y2)/2,width:coords.x2-coords.x1,height:(coords.y2-coords.y1)/2}, 0.9 );
+														 self.svgAlxConsoText.set( self.brick.consumption[self.brick.consumption.length-1].val + 'W');
+														 self.updateOnOff(self.brick.isOn()); };
+														}(coords)
 													, false );
 					this.root.addEventListener( 'click'
 											  , function(e) {self.toggle();
@@ -65,10 +67,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 			 PresoBasicSmartPlug.prototype.updateOnOff = function(v) {
 				 // console.log('PresoBasicSmartPlug->updateOnOff->',v);
-				 if(this.rect) {
-					 // var color;
-					 // if(v) {color = "yellow";} else {color = "grey";}
-					 // this.rect.style.fill = color;
+				 if(this.consoText) {
 					 this.consoText.style.display = v?'inherit':'none';
 					} else {console.log("Unknown rect ???");}
 				}

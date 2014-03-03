@@ -13,7 +13,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				, SpaceBrick ) {
 			 // Presentation
 			 var PresoBasicPalette = function() {
-				 
 				}
 				
 			 PresoBasicPalette.prototype = new PresoTile();

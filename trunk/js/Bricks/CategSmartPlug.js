@@ -5,6 +5,7 @@ define( [ "Bricks/protoBricks"
 			 var CategSmartPlug = function() {
 				 var self = this;
 				 this.init();
+				 this.isSpace = true;
 				 // this.appendPresentations([new PresoBasicSmartPlug()]);
 				 // for(var p in this.presentations) {this.presentations[p].init(this);}
 				 return this;

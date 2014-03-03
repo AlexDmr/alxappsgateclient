@@ -3,9 +3,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 	  , function(Presentation) {
 			 // Presentation
 			 var PresoCategSmartPlug = function() {
-				 //XXX this.init();
-				 this.x = this.y = 0;
-				 this.w = this.h = 1;
+				 this.isSpace = true;
 				}
 				
 			 PresoCategSmartPlug.prototype = new Presentation();
@@ -28,7 +26,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 return this.root;
 				}
 			 PresoCategSmartPlug.prototype.deletePrimitives = function() {
-				 PresoCategSmartPlug.prototype.deletePrimitives.apply(this, []);
+				 Presentation.prototype.deletePrimitives.apply(this, []);
 				 if(this.consoText) {this.consoText.parentNode.removeChild( this.consoText );
 									 this.consoText = null;
 									}

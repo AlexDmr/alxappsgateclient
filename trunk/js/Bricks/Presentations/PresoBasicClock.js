@@ -6,8 +6,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 	  , function(Presentation, svgText, utils) {
 			 // Presentation
 			 var PresoBasicClock = function() {
-				 this.x = this.y = 0;
-				 this.w = this.h = 1;
 				}
 				
 			 PresoBasicClock.prototype = new Presentation();

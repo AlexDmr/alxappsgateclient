@@ -3,9 +3,6 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 	  , function(Presentation) {
 			 // Presentation
 			 var PresoMediaRenderer2 = function() {
-				 //XXX this.init();
-				 this.x = this.y = 0;
-				 this.w = this.h = 1;
 				}
 				
 			 PresoMediaRenderer2.prototype = new Presentation();

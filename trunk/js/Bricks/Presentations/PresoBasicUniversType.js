@@ -4,8 +4,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 	  , function(PresoTile, PresoTileUnivers, CategSmartPlug) {
 			 // Presentation
 			 var PresoBasicUniversType = function() {
-				 this.x = 0; this.y = 3;
-				 this.w = this.h = 12;
+				 PresoTileUnivers.prototype.constructor.apply(this,[]);
 				 this.imgPath = 'images/lego.jpg';
 				}
 				
