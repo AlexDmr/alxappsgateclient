@@ -12,19 +12,17 @@ define( [ "utils/svgAlx"
 				 // document.body.classList.remove( 'noUserSelect' );
 				 var div = document.createElement('div');
 					div.classList.add('AlxModal');
-					div.innerHTML = '<input class="name" type="text" value="'+svgE.get()+'"/><button class="OK" value="OK">OK</button><input type="button" class="Cancel" value="Cancel">Cancel</input>'
+					div.innerHTML = '<input class="name" type="text" value="'+svgE.get()+'"/><button class="OK" value="OK">OK</button><button type="button" class="Cancel" value="Cancel">Cancel</button>'
 					var IN = div.querySelector('input')
 					  , ok = div.querySelector('.OK')
 					  , ca = div.querySelector('.Cancel');
 					IN.addEventListener('keypress', function() {console.log(IN.value);}, false);
-					ok.addEventListener('click', function() {svgE.set( IN.value );
-															 console.log("OK with", IN.value);
-															 document.body.removeChild(div);
-															 // document.body.classList.add( 'noUserSelect' );
-															}, false);
-					ca.addEventListener('click', function() {document.body.removeChild(div);
-															 // document.body.classList.add( 'noUserSelect' );
-															}, false);
+					var fctOK = function()  {svgE.set( IN.value );
+											 console.log("OK with", IN.value);
+											 document.body.removeChild(div); }
+					  , fctCA = function()  {document.body.removeChild(div);}
+					ok.addEventListener('click', fctOK, false); ok.addEventListener('touchstart', fctOK, false);
+					ca.addEventListener('click', fctCA, false); ca.addEventListener('touchstart', fctCA, false);
 					document.body.appendChild( div );
 					IN.focus();
 				}

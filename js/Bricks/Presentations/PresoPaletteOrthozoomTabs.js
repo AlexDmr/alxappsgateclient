@@ -41,15 +41,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 if(!svg) {return};
 				 if(OnOff) {
 					 svg.addEventListener('click', this.blocClick, true);
-					 var L = this.L_bricks_dropShadowFilter = document.querySelectorAll('.Brick.dropShadowFilter');
-					 for(var i=0; i<L.length; i++) {
-						 L.item(i).removeAttribute('filter');
-						}
+					 // var L = this.L_bricks_dropShadowFilter = document.querySelectorAll('.Brick.dropShadowFilter');
+					 // for(var i=0; i<L.length; i++) {
+						 // L.item(i).removeAttribute('filter');
+						// }
 					} else  {svg.removeEventListener('click', this.blocClick, true);
-							 var L = this.L_bricks_dropShadowFilter;
-							 for(var i=0; i<L.length; i++) {
-								 L.item(i).setAttribute('filter', 'url(#dropShadow)');
-								}
+							 // var L = this.L_bricks_dropShadowFilter;
+							 // for(var i=0; i<L.length; i++) {
+								 // L.item(i).setAttribute('filter', 'url(#dropShadow)');
+								// }
 							}
 				}
 			 PresoPaletteOrthozoomTabs.prototype.toggleTileEdition = function(b) {

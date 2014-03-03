@@ -158,10 +158,20 @@ define( [ 'Bricks/protoBricks'
 														 , 'PROGRAM_ROOT' : 'Programmes'
 														 , 'DEVICE_ROOT'  : 'Appareils'
 														 }
+											   , Utype = { 'SERVICE_ROOT' : 'BrickService'
+														 , 'SPATIAL_ROOT' : 'BrickPlace'
+														 , 'PROGRAM_ROOT' : 'BrickPrograms'
+														 , 'DEVICE_ROOT'  : 'BrickDevice'
+														 };
 											 if(!Uname[json[id][Udata].type]) {Uname[json[id][Udata].type] = json[id][Udata].type;}
-											 self.palette.addUniverAccess( {id:'U_'+u,name:Uname[json[id][Udata].type],classes:json[id][Udata].type}, newUnivers);
+											 self.palette.addUniverAccess( {id:'U_'+u,name:Uname[json[id][Udata].type],classes:Utype[json[id][Udata].type] || ''}, newUnivers);
 											 self.palette.changePresentationsWithContext( {tags:['orthozoom']}, newUnivers);
 											 newUnivers.layoutDescendants();
+											 for(var preso=0; preso<newUnivers.presentations.length; preso++) {
+												 if(Utype[json[id][Udata].type]) {
+													 newUnivers.presentations[preso].Render().classList.add( Utype[json[id][Udata].type] );
+													}
+												}
 											}
 										 self.call( 'AlxServer'
 												  , {mtd:'getBricks', args:[]}
