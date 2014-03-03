@@ -52,7 +52,8 @@ define( [
 				 return this;
 				}
 			 svgAlx.prototype.matrixId = function() {
-				 return this.matrixScalars(1,0,0,1,0,0);;
+				 this.root.setAttribute('transform', '');
+				 return this;
 				}
 			 svgAlx.prototype.matrix = function(M) {
 				 this.root.setAttribute('transform', 'matrix('+M.a+','+M.b+','+M.c+','+M.d+','+M.e+','+M.f+')' );

@@ -37,13 +37,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoPaletteOrthozoomTabs.prototype.FeedBackEdition = function(OnOff) {
 				 if(this.feedBackEdition === OnOff) {return}
 				 this.feedBackEdition = OnOff;
+				 var svg = document.querySelector('svg');
+				 if(!svg) {return};
 				 if(OnOff) {
-					 document.addEventListener('click', this.blocClick, true);
+					 svg.addEventListener('click', this.blocClick, true);
 					 var L = this.L_bricks_dropShadowFilter = document.querySelectorAll('.Brick.dropShadowFilter');
 					 for(var i=0; i<L.length; i++) {
 						 L.item(i).removeAttribute('filter');
 						}
-					} else  {document.removeEventListener('click', this.blocClick, true);
+					} else  {svg.removeEventListener('click', this.blocClick, true);
 							 var L = this.L_bricks_dropShadowFilter;
 							 for(var i=0; i<L.length; i++) {
 								 L.item(i).setAttribute('filter', 'url(#dropShadow)');
@@ -251,7 +253,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																, class: 'background'
 																} );
 						 this.panelTile.labelName = new svgText ().set( 'Nom : ' ).translate(3,30);
-						 this.panelTile.entryName = new svgEntry().set( tile.brick.tile.name );
+						 this.panelTile.entryName = new svgEntry().set( tile.brick.getName() );
 						 this.panelTile.Edition.appendChild( this.panelTile.bgRect );
 						 this.panelTile.Edition.appendChild( this.panelTile.labelName );
 						 this.panelTile.Edition.appendChild( this.panelTile.entryName );
@@ -264,8 +266,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 												    }
 												  ).command( function() {
 																 console.log("Valider");
-																 self.editedTile.brick.tile.name = self.panelTile.entryName.get();
-																 self.editedTile.brick.setName( self.editedTile.brick.tile.name );
+																 self.editedTile.brick.setName( self.panelTile.entryName.get() );
 																 self.toggleTileEdition(false);
 																 self.editedTile.root.classList.remove('selected');
 																 self.editedTile = null;
@@ -287,7 +288,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						}
 					 // set up the edition panel
 					 // Name
-					 this.panelTile.entryName.set( tile.brick.tile.name );
+					 this.panelTile.entryName.set( tile.brick.getName() );
 					 // size (depend wether it is a brick or a group)
 					 if(tile.brick.isSpace) {
 						 console.log("A space is under edition, we can change width and height");

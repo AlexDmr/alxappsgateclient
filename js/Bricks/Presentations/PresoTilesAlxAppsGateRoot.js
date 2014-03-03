@@ -20,7 +20,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.L_touches = []; this.D_touchClick = {};
 				 this.touchClickTimer = null;
 				 this.msClick = 130; this.msDblClick = 300;
-				 this.msLongPress = 300;
+				 this.msLongPress = 600;
 				 this.A_longPress = {};
 				 
 				 // Palette
@@ -285,7 +285,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					// Manage D&D 
 					 this.root.addEventListener	( 'touchstart', function(e) {self.touchstart(e)}, false);
 					 this.root.addEventListener	( 'touchend'  , function(e) {self.touchend(e);} , false);
-					 console.log("Avoid dragging", this.getPresoBrickFromDescendant( this.brick.palette ).Render());
+					 // console.log("Avoid dragging", this.getPresoBrickFromDescendant( this.brick.palette ).Render());
 					 DragManager.addDraggable( this.groot
 											 , { eventNode	: this.root
 											   , pathNodes	: [ { node : this.getPresoBrickFromDescendant( this.brick.palette ).Render()
@@ -347,7 +347,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					   , dx = x - P.x
 					   , dy = y - P.y
 					   , d2 = dx*dx+dy*dy;
-					 if(d2 > 200) {
+					 if(d2 > 30) {
 						 clearTimeout(P.timeout);
 						 delete this.A_longPress[id];
 						}

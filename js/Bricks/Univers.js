@@ -48,7 +48,7 @@ define( [ "Bricks/protoBricks"
 					 var prevBrick = this.mapBrickIdToTile[brick.id][i].brick,
 					     data      = this.mapBrickIdToTile[brick.id][i].data;
 					 var parentsBrick = prevBrick.parents.slice();
-					 brick.tile = prevBrick.tile;
+					 brick.setName( prevBrick.getName() );
 					 for(var p=0; p<parentsBrick.length; p++) {
 						 parentsBrick[p].removeChild( prevBrick );
 						 parentsBrick[p].appendChild( brick );
@@ -85,15 +85,10 @@ define( [ "Bricks/protoBricks"
 						 this.mapBrickIdToTile[data.brickId].push( {data: data, brick: brick, parentBrick: parentBrick} );
 						}
 					}
+				 brick.setName( data.name || 'NONAME' );
 				 if(!data.brickId) {
 					 var objData = {x:data.x,y:data.y,w:data.w,h:data.h,color:data.color,class:data.class,brick:brick,parentBrick:parentBrick};
 					 this.D_bricks[brick.localBrickId] = data;
-					 /*brick.tile = {};
-					 brick.tile.x = data.x; brick.tile.y = data.y; 
-					 brick.tile.w = data.w; brick.tile.h = data.h; 
-					 brick.tile.color = data.color || 'white';
-					 brick.tile.class   = data.class || ''*/
-					 brick.setName( data.name || 'NONAME' );
 					}
 				 if(data.children) {
 					 for(var i=0; i<data.children.length; i++) {
@@ -108,7 +103,7 @@ define( [ "Bricks/protoBricks"
 				 var properties = properties || {}, obj = {};
 				 for(var i in properties) json.properties.push( {key:i, value:properties[i]} );				 
 				 var dataMap = this.RecursiveParseDataFromServer( json );
-				 console.log("New univers", json.type);
+				 // console.log("New univers", json.type);
 				 switch(json.type) {
 					 case 'SERVICE_ROOT': dataMap.class = 'BrickService'; dataMap.name = 'Services'; break;
 					 case 'SPATIAL_ROOT': dataMap.class = 'BrickPlace'  ; dataMap.name = 'Plan'; break;
@@ -146,7 +141,7 @@ define( [ "Bricks/protoBricks"
 					   ||obj.categId === '-1943939940'
 					   ) {//console.error('Abort for category', obj.categId);
 					      return null;
-						 } else {console.log("\tNew category", obj.categId);}
+						 } else {/*console.log("\tNew category", obj.categId);*/}
 					 obj.class   = 'CATEGORY CATEGORY_' + obj.categId;
 				     obj.w		 = properties.w || 3
 				     obj.h		 = properties.h || 2

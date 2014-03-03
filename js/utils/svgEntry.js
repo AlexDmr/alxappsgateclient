@@ -12,14 +12,15 @@ define( [ "utils/svgAlx"
 				 // document.body.classList.remove( 'noUserSelect' );
 				 var div = document.createElement('div');
 					div.classList.add('AlxModal');
-					div.innerHTML = '<form><input class="name" type="text" name="valTextSvgE" value="'+svgE.get()+'"/><input type="button" class="OK" value="OK">OK</input><input type="button" class="Cancel" value="Cancel">Cancel</input></form>'
+					div.innerHTML = '<input class="name" type="text" value="'+svgE.get()+'"/><button class="OK" value="OK">OK</button><input type="button" class="Cancel" value="Cancel">Cancel</input>'
 					var IN = div.querySelector('input')
 					  , ok = div.querySelector('.OK')
 					  , ca = div.querySelector('.Cancel');
-					ok.addEventListener('click', function() {svgE.set(this.form.valTextSvgE.value);
+					IN.addEventListener('keypress', function() {console.log(IN.value);}, false);
+					ok.addEventListener('click', function() {svgE.set( IN.value );
+															 console.log("OK with", IN.value);
 															 document.body.removeChild(div);
 															 // document.body.classList.add( 'noUserSelect' );
-															 console.log("OK with this", this.form);
 															}, false);
 					ca.addEventListener('click', function() {document.body.removeChild(div);
 															 // document.body.classList.add( 'noUserSelect' );

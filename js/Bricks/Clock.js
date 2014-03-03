@@ -14,7 +14,7 @@ define( [ "Bricks/protoBricks"
 				 this.call	( 'AppsGate'
 							, {method:"getDevice",args:[{value:'21106637055',type:'String'}]}
 							, function(data) {
-								  console.log("Clock received", data)
+								  // console.log("Clock received", data)
 								  var obj = JSON.parse( data.value );
 								  self.clockValue = parseInt  ( obj.clockValue );
 								  self.localClock = Date.now();
@@ -23,7 +23,7 @@ define( [ "Bricks/protoBricks"
 								 }
 								);
 
-				 console.log('New Clock');
+				 // console.log('New Clock');
 				 
 				 socket.on(id, function(data) {self.update(data);});
 				 return this;

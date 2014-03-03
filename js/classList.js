@@ -1,9 +1,9 @@
 /*
  * ClassList patch for SVG Elements
  */
-console.log("coucou");
+// console.log("coucou");
 if (typeof SVGElement !== 'undefined' && !SVGElement.prototype.classList && Object.defineProperty) {
-console.log('PATCH');
+// console.log('PATCH');
 Object.defineProperty(SVGElement.prototype, 'classList', {
         get: function() {
             var self = this;

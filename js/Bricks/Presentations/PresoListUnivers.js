@@ -26,6 +26,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoListUnivers.prototype.init = function(brick) {
 				 PresoTile.prototype.init.apply(this, [brick]);
 				}
+			 PresoListUnivers.prototype.layoutDescendants = function() {}
 			 PresoListUnivers.prototype.integrateBrick = function(brick) {
 				 // console.log("PresoListUnivers::integrateBrick",this.brick);
 				 // Place the brick presentations at the right places
@@ -34,12 +35,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				   , preso, presoParent
 				   , pos, width, x, y, w, h, color = "red"
 				   , L, self = this;
-				 if(this.mapCategIdToTile[brick.type]) {L=this.brick.mapCategIdToTile[brick.type].length;} else {L=0;}
+				 if(this.mapCategIdToTile[brick.type]) {L=this.mapCategIdToTile[brick.type].length;} else {L=0;}
 				 for(var i=0;i<L;i++) {
 					 this.mapBrickIdToBrick[ brick.id ] = brick;
 					 dataList = this.mapCategIdToTile[brick.type][i];
 					 var g   = new svgGroup();
-					 var txt = new svgText( { style: {fontFamily:'Consolas'} } ).set(brick.name || brick.id);
+					 var txt = new svgText( { style: {} } ).set(brick.name || brick.id);
 					 g.appendChild(txt);
 					 dataList.g.appendChild( g );
 					 this.RecursiveListRePlacement( this.groot );
@@ -58,8 +59,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 								 );
 					}
 				 // For direct references
-				 if(this.mapBrickIdToTile[brick.id]) {
-					 L=this.mapBrickIdToTile[brick.id].length;
+				 if(this.brick.mapBrickIdToTile[brick.id]) {
+					 L=this.brick.mapBrickIdToTile[brick.id].length;
 					 this.mapBrickIdToBrick[brick.id] = brick; // Change the reference to the actual brick
 					} else {L=0;}
 				 for(var i=0;i<L;i++) {
@@ -79,7 +80,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 // console.log("PresoListUnivers::Render", this);
 					 this.mapCategIdToTile = {};
 					 this.mapBrickIdToTile = {};
-					 this.RecursiveListPlacement(this.brick, {indent:'  ',nb:1,root:this.AlxGroup} );
+					 this.RecursiveListPlacement(this.brick, {indent:10,nb:1,root:this.AlxGroup} );
 					}
 				 return this.root;
 				}
@@ -94,26 +95,34 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					}
 				 return pos;
 				}
-			 PresoListUnivers.prototype.RecursiveListPlacement = function(brick, infos) {
+			 PresoListUnivers.prototype.RecursiveListPlacement = function(brick, infos, dec) {
+				 dec = dec || '';
 				 var self = this, brickId = brick.id; this.mapBrickIdToBrick[brickId] = brick;
 				 // Get the names...
 				 // console.log(indent, brick.tile.name); //(indent,preso.brick?preso.brick.name:'NONAME',preso);
 				 var nb = infos.nb++
 				   , root = infos.root
 				   , indent = infos.indent;
-				 var g   = new svgGroup( {transform : 'translate('+(5*indent.length)+','+(20*nb)+')'} );
-				 var txt = new svgText().set(brick.getName());
-				 if(brick.tile.categId) {this.mapCategIdToTile[brick.tile.categId] = this.mapCategIdToTile[brick.tile.categId] || [];
-										 this.mapCategIdToTile[brick.tile.categId].push( {g:g,txt:txt} );
-										 this.mapBrickIdToBrick[brick.tile.categId] = brick;
-										}
-				 if(brick.tile.brickId) {this.mapBrickIdToTile[brick.tile.brickId] = this.mapBrickIdToTile[brick.tile.brickId] || [];
-										 this.mapBrickIdToTile[brick.tile.brickId].push( {g:g,txt:txt} );
-										 this.mapBrickIdToBrick[brick.tile.brickId] = brick;
-										 txt.configure( {style:{fill:'yellow'}} );
-										 // console.log('Color in yellow', brick.tile.brickId);
-										 brickId = brick.tile.brickId;
-										}
+				 var g   = new svgGroup( {transform : 'translate('+indent+','+(20*nb)+')'} );
+				 var txt = new svgText().set( brick.getName());
+				// Is this brick a root for a category ?
+				 for(var i in this.brick.mapCategIdToTile) {
+					 for(var j=0; j<this.brick.mapCategIdToTile[i].length; j++) {
+						 if(this.brick.mapCategIdToTile[i][j].brick === brick) {
+							 this.mapCategIdToTile[i] = this.mapCategIdToTile[i] || [];
+							 this.mapCategIdToTile[i].push( {g:g,txt:txt,brick:brick} );
+							 break;
+							}
+						}
+					}
+				// Is this brick the representant of another brick?
+				 if(this.brick.mapBrickIdToTile[brick.id]) {
+					 this.mapBrickIdToTile[brick.id] = this.mapBrickIdToTile[brick.id] || [];
+					 this.mapBrickIdToTile[brick.id].push( {g:g,txt:txt} );
+					 this.mapBrickIdToBrick[brick.id] = brick;
+					 txt.configure( {style:{fill:'yellow'}} );
+					 // console.log('Color in yellow', brick.tile.brickId);
+					}
 				 svgUtils.DD.DragAndDroppable( txt.getRoot()
 							 , { tags : ['brick']
 							   , size : {w:1,h:1}
@@ -135,9 +144,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					}
 				 var infosChildren = {root:g,nb:1,indent:indent}
 				 for(var i=0; i<brick.children.length; i++) {
-					 this.RecursiveListPlacement(brick.children[i], infosChildren);
-					 infos.nb += infosChildren.nb-1;
+					 this.RecursiveListPlacement(brick.children[i], infosChildren, dec + "\t");
 					}
+				 if(brick.children) {infos.nb += infosChildren.nb-1;}
 				}
 			 PresoListUnivers.prototype.primitivePlug = function(c) {}
 

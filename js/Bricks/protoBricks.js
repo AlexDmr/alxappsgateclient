@@ -202,7 +202,7 @@ define( [ "Bricks/Presentations/utils"
 				}
 			 Brick.prototype.containsChild = function(child) {
 				 var nb = 0;
-				 for(var i=0; i<this.children; i++) {if(this.children[i] === child) {nb++;}}
+				 for(var i=0; i<this.children.length; i++) {if(this.children[i] === child) {nb++;}}
 				 return nb;
 				}
 			 // Return the reference to the Brick constructor

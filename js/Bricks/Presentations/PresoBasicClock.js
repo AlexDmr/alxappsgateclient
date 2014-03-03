@@ -36,7 +36,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 Presentation.prototype.Render.apply(this, []) ;
 				 // Text for consumption
 				 if(!this.clockText) {
-					 this.clockText = new svgText( {style: {fontFamily: 'Consolas', textAnchor: 'left', stroke: 'none'}} );
+					 this.clockText = new svgText( {style: {fontFamily: 'Consolas', textAnchor: 'middle', stroke: 'none'}} );
 					 this.gPreso.appendChild(this.clockText.getRoot());
 					 self.updateClock( this.brick.get_clockValue() );
 					 var coords = this.getPresoCoords();
@@ -44,11 +44,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							  'DOMNodeInsertedIntoDocument'
 							, function(e) 	{var prev = self.clockText.get();
 											 self.clockText.set('00:00');
-											 self.clockText.fillSpace( { x		: coords.x1
+											 self.clockText.matrixId().translate( (coords.x2+coords.x1)/2
+																				, 0 );
+											 /*self.clockText.fillSpace( { x		: coords.x1
 																	   , y		: coords.y1
 																	   , width	: coords.x2 - coords.x1
 																	   , height	: coords.y2 - coords.y1 }
-																	 , 0.7);
+																	 , 0.7);*/
 											 self.clockText.set(prev);
 											}
 							, false );

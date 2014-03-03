@@ -123,14 +123,14 @@ define( [ 'Bricks/protoBricks'
 					}
 				 
 				 // Call the server for the tree structure
-				 setTimeout(function() {
+				 // setTimeout(function() {
 				 self.call( 'AppsGate'
 						  , {method:'getTreeDescription', args:[]}
 						  , function(data) {
-								 console.log(data);
+								 // console.log(data);
 								 var json = JSON.parse(data.value), root = json
 								   , id, newUnivers, Udata;
-								 console.log("getTreeDescription <=", json);
+								 // console.log("getTreeDescription <=", json);
 								 for(var i=0; i<json.children.length; i++) {
 									 id = json.children[i];
 									 if(json[id].type === 'HABITAT_CURRENT') {
@@ -167,7 +167,7 @@ define( [ 'Bricks/protoBricks'
 												  , {mtd:'getBricks', args:[]}
 												  , function(data) {if(data.success) {
 																		 AlxClient.newBricksList(data.res);
-																		 // for(var p=0;p<self.presentations.length;p++) {self.presentations[p].initSemanticZoom();}
+																		 for(var p=0;p<self.presentations.length;p++) {self.presentations[p].initSemanticZoom();}
 																		}
 														}
 												  );
@@ -175,7 +175,7 @@ define( [ 'Bricks/protoBricks'
 									}
 								}
 						  )
-						}, 5000); // End setTimeout
+						// }, 5000); // End setTimeout
 				}
 			 AlxClient.newBricksList = function(bricks) {
 				 // Re-init the device list
