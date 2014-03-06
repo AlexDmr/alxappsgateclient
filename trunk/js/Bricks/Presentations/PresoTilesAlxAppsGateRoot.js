@@ -4,12 +4,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		, "utils/svg"
 		, "utils/svgUtils"
 		, "utils/svgAlx"
+		, "utils/svgText"
 		]
 	  , function( PresoTile
 				/*, PresoBasicPalette*/
 				, AlxUtils
 				, DragManager
-				, svgUtils, svgAlx
+				, svgUtils, svgAlx, svgText
 				) {
 			 // Presentation
 			 var PresoTilesAlxAppsGateRoot = function() {
@@ -17,8 +18,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.w = this.h = 12;
 				 
 				 // Touches for intertaction
-				 this.L_touches = []; this.D_touchClick = {};
-				 this.touchClickTimer = null;
+				 // this.L_touches = []; this.D_touchClick = {};
+				 this.L_pointers = []
+				 // this.touchClickTimer = null;
 				 this.msClick = 130; this.msDblClick = 300;
 				 this.msLongPress = 600;
 				 this.A_longPress = {};
@@ -93,85 +95,84 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 // for(var i=0;i<this.UniversTiles.length;i++) {this.appendChild(this.UniversTiles[i]);}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.getInnerRoot = function() {return this.groot;}
-			 PresoTilesAlxAppsGateRoot.prototype.processL_touches = function(ms) {
-				 this.L_touches = this.L_touches.splice(this.L_touches.length-4,4);
-				 if( this.L_touches.length === 4
-				   &&this.L_touches[0].ms > (ms-this.msDblClick)
-				   &&this.L_touches[0].evt === 1
-				   &&this.L_touches[1].evt === 0
-				   &&this.L_touches[2].evt === 1
-				   &&this.L_touches[3].evt === 0
-				   ) {var dx = 0, dy = 0
-				      for(var i=1;i<4;i++) {
-						 dx += this.L_touches[i].x - this.L_touches[i-1].x;
-						 dy += this.L_touches[i].y - this.L_touches[i-1].y;
-						}
-					  if(Math.abs(dx) < 10 && Math.abs(dy) < 10) {
-						 // console.log('DblClick', this.L_touches[0].target);
-						 // Clean up the touchClick structure
-						 delete this.D_touchClick[ this.L_touches[0].id ]
-						 delete this.D_touchClick[ this.L_touches[1].id ]
-						 
-						 // Callback
-						 // this.CB_clic( {target: this.L_touches[0].target} );
-						 var evt = new MouseEvent('dblclick');
-						 evt.initMouseEvent('dblclick', true, true);
-						 var ptr = this.L_touches[3];
-						 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
-						 ptr.target.dispatchEvent(evt);
-						}
-					 }
+			 PresoTilesAlxAppsGateRoot.prototype.mouseup    = function(e) {
+				 e.identifier = 'mouse';
+				 this.pointerUp( e );
 				}
-			 PresoTilesAlxAppsGateRoot.prototype.processClick = function() {
-				 var ms = Date.now(), D = {}, ptr;
-				 for(var i in this.D_touchClick) {
-					 ptr = this.D_touchClick[i];
-					 if(ptr.click) {
-						 var evt = new MouseEvent('click');
-						 evt.initMouseEvent('click', true, true);
-						 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
-						 ptr.target.dispatchEvent(evt);
-						} else {if(ptr.ms > ms-this.msDblClick) {D[i] = this.D_touchClick[i];}
-							   }
-					}
-				 this.D_touchClick = D;
+			 PresoTilesAlxAppsGateRoot.prototype.mousedown  = function(e) {
+				 e.identifier = 'mouse';
+				 this.pointerDown( e );
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.touchend	= function(e) {
-				 var ms  = Date.now(), ptr;
-				 // Manage click
-				 for(var i=0; i<e.changedTouches.length; i++) {
-					 ptr = e.changedTouches.item(i);
-					 if(  this.D_touchClick[ ptr.identifier ]
-					   && Math.abs(this.D_touchClick[ ptr.identifier ].x - ptr.clientX) < 5
-					   && Math.abs(this.D_touchClick[ ptr.identifier ].y - ptr.clientY) < 5
-					   && this.D_touchClick[ ptr.identifier ].ms > ms-this.msClick
-					   ) {this.D_touchClick[ ptr.identifier ].click = true;}
-					}
-				 // Manage double click
-				 if(e.touches.length === 0) {
-					 ptr = e.changedTouches.item(0);
-					 var obj = {ms:ms,evt:0,id:ptr.identifier,x:ptr.clientX,y:ptr.clientY,target:ptr.target};
-					 this.L_touches.push(obj);
-					 // console.log( this.L_touches );
-					 this.processL_touches(ms);
-					}
+				 console.log("touchend with", e.touches.length, "touches remaining");
+				 this.pointerUp( e.changedTouches.item(0) );
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.touchstart = function(e) {
-				 // console.log( e.touches );
-				 var self = this, ptr, ms  = Date.now()
-				   , timer = setTimeout(function() {self.processClick();}, 10+this.msDblClick);
-				 for(var i=0; i<e.changedTouches.length; i++) {
-					 ptr = e.changedTouches.item(i);
-					 this.D_touchClick[ ptr.identifier ] = {target:ptr.target,id:ptr.identifier,x:ptr.clientX,y:ptr.clientY,ms:ms,timer:timer}
+				 if(e.touches.length > 1) {return}
+				 this.pointerDown( e.changedTouches.item(0) );
+				}
+			 PresoTilesAlxAppsGateRoot.prototype.pointerUp   = function(e) {
+				 var self  = this, ms = Date.now()
+				   , log   = {state:0,target:e.target,id:e.identifier,x:e.clientX,y:e.clientY,ms:ms};
+				 this.L_pointers.push( log );
+				 if(this.L_pointers.length >= 4) {/*console.log('direct'); */this.processPointersLog();}
+				}
+			 PresoTilesAlxAppsGateRoot.prototype.pointerDown = function(e) {
+				 var self  = this, ms  = Date.now()
+				   , timer = setTimeout(function() {/*console.log('timeout'); */self.processPointersLog();}, 10+this.msDblClick)
+				   , log   = {state:1,target:e.target,id:e.identifier,x:e.clientX,y:e.clientY,ms:ms,timer:timer};
+				 this.L_pointers.push( log );
+				}
+			 PresoTilesAlxAppsGateRoot.prototype.processPointersLog = function() {
+				 var ms = Date.now();
+				 // Go through pointers and trigger click, dblclick or just remove the logs
+				 if(this.L_pointers.length >= 2 && (this.L_pointers.length >= 4 || this.L_pointers[0].ms <= ms - this.msDblClick)) {
+					 // Do we have a click ?
+					 // console.log("\tclick?");
+					 var dx = Math.abs(this.L_pointers[1].x - this.L_pointers[0].x)
+					   , dy = Math.abs(this.L_pointers[1].y - this.L_pointers[0].y)
+					   , ds = this.L_pointers[1].ms - this.L_pointers[0].ms ;
+					 if(dx < 5 && dy < 5 && ds < this.msClick) {
+						 // We can trigger a click, but do we have to trigger a dblclick ?
+						 var triggerDblClick = false;
+						 // console.log("\tdblclick?");
+						 if(this.L_pointers.length >= 4) {
+							 dx += Math.abs(this.L_pointers[2].x - this.L_pointers[1].x) + Math.abs(this.L_pointers[3].x - this.L_pointers[2].x);
+							 dy += Math.abs(this.L_pointers[2].y - this.L_pointers[1].y) + Math.abs(this.L_pointers[3].y - this.L_pointers[2].y);
+							 ds  = this.L_pointers[3].ms - this.L_pointers[2].ms;
+							 if(dx < 15 && dy < 15 && ds < this.msClick) {
+								 // Trigger a dblclick
+								 triggerDblClick = true;
+								 var evt = new MouseEvent('dblclick')
+							       , ptr = this.L_pointers[0];
+								 evt.initMouseEvent('dblclick', true, true);
+								 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
+								 evt.AlxGenerated = true;
+								 // console.log('Generate dblclick');
+								 ptr.target.dispatchEvent(evt);
+								 this.L_pointers[0].ms -= this.msDblClick;	// To make sure that it will be erased
+								 this.L_pointers[2].ms -= this.msDblClick;	// To make sure that it will be erased
+								}
+							}
+						 if(!triggerDblClick) {
+							 var evt = new MouseEvent('click')
+							   , ptr = this.L_pointers[0];
+							 evt.initMouseEvent('click', true, true);
+							 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
+							 evt.AlxGenerated = true;
+							 // console.log('Generate click');
+							 ptr.target.dispatchEvent(evt);
+							 ptr.ms -= this.msDblClick;	// To make sure that it will be erased
+							}
+						}
 					}
-				 if(this.touchClickTimer) {clearTimeout(this.touchClickTimer); this.touchClickTimer = null;}
 				 
-				 if(e.touches.length === 1) {
-					 ptr = e.touches.item(0);
-					 var obj = {ms:ms,evt:1,id:ptr.identifier,x:ptr.clientX,y:ptr.clientY,target:e.touches.item(0).target};
-					 this.L_touches.push(obj);
-					 // console.log( this.L_touches );
-					}
+				 // Remove old pointers event by pair (Down and Up)
+				 while( this.L_pointers.length >= 2
+				      &&this.L_pointers[0].ms < ms - this.msDblClick ) {var L = this.L_pointers.splice(0,2);
+																	    if(L[0].timer) {clearTimeout(L[0].timer);}
+																		if(L[1].timer) {console.error('Gros mélange dans la liste des pointeurs... on ne devrait pas avoir un timer ici', L, this.L_pointers);}
+																	   }
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.primitivePlug = function(c) {
 				 var P = this.Render()
@@ -259,15 +260,51 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					// Manage the long press event
 					 this.root.addEventListener( 'longPress' , function(e) {
 																 var node = e.target;
-																 console.log('longPress on', node);
+																 // console.log('longPress on', node);
 																 while(node && !node.TileRoot) {
-																	 console.log(node, node.parentElement);
+																	 // console.log(node, node.parentElement);
 																	 node = node.parentElement;
 																	}
-																 console.log("\tnode <-", node);
+																 // console.log("\tnode <-", node);
 																 if(node) {// Edit node
-																	 var tile = node.TileRoot;
-																	 self.editTile( tile );
+																	 var tile   = node.TileRoot
+																	   , config = self.editTile( tile, e.clientX, e.clientY );
+																	 // Stop drag of the scene
+																	 DragManager.stopDragNode(self.groot);
+																	 // Generate mousedown or touchstart event to start dragging the tile
+																	 if(e.identifier === 'mouse') {
+																		 var evt = new MouseEvent('mousedown');
+																		 evt.initMouseEvent	( 'mousedown'
+																							, true			// Bubbling
+																							, true			// Cancelable
+																							, window		// view
+																							, 0				// detail
+																							, e.clientX		// screenX
+																							, e.clientY		// screenY
+																							, e.clientX		// clientX
+																							, e.clientY		// clientY
+																							);
+																		 evt.target = tile.root;
+																		 tile.root.dispatchEvent(evt);
+																		} else  {console.log('Have to generate a touchstart event with id', e.identifier);
+																				 // document.addEventListener('touchmove', function(e) {console.log(e);}, false);
+																				 var pipoEvt =	{ target		 : tile.root
+																								, preventDefault : function() {}
+																								, stopPropagation: function() {}
+																								, changedTouches : {
+																									  L		: [{ target:tile.root
+																											   , clientX : e.clientX
+																											   , clientY : e.clientY
+																											   , pageX	 : e.clientX
+																											   , pageY	 : e.clientY
+																											   , identifier	: e.identifier
+																											   } ]
+																									, length: 1
+																									, item	: function(i) {return this.L[i];}
+																									}
+																								}
+																				 config.touchstart( pipoEvt );
+																				}
 																	}
 																}
 															 , false);
@@ -287,10 +324,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																				self.longPressStop(ptr.identifier); }
 																		   }, false);
 					
-					// Manage D&D 
+					// Manage user interaction
 					 this.root.addEventListener	( 'touchstart', function(e) {self.touchstart(e)}, false);
 					 this.root.addEventListener	( 'touchend'  , function(e) {self.touchend(e);} , false);
-					 // console.log("Avoid dragging", this.getPresoBrickFromDescendant( this.brick.palette ).Render());
+					 this.root.addEventListener	( 'mousedown' , function(e) {self.mousedown(e)}, false);
+					 this.root.addEventListener	( 'mouseup'   , function(e) {self.mouseup(e);} , false);
+					 
+					// Manage D&D 
 					 DragManager.addDraggable( this.groot
 											 , { eventNode	: this.root
 											   , pathNodes	: [ { node : this.getPresoBrickFromDescendant( this.brick.palette ).Render()
@@ -311,6 +351,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													}
 											   }
 											 );
+											 
+					 // Debug log for user events
+					 document.addEventListener('click'   , function(e) {if(!e.AlxGenerated) {e.stopPropagation();e.preventDefault();/*console.log("System click intercepted !");*/}}, true);
+					 document.addEventListener('dblclick', function(e) {if(!e.AlxGenerated) {e.stopPropagation();e.preventDefault();/*console.log("System dblclick intercepted !");*/}}, true);
+					 // document.addEventListener('click'   , function(e) {console.log('click'   , e);}, false);
+					 // document.addEventListener('dblclick', function(e) {console.log('dblclick', e);}, false);
 					}
 				 return this.root;
 				}
@@ -338,8 +384,18 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoTilesAlxAppsGateRoot.prototype.longPressStart = function(id, x, y, target) {
 				 var self = this;
 				 timeout = setTimeout( function() {var evt = new MouseEvent('longPress');
-												   evt.initMouseEvent('longPress', true, true);
-												   evt.clientX = x; evt.clientY = y;
+												   evt.initMouseEvent( 'longPress'
+																	 , true		// Bubbling
+																	 , true		// Cancelable
+																	 , window	// view
+																	 , 0		// detail
+																	 , x		// screenX
+																	 , y		// screenY
+																	 , x		// clientX
+																	 , y		// clientY
+																	 );
+												   // evt.clientX = x; evt.clientY = y;
+												   evt.identifier = id; evt.target = target;
 												   target.dispatchEvent(evt);
 												   self.longPressStop(id, x, y);
 												  }
@@ -362,9 +418,52 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 if( this.A_longPress[id] ) {clearTimeout(this.A_longPress[id].timeout);
 											 delete this.A_longPress[id];}
 				}
-			 PresoTilesAlxAppsGateRoot.prototype.editTile = function(tile) {
+			 PresoTilesAlxAppsGateRoot.prototype.editTile = function(tile, x, y) {
 				 console.log('Edit node', tile.brick.name, tile);
 				 this.brick.editTile( tile );
+				 tile.setEdited(true);
+				// Turn the tile DragAndDroppable
+				 var nodeFeedBack = new svgText({style:{textAnchor:'middle'}}).translate(x, y).set( tile.brick.name );
+				 var svg = document.querySelector('svg');
+				 svg.appendChild( nodeFeedBack.getRoot() );
+				 var DropZone = tile.DropZone;
+				 if(DropZone) {tile.removeDropZone();}
+				 
+				 var config = 
+				 svgUtils.DD.DragAndDroppable( tile.Render()
+											 , { tags : ['brick']
+											   , size : {w:tile.w,h:tile.h}
+											   , nodeFeedBack : nodeFeedBack.getRoot()
+											   , start: function(config) {
+													 // Create a new Tile and register it so that it can be manipulated by drop zones
+													 console.log('svgUtils.DD.start');
+													 config.brick 		 = tile.brick;
+													 config.presentation = new tile.constructor();
+													 config.presentation.copy( tile );
+													 tile.x = tile.y = 10000; 			// Put that away before removing it
+		
+													 var brick = tile.brick;
+													 console.log("List of parent brick for", brick);
+													 for(var parent=0; parent<brick.parents.length; parent++) {
+														 console.log("\t",parent,':',brick.parents[parent]);
+														}
+		// tile.root.style.display = 'none';	// Don't display but need to be still present for event to appear
+													 // Unplug before replug
+													 // tile.parent.removeChild( tile );
+													}
+											   , end  : function(config) {
+													 svgUtils.DD.removeDragAndDroppable(config.node);
+													 if(DropZone) {config.presentation.addDropZone();}
+													 // config.presentation.setEdited(false);
+													 tile.brick.unPlugPresentation( tile );
+													 console.log(config.brick);
+													 console.log(config.presentation);
+													}
+											   }
+											 );
+				 svg.removeChild( nodeFeedBack.getRoot() );
+				 delete nodeFeedBack;
+				 return config;
 				}
 				
 			 // Return the reference to the PresoTilesAlxAppsGateRoot constructor

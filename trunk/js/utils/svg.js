@@ -41,7 +41,7 @@ var DragManager = {
 		 return -1;
 		}
 	, indexOfNode		: function (node) {
-		 for (var i=0; i<this.TabDraggable.length; i++) {if (this.TabDraggable[i].node == node) {return i;}}
+		 for (var i=0; i<this.TabDraggable.length; i++) {if (this.TabDraggable[i].node === node) {return i;}}
 		 return -1;
 		}
 	, indexOfPointer	: function (id_ptr) {
@@ -165,11 +165,15 @@ var DragManager = {
 	, startDragMouse	: function (e, node) {
 		 var coords = DragManager.getCoordinate_relative_to(e.pageX, e.pageY, DragManager.can);
 		 DragManager.startDrag(e, node, "mouse", coords.x, coords.y);
+		 e.preventDefault();
+		 e.stopPropagation();
 		}
 	, startDragTouch	: function (e, node) {
 		 e.preventDefault();
+		 e.stopPropagation();
 		 var evt = null, coords = null;
 		 for(var i=0;i<e.changedTouches.length;i++) {
+			 // console.log('Touch drag started');
 			 evt    = e.changedTouches.item(i);
 			 coords = DragManager.getCoordinate_relative_to(evt.pageX, evt.pageY, DragManager.can);
 			 DragManager.startDrag(evt, node, evt.identifier, coords.x, coords.y);
@@ -204,9 +208,9 @@ var DragManager = {
 		 
 		 // If not, start the drag
 		 // Compute coordinates of the point in the frame of the node
-		 // console.log("this.TabDraggable[i].id_ptr1 = " + this.TabDraggable[i].id_ptr1);
+		 // console.log("this.TabDraggable[",i,"].id_ptr1 ===", this.TabDraggable[i].id_ptr1);
 		 var M = node.getCTM().inverse();
-		 if(this.TabDraggable[i].id_ptr1 == null) {
+		 if(this.TabDraggable[i].id_ptr1 === null) {
 			 this.TabDraggable[i].id_ptr1 = id_ptr;
 			 this.TabDraggable[i].pt1.x   = x;
 			 this.TabDraggable[i].pt1.y   = y;
@@ -228,6 +232,14 @@ var DragManager = {
 	, stopDragTouch		: function (e) {
 		 e.preventDefault();
 		 for(var i=0;i<e.changedTouches.length;i++) {DragManager.stopDrag(e.changedTouches.item(i), e.changedTouches.item(i).identifier);}
+		}
+	, stopDragNode		: function(node) {
+		 var i = this.indexOfNode(node);
+		 console.log('stopDragNode', i, ":", node);
+		 if( this.TabDragged_node.indexOf(node) >= 0) {
+			 if( typeof this.TabDraggable[i].id_ptr2 !== 'undefined' ) {this.stopDrag({target:node}, this.TabDraggable[i].id_ptr2);}
+			 if( typeof this.TabDraggable[i].id_ptr1 !== 'undefined' ) {this.stopDrag({target:node}, this.TabDraggable[i].id_ptr1);}
+			}
 		}
 	, stopDrag			: function (e, id_ptr) {
 		 var i = this.indexOfPointer(id_ptr);
@@ -253,19 +265,21 @@ var DragManager = {
 	, updateInteractionTouch : function (e) {
 		 e.preventDefault();
 		 var evt = null, coords = null;
+		 // console.log(e);
 		 for(var i=0;i<e.changedTouches.length;i++) {
 			 evt = e.changedTouches.item(i);
 			 coords = DragManager.getCoordinate_relative_to(evt.pageX, evt.pageY, DragManager.can);
+			 // console.log('Update touch drag');
 			 DragManager.updateInteraction(evt.identifier, coords.x, coords.y);
 			}
 		}
 	, updateInteraction : function (id_ptr, x, y) {
 		 var i = this.TabDragging_ptr.indexOf(id_ptr);
-		 if(i == -1) {return;}
+		 if(i == -1) {/*console.log('skip', id_ptr);*/ return;}
 		 i    = this.indexOfPointer(id_ptr); 
 		 var node = this.TabDraggable[i].node;
 		 // Apply translation
-		 // console.log("update while id_ptr2 is " + this.TabDraggable[i].id_ptr2);
+		 // console.log("update TabDraggable[",i,"]");
 		 if(this.TabDraggable[i].id_ptr2 != null) {
 			 this.RotoZoom(i, id_ptr, x, y);
 			} else {this.Drag(i, id_ptr, x, y);}
@@ -276,11 +290,6 @@ var DragManager = {
 			 var id_ptr = this.TabDraggable[index_child].id_ptr1;
 			 this.updateInteraction(id_ptr, x, y /*px, py*/);
 			}
-		 /*if(id_ptr == this.TabDraggable[i].id_ptr1) {
-			  this.TabDraggable[i].pt1p.x = x;
-			  this.TabDraggable[i].pt1p.y = y;
-			 } else {
-					}*/
 		}
 	, RotoZoom : function (i, id_ptr, x, y) {
 		 var obj = this.TabDraggable[i];

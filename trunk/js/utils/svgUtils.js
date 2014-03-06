@@ -56,7 +56,7 @@ define( [ "utils/svg"
 								}
 							 i++;
 							}
-						 this.L_dropZones
+						 return this.L_dropZones;
 						}
 					, DropZone			: function(node, config) {
 						 // config contains possible attributes :
@@ -82,6 +82,22 @@ define( [ "utils/svg"
 						 node.addEventListener('AlxDD_drop' 	, config.drop 		, false);
 						 node.addEventListener('AlxDD_dragOver'	, config.dragOver	, false);
 						}
+					, removeDragAndDroppable : function(node) {
+						 var pos = -1;
+						 for(var i=0; i<this.L_configs.length; i++) {
+							 if(this.L_configs[i].node === node) {
+								 pos = i;
+								 break;
+								}
+							}
+						 if(pos) {
+							 var config = this.L_configs[pos];
+							 config.node.removeEventListener( 'mousedown' , config.mousedown , false);
+							 config.node.removeEventListener( 'touchstart', config.touchstart, false);
+							 this.L_configs.splice(pos, 1);
+							 // console.log("Removing DD for", config);
+							}
+						}
 					, DragAndDroppable	: function(node, config) {
 						 // config contains possible attributes :
 						 //		- tags  : an array of string
@@ -93,23 +109,32 @@ define( [ "utils/svg"
 						 config.start	= config.start	|| null;
 						 config.end		= config.end	|| null;
 						 config.cancel	= config.cancel	|| null;
+						 config.nodeFeedBack = config.nodeFeedBack || node;
+						 config.node	= node;
+						 
+						 this.L_configs = this.L_configs || [];
+						 this.L_configs.push( config );
 						 
 						 // Body
 						 var self = this;
-						 node.addEventListener	( 'mousedown'
-												, function(e) {
+						 config.mousedown = function(e) {
 													 var svg = svgUtils.getSvgCanvas(node);
-													 var clone = self.start_DragAndDroppable(svg, node, e, config);
+													 var clone = self.start_DragAndDroppable(svg, config.nodeFeedBack, e, config);
 													 DragManager.startDragMouse(e, clone);
-													}
+													};
+						 config.touchstart = function(e) {
+													 var svg = svgUtils.getSvgCanvas(node);
+													 var clone = self.start_DragAndDroppable(svg, config.nodeFeedBack, e.changedTouches.item(0), config);
+													 DragManager.startDragTouch(e, clone);
+													};
+						 node.addEventListener	( 'mousedown'
+												, config.mousedown
 												, false );
 						 node.addEventListener	( 'touchstart'
-												, function(e) {
-													 var svg = svgUtils.getSvgCanvas(node);
-													 var clone = self.start_DragAndDroppable(svg, node, e.changedTouches.item(0), config);
-													 DragManager.startDragTouch(e, clone);
-													}
+												, config.touchstart
 												, false );
+												
+						 return config;
 						}
 					, enrichConfigForEvent : function(config, event, x, y, n, clone) {
 						 OsvgPoint.x = x; OsvgPoint.y = y;
@@ -144,7 +169,7 @@ define( [ "utils/svg"
 						 
 						 var idPtr = e.identifier===undefined?'mouse':e.identifier;
 						 this.D_draggingPtr[idPtr] = {nodeUnder:node,config:config};
-						 // console.log(e, 'Pointer', idPtr, ':', this.D_draggingPtr[idPtr]);
+						 console.log('start_DragAndDroppable:', e, 'Pointer', idPtr, ':', this.D_draggingPtr[idPtr]);
 						 
 						 // Callbacks
 						 if(config.start) {config.start.apply(node, [config]);}
@@ -232,6 +257,11 @@ define( [ "utils/svg"
 									  event.config = this.D_draggingPtr[idPtr].config;
 									  this.D_draggingPtr[idPtr].nodeUnder.dispatchEvent(event);
 								 }
+							// CallBack for the end
+							 var endCB = this.D_draggingPtr[idPtr].config.end;
+							 if(endCB) {endCB.apply(this, [this.D_draggingPtr[idPtr].config]);}
+							 delete this.D_draggingPtr[idPtr];
+							 
 							// Stop drag subscribers
 							 this.L_dragged.splice(pos,1);
 							 node.parentElement.removeChild( node );
