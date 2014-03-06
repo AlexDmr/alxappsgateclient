@@ -70,8 +70,10 @@ define( [ "Bricks/protoBricks"
 					 var brick = null;
 					 if (data.categId && data.brick) {
 						 brick = data.brick;
-						} else {brick = new SpaceBrick();
-								brick.init([]);
+						} else {if(!data.brickId || !this.mapBrickIdToTile[data.brickId]) {
+									 brick = new SpaceBrick();
+									 brick.init([]);
+									} else {brick = this.mapBrickIdToTile[data.brickId][0].brick;}
 							   }
 					 data.brick = brick;
 					 if(data.categId) {
@@ -90,9 +92,13 @@ define( [ "Bricks/protoBricks"
 					 var objData = {x:data.x,y:data.y,w:data.w,h:data.h,color:data.color,class:data.class,brick:brick,parentBrick:parentBrick};
 					 this.D_bricks[brick.localBrickId] = data;
 					}
+				 
 				 if(data.children) {
 					 for(var i=0; i<data.children.length; i++) {
 						 var brickChild = this.buildMap(data.children[i], null, brick);
+						 if(brick.containsChild(brickChild)) {
+							 console.log('Multiple reference to child', brickChild, 'in', brick);
+							}
 						 brick.appendChild( brickChild );
 						}
 					}

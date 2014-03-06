@@ -148,12 +148,24 @@ define( function() {
 				}
 			 Presentation.prototype.appendDescendants = function() {
 				 if(this.brick) {
-					 var brick, preso;
+					 var brick, preso, nb;
 					 for(var b=0; b<this.brick.children.length; b++) {
 						 brick = this.brick.children[b];
-						 preso = this.getPresoBrickFromDescendant(brick)
-						 if(preso === null) {preso = this.appendChildFromBrick( brick );}
-						 if(preso) preso.appendDescendants();
+						 nb = this.brick.containsChild( brick );
+						 if(nb > 1) {
+							 console.log('Presentation::appendDescendants : multiple reference of a child brick');
+							}
+						 L_preso = this.getAllPresoBrickFromDescendant(brick);
+						 for(var p=L_preso.length; p<nb; p++) {
+							 preso = brick.getNewPresentation();
+							 this.appendChild(preso);
+							 L_preso.push( preso );
+							}
+						 for(var p=0; p<L_preso.length; p++) {
+							 L_preso[p].appendDescendants();
+							}
+						 // if(preso === null) {preso = this.appendChildFromBrick( brick );}
+						 // if(preso) preso.appendDescendants();
 						}
 					}
 				}

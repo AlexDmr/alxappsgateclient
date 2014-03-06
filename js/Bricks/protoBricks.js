@@ -147,9 +147,23 @@ define( [ "Bricks/Presentations/utils"
 					 this.isAppeningChild = false;
 					}
 				}
-			 Brick.prototype.removeChild = function(c) {
+			 Brick.prototype.removeChild = function(c, preso) {
 				 if(!this.removingChild) {
 					 this.removingChild = true;
+					 for(var i=0; i<this.children.length; i++) {
+						 if( this.children[i] === c
+						   &&(!preso || this.children[i].presentations.indexOf(preso) >= 0)
+						   ) {
+							  this.children.splice(i,1);
+							  c.removeParent(this);
+							  for(p in this.presentations) {
+								 if(!preso || this.presentations[p].children.indexOf(preso) === -1) {
+									 this.presentations[p].removeChildFromBrick(c);
+									} else {this.presentations[p].removeChild(preso);}
+								}
+							 }
+						}
+					 /* OLD : do not take into account preso parameter
 					 var pos = this.children.indexOf(c)
 					 if(pos !== -1) {
 						 this.children.splice(pos,1);
@@ -157,6 +171,7 @@ define( [ "Bricks/Presentations/utils"
 						 // Also unplug presentations
 						 for(p in this.presentations) {this.presentations[p].removeChildFromBrick(c);}
 						}
+					 */
 					 this.removingChild = false;
 					}
 				}

@@ -104,7 +104,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.pointerDown( e );
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.touchend	= function(e) {
-				 console.log("touchend with", e.touches.length, "touches remaining");
+				 if(e.touches.length) return;
 				 this.pointerUp( e.changedTouches.item(0) );
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.touchstart = function(e) {
@@ -112,10 +112,12 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 this.pointerDown( e.changedTouches.item(0) );
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.pointerUp   = function(e) {
-				 var self  = this, ms = Date.now()
-				   , log   = {state:0,target:e.target,id:e.identifier,x:e.clientX,y:e.clientY,ms:ms};
-				 this.L_pointers.push( log );
-				 if(this.L_pointers.length >= 4) {/*console.log('direct'); */this.processPointersLog();}
+				 if(this.L_pointers.length) { // Pour toujours avoir un down avant...
+					 var self  = this, ms = Date.now()
+					   , log   = {state:0,target:e.target,id:e.identifier,x:e.clientX,y:e.clientY,ms:ms};
+					 this.L_pointers.push( log );
+					 if(this.L_pointers.length >= 4) {/*console.log('direct'); */this.processPointersLog();}
+					}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.pointerDown = function(e) {
 				 var self  = this, ms  = Date.now()
@@ -168,11 +170,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					}
 				 
 				 // Remove old pointers event by pair (Down and Up)
-				 while( this.L_pointers.length >= 2
-				      &&this.L_pointers[0].ms < ms - this.msDblClick ) {var L = this.L_pointers.splice(0,2);
-																	    if(L[0].timer) {clearTimeout(L[0].timer);}
-																		if(L[1].timer) {console.error('Gros mélange dans la liste des pointeurs... on ne devrait pas avoir un timer ici', L, this.L_pointers);}
-																	   }
+				 while( this.L_pointers.length
+				      &&( this.L_pointers[0].ms < ms - this.msDblClick 
+					    ||this.L_pointers[0].state === 0
+						)
+					  ) {var L = this.L_pointers.splice(0,1);
+						 if(L[0].timer) {clearTimeout(L[0].timer);}
+						}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.primitivePlug = function(c) {
 				 var P = this.Render()
@@ -440,6 +444,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 config.brick 		 = tile.brick;
 													 config.presentation = new tile.constructor();
 													 config.presentation.copy( tile );
+													 config.coords = { x : tile.x
+																	 , y : tile.y };
 													 tile.x = tile.y = 10000; 			// Put that away before removing it
 		
 													 var brick = tile.brick;
@@ -455,9 +461,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 svgUtils.DD.removeDragAndDroppable(config.node);
 													 if(DropZone) {config.presentation.addDropZone();}
 													 // config.presentation.setEdited(false);
-													 tile.brick.unPlugPresentation( tile );
 													 console.log(config.brick);
 													 console.log(config.presentation);
+													 
+													 // Have to remove the brick from its original parent
+													 // and take care to only remove the corresponding presentation
+													 tile.parent.brick.removeChild(tile.brick, tile);
+													 
+													 // Clean the original tile
+													 tile.brick.unPlugPresentation( tile );
 													}
 											   }
 											 );

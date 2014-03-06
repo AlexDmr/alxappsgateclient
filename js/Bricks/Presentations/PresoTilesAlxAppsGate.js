@@ -206,7 +206,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 															 preso.w = evt.config.size.w;
 															 preso.h = evt.config.size.h;
 															 preso.x = 100000; preso.y = 100000;
-															 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
+															 var coords = evt.config.coords || self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
 																									, Math.floor(svg_point.y/self.getTileSize())
 																									, preso.w
 																									, preso.h );
