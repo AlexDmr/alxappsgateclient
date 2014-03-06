@@ -112,7 +112,8 @@ define( [ "Bricks/Presentations/protoPresentation"
 						 D[i].forceRender();
 						 // console.log("forceRender", D[i]);
 						} else {
-								console.error('A brick is plugged into univers but not referenced in the description data...');}
+								console.error('A brick is plugged into univers but not referenced in the description data...');
+							   }
 					 // console.log("\t", D[i].brick, data);
 					}
 				 // Cleanup marking...
