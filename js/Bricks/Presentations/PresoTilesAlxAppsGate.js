@@ -64,11 +64,28 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.color	= 'cyan';
 				 this.innerMagnitude = 12;
 				 this.display = true;
+				 this.edited  = (typeof(this.edited) === 'undefined')?false:this.edited;
+				 this.setEdited( this.edited );
 				 this.scaleToDisplayChildren = 0.5;
+				 this.displayFgRect = (typeof(this.edited) === 'undefined')?false:this.displayFgRect;
 				 this.validity = { pixelsMinDensity : 0
 								 , pixelsMaxDensity : 999999999
 								 , pixelsRatio		 : this.w / this.h };
 				 if(this.root) this.forceRender();
+				}
+			 PresoTilesAlxAppsGate.prototype.copy = function( preso ) {
+				 Presentation.prototype.init.apply(this,[preso.brick]);
+				 this.DropZone = preso.DropZone;
+				 this.x = preso.x; this.y = preso.y;
+				 this.w = preso.w; this.h = preso.h;
+				 this.color = preso.color; this.innerMagnitude = preso.innerMagnitude;
+				 this.display = preso.display;
+				 this.edited = preso.edited;
+				 this.setEdited( this.edited );
+				 this.scaleToDisplayChildren = preso.scaleToDisplayChildren;
+				 this.validity = { pixelsMinDensity	: preso.validity.pixelsMinDensity
+								 , pixelsMaxDensity	: preso.validity.pixelsMaxDensity
+								 , pixelsRatio		: preso.validity.pixelsRatio };
 				}
 			 PresoTilesAlxAppsGate.prototype.getPresoCoords = function() {
 				 return { x1 : 0.5*dt*size
@@ -108,7 +125,10 @@ define( [ "Bricks/Presentations/protoPresentation"
 				}
 			 PresoTilesAlxAppsGate.prototype.appendChild = function(c) {
 				 Presentation.prototype.appendChild.apply(this, [c]);
-				 if(this.svgG) this.svgG.appendChild( this.svgFgRect );
+				 if(this.svgG) {
+					 this.svgG.appendChild( this.svgFgRect );
+					 this.svgFgRect.getRoot().style.display = this.displayFgRect?'inherit':'none';
+					}
 				 return this;
 				}
 			 PresoTilesAlxAppsGate.prototype.removeChild = function(c) {
@@ -148,116 +168,141 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 if(this.brick.isSpace) {
 						 this.svgName = new svgText({class:'title'}).translate(3,titleHeight).set( this.brick?this.brick.getName():'' );
 						 this.svgGPreso.appendChild( this.svgName );
-						 if(this.children.length) this.svgG.appendChild( this.svgFgRect );
+						 if(this.children.length) {
+							 this.svgG.appendChild( this.svgFgRect );
+							 this.svgFgRect.getRoot().style.display = this.displayFgRect?'inherit':'none';
+							}
 						}
 					 this.rect = this.bgRect = r;
 					 this.root  = g; g.classList.add('TileRoot'); g.TileRoot = this;
 					 this.groot = gr;
 					 for(var i=0;i<this.children.length;i++) {this.primitivePlug(this.children[i]);}
-					 					 
-					 // Deal with drag and drop
+					
+					// Edition ?
+					 this.setEdited( this.edited );
+					 
+					// Deal with drag and drop
 					 if(this.DropZone && this.brick.isSpace)
-					 svgUtils.DD.DropZone( this.root //this.bgRect
-										 , { tags		: ['brick']
-										   , enter		: function(evt) {
-															 self.bgRect.classList.add('selected');
-															 var brick = evt.config.brick
-															   , preso = evt.config.presentation;
-															 // Plug the brick
-															 if(self.brick !== brick && self.brick.ancestors().indexOf(brick) === -1) {
-																 self.appendChild( preso );
-																 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
-																 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
-																 preso.w = evt.config.size.w;
-																 preso.h = evt.config.size.h;
-																 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
-																										, Math.floor(svg_point.y/self.getTileSize())
-																										, preso.w
-																										, preso.h );
-																 // console.log( svg_point, coords );
-																 preso.DropZone = false;
-																 if(coords) {
-																	 preso.x = coords.x;
-																	 preso.y = coords.y;
-																	}
-																 preso.forceRender();
-																 console.log(preso);
-																 if(!coords) {preso.Render().style.display = 'none';}
-																} else {console.error('Ancestors violation');}
-															}
-										   , leave		: function(evt) {
-															 self.bgRect.classList.remove('selected');
-															 var brick = evt.config.brick
-															   , preso = evt.config.presentation;
-															 // Unplug the brick
-															 self.removeChild( preso );
-															}
-										   , dragOver	: function(evt) {
-															 // Resize the rectangle so that it fit into the cases
-															 // console.log("Place brick", brick, "at", evt.x, evt.y);
-															 var brick = evt.config.brick
-															   , preso = evt.config.presentation;
-															 // Change presentation coordinates
-															 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
-															 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
-															 var X = preso.x, Y = preso.y;
-															 preso.x = 100000; preso.y = 100000;
-															 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/( 0+self.getTileSize()))
-																									, Math.floor(svg_point.y/(11+self.getTileSize()))
-																									, preso.w
-																									, preso.h );
-															 preso.x = X; preso.y = Y;
-															 // if(!coords) {console.log("No place...");}
-															 if(  coords 
-															   && ( preso.x !== coords.x || preso.y !== coords.y) ) {
-																 preso.x = coords.x;
-																 preso.y = coords.y;
-																 preso.Render().style.display = 'inherit';
-																 preso.Render().setAttribute ( 'transform'
-																							 , 'translate(' + preso.x*size
-																									 + ', ' + preso.y*(11+size) + ')' 
-																							 );
-																}
-															}
-										   , drop		: function(evt) {
-															 var brick = evt.config.brick
-															   , preso = evt.config.presentation;
-															 self.bgRect.classList.remove('selected');
-															 if(preso.Render().style.display === 'none') {
-																 console.log('Not really inserted...abort!');
-																 return;
-																}
-															 var objData = {x:preso.x,y:preso.y,w:preso.w,h:preso.h,color:preso.color,class:preso.class};
-															 preso.AlxGrosDebug = true;
-															 if(self.brick.containsChild(brick) === 0) {
-																 console.log("Plug", brick, "under", self.brick);
-																 if(preso.parent) preso.parent.removeChild( preso );
-																 brick.unPlugPresentation( preso );
-																 self.brick.appendChild( brick );
-																 var preso2 = self.getPresoBrickFromDescendant( brick );
-																 if(preso2 !== preso) {
-																	 console.log("Ca assure pas...");
-																	}
-																 brick.configPresoHavingParentBrick	( self.brick
-																									, function() {
-																										 this.x = objData.x;
-																										 this.y = objData.y;
-																										 this.w = objData.w;
-																										 this.h = objData.h;
-																										 this.class = objData.class;
-																										 this.color = objData.color;
-																										 this.forceRender();
-																										}
-																									 );
-																} else	{console.error("Ca sent la vue multiple...");
-																		}
-															 // preso.DropZone = true;
-															 // preso.forceRender();
-															}
-										   } 
-										 );
+						this.addDropZone();
 					}
 				 return this.root;
+				}
+			 PresoTilesAlxAppsGate.prototype.removeDropZone = function() {
+				 svgUtils.DD.removeDropZone( this.root );
+				}
+			 PresoTilesAlxAppsGate.prototype.addDropZone = function() {
+				 var self = this;
+				 svgUtils.DD.DropZone( this.root //this.bgRect
+									 , { tags		: ['brick']
+									   , enter		: function(evt) {
+														 self.bgRect.classList.add('selected');
+														 var brick = evt.config.brick
+														   , preso = evt.config.presentation;
+														 // Plug the brick
+														 if(self.brick !== brick && self.brick.ancestors().indexOf(brick) === -1) {
+															 self.appendChild( preso );
+															 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
+															 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
+															 preso.w = evt.config.size.w;
+															 preso.h = evt.config.size.h;
+															 preso.x = 100000; preso.y = 100000;
+															 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/self.getTileSize())
+																									, Math.floor(svg_point.y/self.getTileSize())
+																									, preso.w
+																									, preso.h );
+															 // console.log( svg_point, coords );
+															 preso.DropZone = false;
+															 if(coords) {
+																 preso.x = coords.x;
+																 preso.y = coords.y;
+																}
+															 preso.forceRender();
+															 console.log(preso);
+															 if(!coords) {preso.Render().style.display = 'none';}
+															} else {console.error('Ancestors violation');}
+														}
+									   , leave		: function(evt) {
+														 self.bgRect.classList.remove('selected');
+														 var brick = evt.config.brick
+														   , preso = evt.config.presentation;
+														 // Unplug the brick
+														 self.removeChild( preso );
+														}
+									   , dragOver	: function(evt) {
+														 // Resize the rectangle so that it fit into the cases
+														 // console.log("Place brick", brick, "at", evt.x, evt.y);
+														 var brick = evt.config.brick
+														   , preso = evt.config.presentation;
+														 // Change presentation coordinates
+														 svg_point.x = evt.xCanvas; svg_point.y = evt.yCanvas;
+														 svg_point = svg_point.matrixTransform( self.groot.getCTM().inverse() );
+														 var X = preso.x, Y = preso.y;
+														 preso.x = 100000; preso.y = 100000;
+														 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/( 0+self.getTileSize()))
+																								, Math.floor(svg_point.y/(11+self.getTileSize()))
+																								, preso.w
+																								, preso.h );
+														 preso.x = X; preso.y = Y;
+														 // if(!coords) {console.log("No place...");}
+														 if(  coords 
+														   && ( preso.x !== coords.x || preso.y !== coords.y) ) {
+															 preso.x = coords.x;
+															 preso.y = coords.y;
+															 preso.Render().style.display = 'inherit';
+															 preso.Render().setAttribute ( 'transform'
+																						 , 'translate(' + preso.x*size
+																								 + ', ' + preso.y*(11+size) + ')' 
+																						 );
+															}
+														}
+									   , drop		: function(evt) {
+														 var brick = evt.config.brick
+														   , preso = evt.config.presentation;
+														 self.bgRect.classList.remove('selected');
+														 if(preso.Render().style.display === 'none') {
+															 console.log('Not really inserted...abort!');
+															 return;
+															}
+														 var objData = {x:preso.x,y:preso.y,w:preso.w,h:preso.h,color:preso.color,class:preso.class};
+														 preso.AlxGrosDebug = true;
+														 if(self.brick.containsChild(brick) === 0) {
+															 console.log("Plug", brick, "under", self.brick);
+															 if(preso.parent) preso.parent.removeChild( preso );
+															 brick.unPlugPresentation( preso );
+															 self.brick.appendChild( brick );
+															 var preso2 = self.getPresoBrickFromDescendant( brick );
+															 if(preso2 !== preso) {
+																 console.log("Ca sent le déplacement...");
+																}
+															 brick.configPresoHavingParentBrick	( self.brick
+																								, function() {
+																									 this.x = objData.x;
+																									 this.y = objData.y;
+																									 this.w = objData.w;
+																									 this.h = objData.h;
+																									 this.class = objData.class;
+																									 this.color = objData.color;
+																									 this.forceRender();
+																									}
+																								 );
+															} else	{console.error("Ca sent la vue multiple...");
+																	}
+														 console.log("List of parent brick for", brick);
+														 for(var parent=0; parent<brick.parents.length; parent++) {
+															 console.log("\t",parent,':',brick.parents[parent]);
+															}
+														 // preso.DropZone = true;
+														 // preso.forceRender();
+														}
+									   } 
+									 );
+			}
+			 PresoTilesAlxAppsGate.prototype.setEdited = function(edited) {
+				 this.edited = edited;
+				 if(this.root) {
+					 if(edited) this.root.classList.add   ('selected');
+					       else this.root.classList.remove('selected');
+					}
 				}
 			 PresoTilesAlxAppsGate.prototype.getInnerRoot = function() {return this.groot;}
 			 PresoTilesAlxAppsGate.prototype.primitivePlug = function(c) {
@@ -328,11 +373,13 @@ define( [ "Bricks/Presentations/protoPresentation"
 				if(scale < this.scaleToDisplayChildren) {
 					 if(this.display) {this.display = false;
 									   L_CB.push( function(v) {if(self.svgFgRect.root.parentElement) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,0,1,self.svgFgRect.root]);
+															   self.displayFgRect = true;
 															   self.CB_Fade(v,1,0);} );
 									   res = true;
 									  } else {res = false;}
 					} else 	{if(!this.display) {this.display = true;
 												L_CB.push( function(v) {if(self.svgFgRect.root.parentElement) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,1,0,self.svgFgRect.root]);
+																		self.displayFgRect = false;
 																		self.CB_Fade(v,0,1);} );
 											   }
 							 res = true;

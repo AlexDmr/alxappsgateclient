@@ -82,6 +82,7 @@ svg g.Univers  > .gImage  > circle {
 }
 
 /* Other things... */
+.paletteRoot text			{fill: black; stroke: none;}
 svg .AlxTab				{fill	: lightgrey; stroke:black;}
 
 svg .AlxTab.BrickUser 	{fill	: lightblue; stroke:black;}

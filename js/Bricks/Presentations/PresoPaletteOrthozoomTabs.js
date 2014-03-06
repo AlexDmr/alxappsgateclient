@@ -240,9 +240,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 PresoPaletteOrthozoomTabs.prototype.editTile = function(tile) {
 				 var self = this;
 				 // Feedback for the selected tile
-				 if(this.editedTile) {
-					 this.editedTile.root.classList.remove('selected');
-					}
+				 if(this.editedTile) {this.editedTile.setEdited(false);}
 				 this.editedTile = tile;
 				 // Creation of the edition palette if required
 				 if(this.root) {
@@ -269,7 +267,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																 console.log("Valider");
 																 self.editedTile.brick.setName( self.panelTile.entryName.get() );
 																 self.toggleTileEdition(false);
-																 self.editedTile.root.classList.remove('selected');
+																 self.editedTile.setEdited(false);
 																 self.editedTile = null;
 																} );
 						 this.btCA = new svgButton( { bg	  : {style: {fill: '#F99', stroke: 'black'}}
@@ -277,9 +275,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 												    }
 												  ).command( function() {
 																 console.log("Annuler");
-																 self.editedTile.root.classList.remove('selected');
+																 self.editedTile.setEdited(false);
 																 self.toggleTileEdition(false);
-																 self.editedTile.root.classList.remove('selected');
 																 self.editedTile = null;
 																} );
 						 this.panelTile.Edition.appendChild( this.btOK.translate(50, 300) );
