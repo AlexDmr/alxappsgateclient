@@ -23,6 +23,8 @@ define( [ 'Bricks/protoBricks'
 			 AlxClient.nbBricks = 0;
 			 AlxClient.devices	= {};
 
+			 AlxClient.D_bricks = {};
+			 
 			 AlxClient.bricksMap = {
 				  0		: null	// Temperature
 				, 1		: null	// Luminosité
@@ -63,7 +65,7 @@ define( [ 'Bricks/protoBricks'
 									, children : [
 										  { x:7,y:0,w:5,h:5,color:'blue',name:'Cuisine'
 										  , children : [
-												  {x:0,y:10,w:2,h:2,brickId:'capteurContact1',name:'pipo capteur de contact'}
+												  {x:0,y:8,w:2,h:2,brickId:'capteurContact1',name:'pipo capteur de contact'}
 												, {x:6,y:5,w:2,h:2,brickId:'ENO878052',name:'petit fantôme Spöka'}	// Spöka
 												]
 										  }
@@ -197,18 +199,23 @@ define( [ 'Bricks/protoBricks'
 					 if(!brick.type) {console.error('WARNING : brick with no id :', brick); continue;}
 					 id		= brick.id[0].val;
 					 if(!brick.name) {name = id;} else {name = brick.name[0].val;}
-					 // console.log("New brick", brick);
-					 if(this.bricksMap[type]) {
-						 var Constr	  = this.bricksMap[type];
-						 var newBrick = new Constr(id, brick);
-						 newBrick.isBrick = true;
-						 newBrick.type = type;
-						 newBrick.name = name;
-						 newBrick.init();
-						 for(var p=0;p<this.Univers.length;p++) {
-							 this.Univers[p].integrateBrick(newBrick);
-							}
-						} else {/*console.log("Unsupported brick type :", type, " for", brick);*/}
+					 
+					 // Check if this brick does still exist
+					 if(typeof this.D_bricks[id] === 'undefined') {
+						 console.log("New brick", brick);
+						 if(this.bricksMap[type]) {
+							 var Constr	  = this.bricksMap[type];
+							 var newBrick = new Constr(id, brick);
+							 newBrick.isBrick = true;
+							 newBrick.type = type;
+							 newBrick.name = name;
+							 newBrick.init();
+							 this.D_bricks[id] = newBrick;
+							 for(var p=0;p<this.Univers.length;p++) {
+								 this.Univers[p].integrateBrick(newBrick);
+								}
+							} else {console.log("Unsupported brick type :", type, " for", brick);}
+						} else {console.log("Brick with id", id, "has still been integrated...");}
 					}
 				}
 			 AlxClient.updateBrickList = function(data) {

@@ -18,6 +18,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.mapBrickIdToTile = {};
 				 this.mapCategIdToTile = {};
 				 // this.buildMap(this.brick.getData(), this);
+				 this.scaleFactor = 3;
 				}
 			 PresoBasicUnivers.prototype.integrateBrick = function(brick) {
 				 // console.log("PresoBasicUnivers::integrateBrick",this.brick);
@@ -39,7 +40,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 							 console.error('Categ preso is null for', brick, "under", presoParent);
 							 continue;
 							}
-						 width = Math.floor( presoParent.innerMagnitude*presoParent.w / Math.max(presoParent.w, presoParent.h) );
+						 width = presoParent.scaleFactor*presoParent.w;//Math.floor( presoParent.innerMagnitude*presoParent.w / Math.max(presoParent.w, presoParent.h) );
 						 pos   = presoParent.children.indexOf(preso);
 						 x 	   = pos % width;
 						 y     = Math.floor(pos / width);
@@ -107,6 +108,9 @@ define( [ "Bricks/Presentations/protoPresentation"
 						 D[i].y = data.y;
 						 D[i].w = data.w;
 						 D[i].h = data.h;
+						 if(isNaN(D[i].h)) {
+							 console.log('arg');
+							}
 						 D[i].color = data.color || D[i].color;
 						 D[i].class = data.class || D[i].class;
 						 D[i].forceRender();

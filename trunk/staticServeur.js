@@ -58,8 +58,10 @@ var RRServer = {
 		 var ms = (new Date()).getTime();
 		 var T = JSON.parse(json.value);
 		 for(var i=0; i<T.length; i++) {
-			 var brick = this.updateBrick(T[i], ms);
-			 brick.origin = origin;
+			 if(T[i]) {
+				 var brick = this.updateBrick(T[i], ms);
+				 brick.origin = origin;
+				} else {console.log("WARNING, there is a null device in the list at index", i);}
 			}
 		}
 	// Messages exchange

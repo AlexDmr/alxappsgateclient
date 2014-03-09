@@ -39,8 +39,10 @@ define( [ "Bricks/protoBricks"
 				// Process categories
 				 for(var i=0;i<L;i++) {
 					 var parentBrick = this.mapCategIdToTile[brick.type][i].brick;
-					 if(parentBrick) {parentBrick.appendChild(brick);}
-					 brick.tile = {brickId:brick.id}
+					 if(parentBrick) {
+						 parentBrick.appendChild(brick);
+						}
+					 // brick.tile = {brickId:brick.id}
 					}
 				// Process bricks id
 				 if(this.mapBrickIdToTile[brick.id]) {L=this.mapBrickIdToTile[brick.id].length;} else {L=0;}
@@ -83,6 +85,7 @@ define( [ "Bricks/protoBricks"
 					 if(data.brickId) {
 						 delete brick.isSpace;
 						 brick.id = data.brickId;
+						 brick.isTheOriginal = false;
 						 if(!this.mapBrickIdToTile[data.brickId]) {this.mapBrickIdToTile[data.brickId] = [];}
 						 this.mapBrickIdToTile[data.brickId].push( {data: data, brick: brick, parentBrick: parentBrick} );
 						}
@@ -109,7 +112,7 @@ define( [ "Bricks/protoBricks"
 				 var properties = properties || {}, obj = {};
 				 for(var i in properties) json.properties.push( {key:i, value:properties[i]} );				 
 				 var dataMap = this.RecursiveParseDataFromServer( json );
-				 // console.log("New univers", json.type);
+				 console.log("New univers", json.type, dataMap);
 				 switch(json.type) {
 					 case 'SERVICE_ROOT': dataMap.class = 'BrickService'; dataMap.name = 'Services'; break;
 					 case 'SPATIAL_ROOT': dataMap.class = 'BrickPlace'  ; dataMap.name = 'Plan'; break;

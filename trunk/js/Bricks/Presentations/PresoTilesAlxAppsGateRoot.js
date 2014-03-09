@@ -430,7 +430,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 var nodeFeedBack = new svgText({style:{textAnchor:'middle'}}).translate(x, y).set( tile.brick.name );
 				 var svg = document.querySelector('svg');
 				 svg.appendChild( nodeFeedBack.getRoot() );
-				 var DropZone = tile.DropZone;
+				 var DropZone = tile.DropZone && tile.brick.isSpace;
 				 if(DropZone) {tile.removeDropZone();}
 				 
 				 var config = 
@@ -440,36 +440,40 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											   , nodeFeedBack : nodeFeedBack.getRoot()
 											   , start: function(config) {
 													 // Create a new Tile and register it so that it can be manipulated by drop zones
-													 console.log('svgUtils.DD.start');
+													 // console.log('svgUtils.DD.start');
 													 config.brick 		 = tile.brick;
 													 config.presentation = new tile.constructor();
 													 config.presentation.copy( tile );
 													 config.coords = { x : tile.x
 																	 , y : tile.y };
-													 tile.x = tile.y = 10000; 			// Put that away before removing it
-		
-													 var brick = tile.brick;
-													 console.log("List of parent brick for", brick);
-													 for(var parent=0; parent<brick.parents.length; parent++) {
-														 console.log("\t",parent,':',brick.parents[parent]);
-														}
-		// tile.root.style.display = 'none';	// Don't display but need to be still present for event to appear
-													 // Unplug before replug
-													 // tile.parent.removeChild( tile );
+													 tile.x = tile.y = 10000; // Put that away before removing it
 													}
 											   , end  : function(config) {
 													 svgUtils.DD.removeDragAndDroppable(config.node);
-													 if(DropZone) {config.presentation.addDropZone();}
+													 if(DropZone) {
+														 console.log('We activate the dropzone again for', config.presentation);
+														 tile.addDropZone();
+														}
 													 // config.presentation.setEdited(false);
-													 console.log(config.brick);
-													 console.log(config.presentation);
+													 // console.log(config.brick);
+													 // console.log(config.presentation);
 													 
 													 // Have to remove the brick from its original parent
 													 // and take care to only remove the corresponding presentation
+													 tile.x = config.presentation.x;
+													 tile.y = config.presentation.y;
+													 if(config.presentation.parent) {
+														 config.presentation.parent.brick.removeChild(config.brick, config.presentation);
+														}
+													 config.brick.unPlugPresentation( config.presentation );
+													 tile.forceRender();
+													 /*
 													 tile.parent.brick.removeChild(tile.brick, tile);
 													 
 													 // Clean the original tile
 													 tile.brick.unPlugPresentation( tile );
+													 */
+													 console.log("Presentations:", config.brick.presentations );
 													}
 											   }
 											 );

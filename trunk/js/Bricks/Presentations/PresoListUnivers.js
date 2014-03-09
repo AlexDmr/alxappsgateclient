@@ -151,6 +151,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 if(brick.children) {infos.nb += infosChildren.nb-1;}
 				}
 			 PresoListUnivers.prototype.primitivePlug = function(c) {}
+			 PresoListUnivers.prototype.appendDescendants = function() {}
 
 			 // Return the reference to the PresoBasicAlxHueLamp constructor
 			 return PresoListUnivers;

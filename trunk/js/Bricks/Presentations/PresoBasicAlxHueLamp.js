@@ -38,7 +38,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 var self = this;
 					 PresoTile.prototype.Render.apply(this, []);
 					 this.root.classList.add('PresoBasicSmartPlug');
-					 this.root.classList.add('Brick'); this.root.classList.add('dropShadowFilter');
+					 this.root.classList.add('Brick'); 
+					 this.root.classList.add('BrickDevice');
+					 // this.root.classList.add('dropShadowFilter');
 					 // this.root.setAttribute('filter', 'url(#dropShadow)');
 					 this.IsOn( this.brick.IsOn );
 					 this.root.addEventListener( 'click'

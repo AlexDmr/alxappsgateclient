@@ -54,11 +54,12 @@ svg g.TileRoot > g.bgPreso > rect.tile {
 }
 
 /* Brick with wich we can interact */
+svg.edition g.Brick.TileRoot > g.bgPreso > rect.shadow,
 svg g.TileRoot > g.bgPreso > rect.shadow {
 	display	: none;
 }
 
-svg g.TileRoot.dropShadowFilter > g.bgPreso > rect.shadow {
+svg g.Brick.TileRoot > g.bgPreso > rect.shadow {
 	display	: inherit;
 }
 

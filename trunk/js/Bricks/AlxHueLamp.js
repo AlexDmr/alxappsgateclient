@@ -6,10 +6,12 @@ define( [ "Bricks/protoBricks"
 				 var self = this;
 				 this.id = id;
 				 this.data = brick;
+				 console.log('Init Hue lamp', brick);
 				 this.HueLocation 	= brick.HueLocation[0].val;
 				 this.HueUser		= brick.HueUser[0].val;
 				 this.HueId			= brick.HueId[0].val;
 				 this.IsOn			= brick.on[brick.on.length-1].val;
+				 this.IsReachable	= brick.reachable[brick.reachable.length-1].val;
 				 // console.log("HueLamp",id,"at URL",this.HueLocation,'is',this.IsOn?'on':'off');
 				 socket.on(id, function(data) {self.update(data);});
 				 return this;
