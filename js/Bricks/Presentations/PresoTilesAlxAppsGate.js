@@ -62,7 +62,8 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.x		= this.y = 0;
 				 this.w		= this.h = 1;
 				 this.color	= 'cyan';
-				 this.innerMagnitude = 12;
+				 // this.innerMagnitude = 12;
+				 this.scaleFactor = 2; // How many times do we divide parent tile size...
 				 this.display = true;
 				 this.edited  = (typeof(this.edited) === 'undefined')?false:this.edited;
 				 this.setEdited( this.edited );
@@ -78,7 +79,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.DropZone = preso.DropZone;
 				 this.x = preso.x; this.y = preso.y;
 				 this.w = preso.w; this.h = preso.h;
-				 this.color = preso.color; this.innerMagnitude = preso.innerMagnitude;
+				 this.color = preso.color; this.scaleFactor = preso.scaleFactor;
 				 this.display = preso.display;
 				 this.edited = preso.edited;
 				 this.setEdited( this.edited );
@@ -86,6 +87,44 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.validity = { pixelsMinDensity	: preso.validity.pixelsMinDensity
 								 , pixelsMaxDensity	: preso.validity.pixelsMaxDensity
 								 , pixelsRatio		: preso.validity.pixelsRatio };
+				}
+			 PresoTilesAlxAppsGate.prototype.canBeResizedTo = function(w, h) {
+				 if(w<=0 || h<=0) {return false;}
+				 console.log("canBeResizedTo", w, h);
+				 // Enough place for the children?
+				 // XXX take care that we are talking of the internal magnitudes...
+				 if(this.children.length) {
+					 var minW = this.children[0].x + this.children[0].w
+					   , minH = this.children[0].y + this.children[0].h;
+					 for(var i=1; i<this.children.length; i++) {
+						 minW = Math.max(minW, this.children[i].x + this.children[i].w);
+						 minH = Math.max(minH, this.children[i].y + this.children[i].h);
+						}
+					 // Ask for innerWidth and innerHeight...
+					 var inner = this.getInnerDimensions(w,h);
+					 if( inner.w<minW || inner.h<minH ) {
+						 console.log("\tChildren limit", w, h, inner, minW, minH);
+						 return false;
+						} else {console.log("\tChildren OK", w, h, inner, minW, minH);}
+					}
+				 
+				 // Enough place with sibling and inside parent?
+				 if(this.parent) {
+					 // Fit inside parent?
+					 var Pinner = this.parent.getInnerDimensions();
+					 if( Pinner.w < this.x+w
+					   ||Pinner.h < this.y+h+(this.brick&&this.brick.isSpace)?1:0 ) {console.log("\tDo not fit into parent"); return false;}
+					 // Do not collide with sibling?
+					 var child;
+					 for(var i=0; i<this.parent.children.length; i++) {
+						 child = this.parent.children[i];
+						 if(child === this) {continue;}
+						 if(svgUtils.intersectionRect( this.x , this.y , this.x+w, this.y+h
+													 , child.x, child.y, child.x+child.w, child.y+child.h )) {console.log("\tSibling limit, collision with", child); return false;}
+						}
+					}
+				 
+				 return true;
 				}
 			 PresoTilesAlxAppsGate.prototype.getPresoCoords = function() {
 				 return { x1 : 0.5*dt*size
@@ -107,16 +146,16 @@ define( [ "Bricks/Presentations/protoPresentation"
 							 child = this.children[c];
 							 if( svgUtils.intersectionRect	( child.x, child.y, child.x+child.w, child.y+child.h
 															, x-i    , y-j    , x-i+w          , y-j+h              )
-							   && x-i >= 0 && x-i+w <= Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
-						       && y-j >= 0 && y-j+h <= Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
+							   && x-i >= 0 && x-i+w <= this.scaleFactor*this.w//Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
+						       && y-j >= 0 && y-j+h <= this.scaleFactor*this.h//Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
 							   ) {
 								  intersect = true;
 								  break;
 								 }
 							}
 						 if(  !intersect 
-						   && x-i >= 0 && x-i+w <= Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
-						   && y-j >= 0 && y-j+h <= Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
+						   && x-i >= 0 && x-i+w <= this.scaleFactor*this.w//Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
+						   && y-j >= 0 && y-j+h <= this.scaleFactor*this.h//Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
 						   ) {return {x:x-i,y:y-j};}
 						}
 					}
@@ -139,14 +178,31 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoTilesAlxAppsGate.prototype.setName = function(name) {
 				 if(this.svgName) {this.svgName.set(name);}
 				}
+			 PresoTilesAlxAppsGate.prototype.getInnerDimensions = function(w,h) {
+				 w = (typeof w === 'undefined')?this.w:w;
+				 h = (typeof h === 'undefined')?this.h:h;
+				 return { w: this.scaleFactor*w
+						, h: this.scaleFactor*h }
+				 /*var max = Math.max(w,h);
+				 return { w: Math.floor(this.innerMagnitude * w / max)
+						, h: Math.floor(this.innerMagnitude * h / max) }*/
+				}
 			 PresoTilesAlxAppsGate.prototype.Render = function() {
 				 var self = this;
 				 if(!this.root) {
+					if( isNaN(this.x)
+					  ||isNaN(this.y)
+					  ||isNaN(this.w)
+					  ||isNaN(this.h) ) {
+						 console.error("Problem with magnitudes for", this);
+						}
+					
 					// The root
 					 this.svgG = new svgGroup( {class: (this.brick&&this.brick.tile)?this.brick.tile.class:''}
 											 ).translate(this.x*size, this.y*(11+size));
 						var g = this.svgG.getRoot();
-					 var scale = (Math.max(this.w,this.h)-2*dt)/this.innerMagnitude
+					 // var scale = (Math.max(this.w,this.h)-2*dt)/this.innerMagnitude
+					 var scale = (this.w-2*dt)/(this.scaleFactor*this.w)
 					   , titleHeight;
 					// The space for children
 					if(this.brick.isSpace) {titleHeight = 11;} else {titleHeight = 0;}
@@ -286,11 +342,12 @@ define( [ "Bricks/Presentations/protoPresentation"
 																									}
 																								 );
 															} else	{console.error("Ca sent la vue multiple...");
+																	 self.brick.appendChild(brick, preso);
 																	}
-														 console.log("List of parent brick for", brick);
+														 /*console.log("List of parent brick for", brick);
 														 for(var parent=0; parent<brick.parents.length; parent++) {
 															 console.log("\t",parent,':',brick.parents[parent]);
-															}
+															}*/
 														 // preso.DropZone = true;
 														 // preso.forceRender();
 														}

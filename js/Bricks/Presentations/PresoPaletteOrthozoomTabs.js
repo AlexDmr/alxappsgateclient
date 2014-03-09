@@ -41,11 +41,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 if(!svg) {return};
 				 if(OnOff) {
 					 svg.addEventListener('click', this.blocClick, true);
+					 svg.classList.add('edition');
 					 // var L = this.L_bricks_dropShadowFilter = document.querySelectorAll('.Brick.dropShadowFilter');
 					 // for(var i=0; i<L.length; i++) {
 						 // L.item(i).removeAttribute('filter');
 						// }
 					} else  {svg.removeEventListener('click', this.blocClick, true);
+							 svg.classList.remove('edition');
 							 // var L = this.L_bricks_dropShadowFilter;
 							 // for(var i=0; i<L.length; i++) {
 								 // L.item(i).setAttribute('filter', 'url(#dropShadow)');
@@ -125,6 +127,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							this.svgAlxRoot.appendChild( this.svgAlxgroot );
 						 this.svgAlxRoot.translate(950,0);
 					 
+					// Button Save traces
 					 this.btSave = new svgButton({bg	  : {style: {fill: 'lightgreen', stroke: 'black'}}, 
 												  content : {value:'Sauver les traces',style:{fontFamily: 'Consolas'}}
 												 }).command( function() {
@@ -134,7 +137,21 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																				);
 																} );
 					 this.svgAlxTopMenu.appendChild(this.btSave.translate(-900,-20));
-					 
+					
+					// Button Get bricks
+					 this.btgetBrick = new svgButton({bg	  : {style: {fill: 'lightgreen', stroke: 'black'}}, 
+												  content : {value:'Charger les briques',style:{fontFamily: 'Consolas'}}
+												 }).command( function() {
+																 self.brick.call( 'AlxServer'
+																				, {mtd:'getBricks',args:[]}
+																				, function(data) {if(data.success) {
+																					 AlxClient.newBricksList(data.res);
+																					}}
+																				);
+																} );
+					 this.svgAlxTopMenu.appendChild(this.btgetBrick.translate(-700,-20));
+					
+					// New space by drag and drop
 					 svgUtils.DD.DragAndDroppable( this.space.getRoot()
 												 , { tags : ['brick']
 												   , size : {w:4,h:3}
@@ -259,7 +276,62 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						 this.svgAlxRoot.appendChild( this.panelTile.Edition );
 						 this.panelTile.entryName.rightTo(this.panelTile.labelName);
 						 
-						 // Buttons
+						 // Magnitudes for a space
+						 this.svgG_spaceMagnitude = new svgGroup().translate(3, 100);;
+							this.svgG_spaceWidth  = new svgGroup();
+							this.svgG_spaceMagnitude.appendChild( this.svgG_spaceWidth  );
+								this.svgTextWidth	= new svgText().set('Largeur : ' + self.editedTile.w);
+								this.svgG_spaceWidth.appendChild( this.svgTextWidth );
+								this.svgBtWidthPlus = new svgButton	( {content: {image: 'images/Palette/plus.png', width:50, height:50}} 
+																	).translate(175,-30).command( function() {
+																					 console.log('Width plus');
+																					 if(self.editedTile.canBeResizedTo(self.editedTile.w+1, self.editedTile.h)) {
+																						 self.editedTile.w++;
+																						 self.svgTextWidth.set('Largeur : ' + self.editedTile.w);
+																						 self.editedTile.forceRender();
+																						}
+																					}
+																			 );
+								this.svgG_spaceWidth.appendChild( this.svgBtWidthPlus )
+								this.svgBtWidthMinus= new svgButton	( {content: {image: 'images/Palette/minus.png', width:50, height:50}} 
+																	).translate(100,-30).command( function() {
+																					 console.log('Width minus');
+																					 if(self.editedTile.canBeResizedTo(self.editedTile.w-1, self.editedTile.h)) {
+																						 self.editedTile.w--;
+																						 self.svgTextWidth.set('Largeur : ' + self.editedTile.w);
+																						 self.editedTile.forceRender();
+																						}
+																					}
+																			 );
+								this.svgG_spaceWidth.appendChild( this.svgBtWidthMinus )
+							this.svgG_spaceHeight = new svgGroup().translate(0,80);
+							this.svgG_spaceMagnitude.appendChild( this.svgG_spaceHeight );
+								this.svgTextHeight	= new svgText().set('Hauteur : ' + self.editedTile.h);
+								this.svgG_spaceHeight.appendChild( this.svgTextHeight );
+								this.svgBtHeightPlus = new svgButton	( {content: {image: 'images/Palette/plus.png', width:50, height:50}} 
+																	).translate(175,-30).command( function() {
+																					 console.log('Height plus');
+																					 if(self.editedTile.canBeResizedTo(self.editedTile.w, self.editedTile.h+1)) {
+																						 self.editedTile.h++;
+																						 self.svgTextHeight.set('Hauteur : ' + self.editedTile.h);
+																						 self.editedTile.forceRender();
+																						}
+																					}
+																			 );
+								this.svgG_spaceHeight.appendChild( this.svgBtHeightPlus )
+								this.svgBtHeightMinus= new svgButton	( {content: {image: 'images/Palette/minus.png', width:50, height:50}} 
+																	).translate(100,-30).command( function() {
+																					 console.log('Height minus');
+																					 if(self.editedTile.canBeResizedTo(self.editedTile.w, self.editedTile.h-1)) {
+																						 self.editedTile.h--;
+																						 self.svgTextHeight.set('Hauteur : ' + self.editedTile.h);
+																						 self.editedTile.forceRender();
+																						}
+																					}
+																			 );
+								this.svgG_spaceHeight.appendChild( this.svgBtHeightMinus )
+							
+						 // Buttons						 
 						 this.btOK = new svgButton( { bg	  : {style: {fill: 'lightgreen', stroke: 'black'}}
 												    , content : {value:'Valider',style:{fontFamily: 'Consolas'}}
 												    }
@@ -287,10 +359,11 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 // set up the edition panel
 					 // Name
 					 this.panelTile.entryName.set( tile.brick.getName() );
-					 // size (depend wether it is a brick or a group)
+					 // size (depend whether it is a brick or a group)
 					 if(tile.brick.isSpace) {
 						 console.log("A space is under edition, we can change width and height");
-						}
+						 this.panelTile.Edition.appendChild( this.svgG_spaceMagnitude );
+						} else {this.panelTile.Edition.removeChild( this.svgG_spaceMagnitude );}
 					 if(tile.brick.isBrick) {
 						 console.log("A space is under edition, we can change width and height");
 						}

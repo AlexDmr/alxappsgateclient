@@ -31,6 +31,14 @@ define( [ "Bricks/Presentations/utils"
 				 var parent = preso.parent, pos = this.presentations.indexOf(preso);
 				 if(parent) {parent.removeChild(preso);}
 				 if(pos >= 0) {this.presentations.splice(pos,1);}
+				 // XXX ATTENTION : code récursif pour libérer les descendants...
+				 var child;
+				 while(preso.children.length) {
+					 child = preso.children[0];
+					 if(child.brick) {
+						 child.brick.unPlugPresentation(child);
+						} else {preso.removeChild(child);}
+					}
 				}
 			 Brick.prototype.configPresoHavingParentBrick = function(brick, f) {
 				 var preso;
@@ -137,13 +145,17 @@ define( [ "Bricks/Presentations/utils"
 					 this.removingParent = false;
 					}
 				}
-			 Brick.prototype.appendChild = function(c) {
+			 Brick.prototype.appendChild = function(c, preso) {
 				 if(!this.isAppeningChild) {
 					 this.isAppeningChild = true;
 					 this.children.push(c);
 					 c.appendParent(this);
 					 // Also plug presentations
-					 for(var p in this.presentations) {this.presentations[p].appendChildFromBrick(c);}
+					 for(var p in this.presentations) {
+						 if(this.presentations[p].children.indexOf(preso) === -1) {
+							 this.presentations[p].appendChildFromBrick(c);
+							}
+						}
 					 this.isAppeningChild = false;
 					}
 				}
@@ -161,6 +173,7 @@ define( [ "Bricks/Presentations/utils"
 									 this.presentations[p].removeChildFromBrick(c);
 									} else {this.presentations[p].removeChild(preso);}
 								}
+							  break;
 							 }
 						}
 					 /* OLD : do not take into account preso parameter
