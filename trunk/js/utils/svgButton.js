@@ -16,12 +16,13 @@ define( [ "utils/svgAlx"
 						this.Acontent	= new svgText(config.content).set(config.content.value);
 						this.Aroot.appendChild(this.Arect);
 						this.Aroot.appendChild(this.Acontent);
-						this.Acontent.getRoot().addEventListener( 'DOMNodeInsertedIntoDocument'
-							, function(e) {
+						svgUtils.onDOMNodeInsertedIntoDocument(
+							  self.Acontent.getRoot()
+							, function() {
 								 var bbox = self.Acontent.getRoot().getBBox();
 								 self.Arect.configure({x:bbox.x-3,y:bbox.y-3,width:bbox.width+6,height:bbox.height+6});
 								}
-							, false );
+							);
 						} else	{if(config.content.image) {
 									 this.svgImg = new svgImage	( { width	: config.content.width  || 50
 																  , height	: config.content.height || 50

@@ -15,7 +15,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 // Presentation
 			 var PresoTilesAlxAppsGateRoot = function() {
 				 this.x = 0; this.y = 0;
-				 this.w = this.h = 12;
+				 this.w = this.h = 24;
 				 
 				 // Touches for intertaction
 				 // this.L_touches = []; this.D_touchClick = {};
@@ -58,9 +58,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 										}
 									 
 									 // console.log("Click!", e);
-									 var M1 = self.groot.parentElement.getCTM().inverse().multiply(self.groot.getCTM());
+									 var M1 = (self.groot.parentElement || self.groot.parentNode).getCTM().inverse().multiply(self.groot.getCTM());
 									 var r = e.target;
-									 while(r && !r.classList.contains('TileRoot')) {r = r.parentElement;}
+									 while(r && !r.classList.contains('TileRoot')) {r = r.parentElement || r.parentNode;}
 									 var bbox = r.TileRoot.getPresoCoords();
 									 // console.log( bbox );
 									 self.svg_point.x = (bbox.x2-bbox.x1)/2;
@@ -73,7 +73,10 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									 
 									 // var M2 = r.getCTM().inverse().multiply(M1);
 									 // var M2 = r.getCTM().translate(dx-w/2,dy-h/2).inverse().multiply(M1);
+									 var displayed = r.style.display;
+									 r.style.display = 'inherit';
 									 var M2 = r.getCTM().translate(dx-w/2,dy-h/2).inverse().multiply(self.groot.getCTM());
+									 r.style.display = displayed;
 									 // var M2 = r.parentElement.getCTM().inverse().multiply(r.getCTM()).translate(dx-w/2,dy-h/2).inverse().multiply(self.groot.getCTM());
 									 
 									 var ms = Date.now(); //(new Date()).getTime();
@@ -92,6 +95,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 // PresoTilesAlxAppsGateRoot.prototype.initPresoTile = PresoTilesAlxAppsGateRoot.prototype.init;
 			 PresoTilesAlxAppsGateRoot.prototype.init = function(brick, children) {
 				 PresoTile.prototype.init.apply(this,[brick, children]); //this.initPresoTile(brick, children);
+				 this.w = this.h = 24;
 				 // for(var i=0;i<this.UniversTiles.length;i++) {this.appendChild(this.UniversTiles[i]);}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.getInnerRoot = function() {return this.groot;}
@@ -145,10 +149,17 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							 if(dx < 15 && dy < 15 && ds < this.msClick) {
 								 // Trigger a dblclick
 								 triggerDblClick = true;
-								 var evt = new MouseEvent('dblclick')
+								 var evt
 							       , ptr = this.L_pointers[0];
-								 evt.initMouseEvent('dblclick', true, true);
-								 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
+								 try {evt = new MouseEvent('dblclick')
+									 } catch(err) {evt = document.createEvent('MouseEvent');}
+								 evt.initMouseEvent	( 'dblclick', true, true, window, 0
+													, ptr.clientX, ptr.clientY
+													, ptr.clientX, ptr.clientY
+													, false, false, false, false // Ctrl, Alt, Shift, MetaKey
+													, 0, null // button, related target
+													);
+								 // evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
 								 evt.AlxGenerated = true;
 								 // console.log('Generate dblclick');
 								 ptr.target.dispatchEvent(evt);
@@ -157,10 +168,18 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 								}
 							}
 						 if(!triggerDblClick) {
-							 var evt = new MouseEvent('click')
+							 var evt
 							   , ptr = this.L_pointers[0];
-							 evt.initMouseEvent('click', true, true);
-							 evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
+							 try {evt = new MouseEvent('click');
+								 } catch(err) {evt = document.createEvent('MouseEvent');
+											  }
+							 evt.initMouseEvent	( 'click', true, true, window, 0
+												, ptr.clientX, ptr.clientY
+												, ptr.clientX, ptr.clientY
+												, false, false, false, false // Ctrl, Alt, Shift, MetaKey
+												, 0, null // button, related target
+												);
+							 // evt.clientX = ptr.clientX; evt.clientY = ptr.clientY;
 							 evt.AlxGenerated = true;
 							 // console.log('Generate click');
 							 ptr.target.dispatchEvent(evt);
@@ -210,7 +229,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							feOffset.setAttribute('dx', 5); feOffset.setAttribute('dy', 5); feOffset.setAttribute('result', 'offsetblur');
 							filter.appendChild( feOffset );
 						var feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
-							feFlood.setAttribute('flood-color', 'offsetblur');
+							feFlood.setAttribute('flood-color', 'black'/*'offsetblur'*/);
 							filter.appendChild( feFlood );
 						var feComposite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
 							feComposite.setAttribute('in2', 'offsetblur'); feComposite.setAttribute('operator', 'in');
@@ -267,7 +286,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																 // console.log('longPress on', node);
 																 while(node && !node.TileRoot) {
 																	 // console.log(node, node.parentElement);
-																	 node = node.parentElement;
+																	 node = node.parentElement || node.parentNode;
 																	}
 																 // console.log("\tnode <-", node);
 																 if(node) {// Edit node
@@ -277,17 +296,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																	 DragManager.stopDragNode(self.groot);
 																	 // Generate mousedown or touchstart event to start dragging the tile
 																	 if(e.identifier === 'mouse') {
-																		 var evt = new MouseEvent('mousedown');
-																		 evt.initMouseEvent	( 'mousedown'
-																							, true			// Bubbling
-																							, true			// Cancelable
-																							, window		// view
-																							, 0				// detail
-																							, e.clientX		// screenX
-																							, e.clientY		// screenY
-																							, e.clientX		// clientX
-																							, e.clientY		// clientY
-																							);
+																		 var evt;
+																		 try {evt = new MouseEvent('mousedown')
+																			 } catch(err) {evt = document.createEvent('MouseEvent');}
+																		 evt.initMouseEvent	( 'mousedown', true, true, window, 0
+																						, e.clientX, e.clientY
+																						, e.clientX, e.clientY
+																						, false, false, false, false // Ctrl, Alt, Shift, MetaKey
+																						, 0, null // button, related target																						
+																						);
 																		 evt.target = tile.root;
 																		 tile.root.dispatchEvent(evt);
 																		} else  {console.log('Have to generate a touchstart event with id', e.identifier);
@@ -339,6 +356,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											 , { eventNode	: this.root
 											   , pathNodes	: [ { node : this.getPresoBrickFromDescendant( this.brick.palette ).Render()
 																, goThrough : false } ]
+											   , inter2pt	: 'OrthoZoom'
 											   , CB_zoom	: function() {
 													 var L_CB = [];
 													 self.ComputeSemanticZoom( self.idMatrix, L_CB);
@@ -387,7 +405,16 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 			 // Long press
 			 PresoTilesAlxAppsGateRoot.prototype.longPressStart = function(id, x, y, target) {
 				 var self = this;
-				 timeout = setTimeout( function() {var evt = new MouseEvent('longPress');
+				 timeout = setTimeout( function() {var evt;
+												   try {evt = new MouseEvent('longPress')
+													   } catch(err) {evt = document.createEvent('MouseEvent');}
+												   evt.initMouseEvent( 'longPress', true, true, window, 0
+																	, x, y
+																	, x, y
+																	, false, false, false, false // Ctrl, Alt, Shift, MetaKey
+																	, 0, null // button, related target
+																	);
+												   /*evt = new MouseEvent('longPress');
 												   evt.initMouseEvent( 'longPress'
 																	 , true		// Bubbling
 																	 , true		// Cancelable
@@ -397,7 +424,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																	 , y		// screenY
 																	 , x		// clientX
 																	 , y		// clientY
-																	 );
+																	 );*/
 												   // evt.clientX = x; evt.clientY = y;
 												   evt.identifier = id; evt.target = target;
 												   target.dispatchEvent(evt);

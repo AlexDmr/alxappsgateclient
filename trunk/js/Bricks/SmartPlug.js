@@ -12,6 +12,7 @@ define( [ "Bricks/protoBricks"
 				 var self = this;
 				 this.id = id;
 				 socket.on(id, function(data) {self.update(data);});
+				 console.log("New SmartPlug :", this);
 				 return this;
 				};
 			 SmartPlug.prototype = new Brick();
@@ -22,7 +23,7 @@ define( [ "Bricks/protoBricks"
 										, PresoBasicSmartPlug
 										, { pixelsMinDensity : 0
 										  , pixelsMaxDensity : 999999999
-										  , pixelsRatio		 : 1 }
+										  , pixelsRatio		 : {w:1,h:1} }
 										);
 				}
 			 SmartPlug.prototype.isOn = function() {return this.OnOff[this.OnOff.length-1].val}
@@ -40,7 +41,7 @@ define( [ "Bricks/protoBricks"
 				 return {val:null};
 				}
 			 SmartPlug.prototype.update = function(data) {
-				 // console.log("Updating", data);
+				 console.log("Updating", data);
 				 if(data.consumption) {
 					 this.consumption.push({ms:data.ms,val:data.consumption});
 					 for(var p in this.presentations) {this.presentations[p].updateConsumption(data.consumption);}

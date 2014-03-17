@@ -8,24 +8,36 @@ define( [ "utils/svg"
 			 
 			 // Define a singleton
 			 var svgUtils = {
-				  ancestors : function(node) {
+				   onDOMNodeInsertedIntoDocument : function(node, CB) {
+					 var mutObs = new MutationObserver(
+										 function(mutations) {
+											 var L = svgUtils.ancestors(node);
+											 if(L.indexOf(document.body) >= 0) {
+												 CB.apply(mutations, []);
+												 this.disconnect();
+												}
+											}
+										);
+					 mutObs.observe( document, {subtree: true, childList:true});
+					}
+				 , ancestors : function(node) {
 					 var L = [];
-					 while(node.parentElement) {
-						 L.push( node.parentElement );
-						 node = node.parentElement;
+					 while(node.parentElement || node.parentNode) {
+						 L.push( node.parentElement || node.parentNode );
+						 node = node.parentElement || node.parentNode;
 						}
 					 return L;
 					}
 				, getSvgCanvas : function(node) {
 					 while(node && node.tagName !== 'svg') {
-						 node = node.parentElement;
+						 node = node.parentElement || node.parentNode;
 						}
 					 return node
 					}
 				, isDisplayed : function(root, n) {
 					 while(n && n !== root) {
 						 if(n.style.display === 'none') {return false;}
-						 n = n.parentElement;
+						 n = n.parentElement || n.parentNode;
 						}
 					 return true;
 					}
@@ -39,7 +51,7 @@ define( [ "utils/svg"
 					, L_dropZones		: []
 					, D_draggingPtr		: {}
 					, getDropZoneUnder	: function(n) {
-						 while(n && !n.AlxDropZone) {n = n.parentElement;}
+						 while(n && !n.AlxDropZone) {n = n.parentElement || n.parentNode;}
 						 return n?n.AlxDropZone:null;
 						}
 					, removeDropZone : function(node) {
@@ -202,7 +214,12 @@ define( [ "utils/svg"
 																	   , n = dropZone?dropZone.node:null;
 																	 if(self.D_draggingPtr[idPtr].nodeUnder !== n) {
 																		 if(self.D_draggingPtr[idPtr].nodeUnder) {
-																			 var event = new CustomEvent('AlxDD_leave', {bubbles:false,cancelable:false});
+																			 var event;
+																			 if(typeof CustomEvent === 'function') {
+																				 event = new CustomEvent('AlxDD_leave', {bubbles:false,cancelable:false});
+																				} else {event = document.createEvent('CustomEvent');
+																					    event.initCustomEvent('AlxDD_leave', false, false, {});
+																					   }
 																			 self.enrichConfigForEvent(config,event,x,y,n,clone);
 																			 self.D_draggingPtr[idPtr].nodeUnder.dispatchEvent(event);
 																			}
@@ -211,7 +228,12 @@ define( [ "utils/svg"
 																								, dropZone.config.tags
 																								).length
 																			) {
-																			 var event = new CustomEvent('AlxDD_enter', {bubbles:false,cancelable:false});
+																			 var event; // = new CustomEvent('AlxDD_enter', {bubbles:false,cancelable:false});
+																			 if(typeof CustomEvent === 'function') {
+																				 event = new CustomEvent('AlxDD_enter', {bubbles:false,cancelable:false});
+																				} else {event = document.createEvent('CustomEvent');
+																					    event.initCustomEvent('AlxDD_enter', false, false, {});
+																					   }
 																			 self.enrichConfigForEvent(config,event,x,y,n,clone);
 																			 n.dispatchEvent(event);
 																			 // console.log('Enter', x, y, n);
@@ -221,9 +243,12 @@ define( [ "utils/svg"
 																		 // console.log('nodeUnder', n);
 																		} else {// Trigger a AlxDD_dragOver event if there is a node
 																				if(n) {
-																					 var event = new CustomEvent( 'AlxDD_dragOver'
-																												, { bubbles		: false
-																												  , cancelable	: false } );
+																					 var event;// = new CustomEvent( 'AlxDD_dragOver', { bubbles: false, cancelable: false } );
+																					 if(typeof CustomEvent === 'function') {
+																						 event = new CustomEvent('AlxDD_dragOver', {bubbles:false,cancelable:false});
+																						} else {event = document.createEvent('CustomEvent');
+																								event.initCustomEvent('AlxDD_dragOver', false, false, {});
+																							   }
 																					 self.enrichConfigForEvent(config,event,x,y,n,clone);
 																					 n.dispatchEvent(event);
 																					}
@@ -232,7 +257,12 @@ define( [ "utils/svg"
 																	}
 																}
 															 if(i === -1 && self.D_draggingPtr[idPtr].nodeUnder) {
-																 var event = new CustomEvent('AlxDD_leave', {bubbles:false,cancelable:false});
+																 var event;// = new CustomEvent('AlxDD_leave', {bubbles:false,cancelable:false});
+																 if(typeof CustomEvent === 'function') {
+																	 event = new CustomEvent('AlxDD_leave', {bubbles:false,cancelable:false});
+																	} else {event = document.createEvent('CustomEvent');
+																			event.initCustomEvent('AlxDD_leave', false, false, {});
+																		   }
 																 self.enrichConfigForEvent(config,event,x,y,n,clone);
 																 self.D_draggingPtr[idPtr].nodeUnder.dispatchEvent(event);
 																 self.D_draggingPtr[idPtr].nodeUnder = null;
@@ -253,7 +283,13 @@ define( [ "utils/svg"
 													, dropZone.config.tags
 													).length
 							   ) {var event;
-								  event = new CustomEvent('AlxDD_drop', {bubbles:false,cancelable:false,draggedNode:node,draggedObject:this.D_draggingPtr[idPtr]});
+								  if(typeof CustomEvent === 'function') {
+									 event = new CustomEvent('AlxDD_drop', {bubbles:false,cancelable:false,draggedNode:node,draggedObject:this.D_draggingPtr[idPtr]});
+									} else {event = document.createEvent('CustomEvent');
+											event.initCustomEvent('AlxDD_leave', false, false, {draggedNode:node,draggedObject:this.D_draggingPtr[idPtr]});
+											event.draggedNode	= node;
+											event.draggedObject = this.D_draggingPtr[idPtr]
+										   }
 									  event.config = this.D_draggingPtr[idPtr].config;
 									  this.D_draggingPtr[idPtr].nodeUnder.dispatchEvent(event);
 								 }
@@ -264,7 +300,9 @@ define( [ "utils/svg"
 							 
 							// Stop drag subscribers
 							 this.L_dragged.splice(pos,1);
-							 node.parentElement.removeChild( node );
+							 if(node.parentElement) {
+								 node.parentElement.removeChild( node );
+								} else {node.parentNode.removeChild( node );}
 							 DragManager.removeDraggable(node);
 							 if(this.L_dragged.length === 0) {
 								 DragManager.UnSubscribe_Drag('svgUtils.DD');

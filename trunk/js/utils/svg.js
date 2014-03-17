@@ -53,9 +53,9 @@ var DragManager = {
 		}
 	, getAncestors		: function (node) {
 		 var T_rep = new Array();
-		 while(node.parentElement) {
-			 T_rep.push( node.parentElement );
-			 node = node.parentElement;
+		 while(node.parentElement || node.parentNode) {
+			 T_rep.push( node.parentElement || node.parentNode );
+			 node = node.parentElement || node.parentNode;
 			}
 		 return T_rep;
 		}
@@ -88,6 +88,8 @@ var DragManager = {
 		}
 	, addDraggable		: function (node, conf) {
 		 conf = conf || {};
+		 conf.inter1pt = conf.inter1pt || 'Drag';
+		 conf.inter2pt = conf.inter2pt || 'RotoZoom';
 		 eventNode = conf.eventNode || node;
 		 pathNodes = conf.pathNodes || [];
 		 // Is it still draggable?
@@ -108,6 +110,10 @@ var DragManager = {
 				obj_draggable.pt2p    = this.can.createSVGPoint();
 			obj_draggable.depends_of  = null;        // The ancestor node that is also draggable
 			obj_draggable.Tab_depend  = new Array(); // The closest descendants nodes that are also draggable
+			
+			// Reference interaction techniques
+			obj_draggable.interaction = [null, conf.inter1pt, conf.inter2pt];
+
 			// Dependancies
 			var T_ancestors   = this.getAncestors  (node), index_ancestor
 			  , T_descendants = this.getDescendants(node), index_descendant;
@@ -132,6 +138,7 @@ var DragManager = {
 					 break;
 					}
 				}
+			
 			// Add dependency with respect to descendants
 			var T_tmp = new Array(node), n_tmp, nc_tmp, i_nc_tmp;
 			while(T_tmp.length) {
@@ -190,7 +197,8 @@ var DragManager = {
 		 if(this.TabDraggable[i].pathNodes.length) {
 			 var doDragThrough = undefined, doDragNotThrough = true;
 			 var ancestors = [], child = e.target;
-			 while(child) {ancestors.push(child); child = child.parentElement;}
+			 while(child) {ancestors.push(child);
+						   child = child.parentElement || child.parentNode; }
 			 for(var n=0; n<this.TabDraggable[i].pathNodes.length; n++) {
 				 var parent	   = this.TabDraggable[i].pathNodes[n].node;
 				 var goThrough = this.TabDraggable[i].pathNodes[n].goThrough;
@@ -277,12 +285,16 @@ var DragManager = {
 		 var i = this.TabDragging_ptr.indexOf(id_ptr);
 		 if(i == -1) {/*console.log('skip', id_ptr);*/ return;}
 		 i    = this.indexOfPointer(id_ptr); 
-		 var node = this.TabDraggable[i].node;
+		 var obj  = this.TabDraggable[i]
+		   , node = obj.node;
 		 // Apply translation
 		 // console.log("update TabDraggable[",i,"]");
 		 if(this.TabDraggable[i].id_ptr2 != null) {
-			 this.RotoZoom(i, id_ptr, x, y);
-			} else {this.Drag(i, id_ptr, x, y);}
+			 // this.RotoZoom(i, id_ptr, x, y);
+			 this[obj.interaction[2]].apply(this, [i, id_ptr, x, y]);
+			} else	{//this.Drag(i, id_ptr, x, y);
+					 this[obj.interaction[1]].apply(this, [i, id_ptr, x, y]);
+					}
 		 
 		 // Update depending nodes
 		 for(var j=0; j<this.TabDraggable[i].Tab_depend.length; j++) {
@@ -291,13 +303,41 @@ var DragManager = {
 			 this.updateInteraction(id_ptr, x, y /*px, py*/);
 			}
 		}
-	, RotoZoom : function (i, id_ptr, x, y) {
-		 var obj = this.TabDraggable[i];
+	, OrthoZoom : function (i, id_ptr, x, y) {
+		 var obj = this.TabDraggable[i], parent = obj.node.parentElement || obj.node.parentNode;
 		 if(id_ptr == this.TabDraggable[i].id_ptr1) {
 			 obj.pt1p.x = x; obj.pt1p.y = y;
-			 obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentElement.getCTM().inverse() );
+			 obj.pt1p = obj.pt1p.matrixTransform( parent.getCTM().inverse() );
 			} else {obj.pt2p.x = x; obj.pt2p.y = y;
-					obj.pt2p = obj.pt2p.matrixTransform( obj.node.parentElement.getCTM().inverse() );
+					obj.pt2p = obj.pt2p.matrixTransform( parent.getCTM().inverse() );
+				   }
+		 // Compute the current center point
+		 var cx  = (obj.pt1.x  + obj.pt2.x ) / 2
+		   , cy  = (obj.pt1.y  + obj.pt2.y ) / 2
+		   , cxp = (obj.pt1p.x + obj.pt2p.x) / 2
+		   , cyp = (obj.pt1p.y + obj.pt2p.y) / 2;
+		 
+		 // Compute the scale relative to the original scale
+		 var dx  = obj.pt1.x  - obj.pt2.x
+		   , dy  = obj.pt1.y  - obj.pt2.y
+		   , dxp = obj.pt1p.x - obj.pt2p.x
+		   , dyp = obj.pt1p.y - obj.pt2p.y;
+		 var s = Math.sqrt(dxp*dxp + dyp*dyp) / Math.sqrt(dx*dx + dy*dy);
+		 
+		 var tx = cxp - s*cx
+		   , ty = cyp - s*cy;
+		 // Maintains the central point at the center with respect to the scale
+		 this.mapTransform[obj.uid] = {obj:obj,matrix:'matrix('+s+','+0+','+0+','+s+','+tx+','+ty+')'};
+		 this.updateRender();
+		}
+	, RotoZoom : function (i, id_ptr, x, y) {
+		 var obj = this.TabDraggable[i]
+		   , parent = obj.node.parentElement || obj.node.parentNode;
+		 if(id_ptr == this.TabDraggable[i].id_ptr1) {
+			 obj.pt1p.x = x; obj.pt1p.y = y;
+			 obj.pt1p = obj.pt1p.matrixTransform( parent.getCTM().inverse() );
+			} else {obj.pt2p.x = x; obj.pt2p.y = y;
+					obj.pt2p = obj.pt2p.matrixTransform( parent.getCTM().inverse() );
 				   }
 		 // console.log("RotoZoom");
 		 /*console.log("RotoZoom <" + this.TabDraggable[i].pt1p.x + ';' + this.TabDraggable[i].pt1p.y + '>'
@@ -328,11 +368,12 @@ var DragManager = {
 		}
 	, Drag : function (i, id_ptr, x, y) {
 		 // console.log("Drag with " + id_ptr);
-		 var obj = this.TabDraggable[i], mat;
+		 var obj = this.TabDraggable[i], mat
+		   , parent = obj.node.parentElement || obj.node.parentNode;
 			obj.pt1p.x = x; obj.pt1p.y = y;
-			if(obj.node.parentElement.getCTM()) {
-				 obj.pt1p = obj.pt1p.matrixTransform( obj.node.parentElement.getCTM().inverse() );
-				 mat = obj.node.parentElement.getCTM().inverse().multiply( obj.node.getCTM() );
+			if(parent.getCTM()) {
+				 obj.pt1p = obj.pt1p.matrixTransform( parent.getCTM().inverse() );
+				 mat = parent.getCTM().inverse().multiply( obj.node.getCTM() );
 				} else {mat = obj.node.getCTM();}
 						
 		 // var mat = obj.node.parentElement.getCTM().inverse().multiply( obj.node.getCTM() );;

@@ -21,7 +21,7 @@ define( [ "Bricks/Presentations/utils"
 			 Brick.prototype.appendPresoFactory = function(name, constr, validity) {
 				 validity = validity || { pixelsMinDensity	: 0
 										, pixelsMaxDensity	: 999999999
-										, pixelsRatio		: 0
+										, pixelsRatio		: {w:0,h:0}
 										};
 				 if(!validity) {throw('Pas de domaine de validité définit pour ' + name);}
 				 this.presoFactories[name] = {name:name,constr:constr,validity:validity,UIs:[]};
@@ -75,15 +75,19 @@ define( [ "Bricks/Presentations/utils"
 				 context 				= context				|| {};
 				 context.tags			= context.tags 			|| [];
 				 context.pixelsDensity	= context.pixelsDensity || 1;
-				 context.pixelsRatio	= context.pixelsRatio	|| 1;
+				 context.pixelsRatio	= context.pixelsRatio	|| {w:0,h:0};
 				 // Context contains informations such as ratio and pixels
 				 for(var i in this.presoFactories) {
 					 var factory = this.presoFactories[i];
 					 factory.validity.tags = factory.validity.tags || []
 					 if (  factory.validity.pixelsMinDensity <= context.pixelsDensity
 						&& factory.validity.pixelsMaxDensity >= context.pixelsDensity
-						&& (  factory.validity.pixelsRatio === 0
-						   || factory.validity.pixelsRatio === context.pixelsRatio)
+						&& (  factory.validity.pixelsRatio.w === 0
+						   || factory.validity.pixelsRatio.h === 0
+						   || ( factory.validity.pixelsRatio.w === context.pixelsRatio.w
+							  &&factory.validity.pixelsRatio.h === context.pixelsRatio.h
+							  )
+						   )
 						&& utils.intersect(factory.validity.tags, context.tags).length === context.tags.length
 						) {// This is the right factory!
 						   return this.getNewPresentation(factory.name);

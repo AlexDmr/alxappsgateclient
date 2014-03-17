@@ -24,7 +24,7 @@ define( [ "Bricks/protoBricks"
 										, PresoPaletteOrthozoomTabs
 										, { pixelsMinDensity : 0
 										  , pixelsMaxDensity : 999999999
-										  , pixelsRatio		 : 0 }
+										  , pixelsRatio		 : {w:0,h:0} }
 										);
 				}
 			 Palette.prototype.update = function(data) {

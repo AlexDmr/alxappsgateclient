@@ -14,13 +14,13 @@ define( [ "Bricks/protoBricks"
 										, PresoMediaRenderer
 										, { pixelsMinDensity : 0
 										  , pixelsMaxDensity : 0.5
-										  , pixelsRatio		 : 1 }
+										  , pixelsRatio		 : {w:1,h:1} }
 										);
 				 this.appendPresoFactory( 'PresoMediaRenderer2'
 										, PresoMediaRenderer2
 										, { pixelsMinDensity : 0.5
 										  , pixelsMaxDensity : 2
-										  , pixelsRatio		 : 1 }
+										  , pixelsRatio		 : {w:1,h:1} }
 										);
 				}
 			 return UpnpMediaRenderer;

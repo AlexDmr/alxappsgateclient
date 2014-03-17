@@ -23,7 +23,7 @@ define( [ "Bricks/protoBricks"
 										, PresoBasicAlxHueLamp
 										, { pixelsMinDensity : 0
 										  , pixelsMaxDensity : 999999999
-										  , pixelsRatio		 : 1 }
+										  , pixelsRatio		 : {w:1,h:1} }
 										);
 				 return this;
 				}

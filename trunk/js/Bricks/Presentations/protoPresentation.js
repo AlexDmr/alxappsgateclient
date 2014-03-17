@@ -124,8 +124,8 @@ define( function() {
 				}
 			 Presentation.prototype.deletePrimitives = function() {
 				 // console.log("Presentation::deletePrimitives", this);
-				 if(this.root && this.root.parentElement) {
-					 this.root.parentElement.removeChild(this.root);
+				 if(this.root && (this.root.parentElement || this.root.parentNode)) {
+					 (this.root.parentElement || this.root.parentNode).removeChild(this.root);
 					 this.root = null;
 					}
 				}
@@ -145,6 +145,7 @@ define( function() {
 				}
 			 Presentation.prototype.primitiveUnPlug = function(c) {
 				 if(c.root && c.root.parentElement) {c.root.parentElement.removeChild(c.root);}
+				 if(c.root && c.root.parentNode   ) {c.root.parentNode.removeChild(c.root);}
 				}
 			 Presentation.prototype.appendDescendants = function() {
 				 if(this.brick) {

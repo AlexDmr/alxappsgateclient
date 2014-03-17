@@ -43,7 +43,16 @@ define( [ "utils/svgAlx"
 					this.Acontent	= new svgText(config.content).set(config.content.value);
 					this.Aroot.appendChild(this.Arect);
 					this.Aroot.appendChild(this.Acontent);
-					this.Acontent.getRoot().addEventListener( 'DOMNodeInsertedIntoDocument'
+					svgUtils.onDOMNodeInsertedIntoDocument(
+						  this.Acontent.getRoot()
+						, function() {
+							 var bboxR = self.Arect.getBBox()
+							   , bboxC = self.Acontent.getBBox();
+							 // Left middle alignment
+							 self.Acontent.translate(0, bboxC.height);
+							}
+						);
+					/*this.Acontent.getRoot().addEventListener( 'DOMNodeInsertedIntoDocument'
 						, function(e) {
 							 var bboxR = self.Arect.getBBox()
 							   , bboxC = self.Acontent.getBBox();
@@ -51,7 +60,7 @@ define( [ "utils/svgAlx"
 							 self.Acontent.translate(0, bboxC.height);
 							 // self.Acontent.configure({x:bbox.x-3,y:bbox.y-3,width:bbox.width+6,height:bbox.height+6});
 							}
-						, false );
+						, false );*/
 				 this.Aroot.getRoot().addEventListener( 'click', function(e) {modal(self);}, false);
 				 
 				 this.root = this.Aroot.getRoot();

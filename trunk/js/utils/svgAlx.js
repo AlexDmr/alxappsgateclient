@@ -24,12 +24,16 @@ define( [
 				 return this;
 				}
 			 svgAlx.prototype.appendChild = function(svgA) {
-				 if(svgA.getRoot().parentElement === null)
+				 var parent;
+				 if(typeof svgA.getRoot().parentElement === 'undefined') {parent = svgA.getRoot().parentNode;} else {parent = svgA.getRoot().parentElement;}
+				 if(parent === null)
 					this.root.appendChild( svgA.getRoot() );
 				 return this;
 				}
 			 svgAlx.prototype.removeChild = function(svgA) {
-				 if(svgA.getRoot().parentElement === this.root)
+				 var parent;
+				 if(typeof svgA.getRoot().parentElement === 'undefined') {parent = svgA.getRoot().parentNode;} else {parent = svgA.getRoot().parentElement;}
+				 if(parent === this.root)
 					this.root.removeChild( svgA.getRoot() );
 				 return this;
 				}
@@ -61,33 +65,37 @@ define( [
 				}
 			 svgAlx.prototype.fillSpace = function(rect, scale) {
 				// Compute scale
-				 var bbox    = this.getBBox();
+				 var bbox    = this.getBBox()
+				   , parent;
+				 if(typeof this.root.parentElement === 'undefined') {parent = this.root.parentNode;} else {parent = this.root.parentElement;}
+				 var M = parent.getCTM().inverse().multiply(this.root.getCTM());
 				 svgPoint.x  = svgPoint.y = 0;
-				 var svgPointO   = svgPoint.matrixTransform( this.root.parentElement.getCTM().inverse().multiply(this.root.getCTM()) );
+				 var svgPointO   = svgPoint.matrixTransform( M );
 				 svgPoint.x  = bbox.width; svgPoint.y = bbox.height;
-				 var svgPointWH  = svgPoint.matrixTransform( this.root.parentElement.getCTM().inverse().multiply(this.root.getCTM()) );
+				 var svgPointWH  = svgPoint.matrixTransform( M );
 				 bbox.width  = svgPointWH.x - svgPointO.x;
 				 bbox.height = svgPointWH.y - svgPointO.y;
 				 var S		 = scale * Math.min(rect.width/bbox.width, rect.height/bbox.height);
 				 this.scale(S,S);
 				// Compute translation
 				 svgPoint.x  = svgPoint.y = 0;
-				 svgPointO   = svgPoint.matrixTransform( this.root.parentElement.getCTM().inverse().multiply(this.root.getCTM()) );
+				 svgPointO   = svgPoint.matrixTransform( M );
 				 svgPoint.x  = bbox.width; svgPoint.y = bbox.height;
-				 svgPointWH  = svgPoint.matrixTransform( this.root.parentElement.getCTM().inverse().multiply(this.root.getCTM()) );
+				 svgPointWH  = svgPoint.matrixTransform( M );
 				 bbox.width  = svgPointWH.x - svgPointO.x;
 				 bbox.height = svgPointWH.y - svgPointO.y;
 				 svgPoint.x  = bbox.x; svgPoint.y = bbox.y;
-				 svgPointO   = svgPoint.matrixTransform( this.root.parentElement.getCTM().inverse().multiply(this.root.getCTM()) );
+				 svgPointO   = svgPoint.matrixTransform( M );
 				 var DX		 = rect.x - svgPoint.x/S + (rect.width  - bbox.width ) / 2
 				   , DY		 = rect.y - svgPoint.y/S + (rect.height - bbox.height) / 2;
 				 this.translate(DX, DY);
 				 return this;
 				}
 			 svgAlx.prototype.rightTo = function(svgE) {
-				 var bbox = svgE.getBBox(), bbox2 = this.getBBox();
+				 var bbox = svgE.getBBox(), bbox2 = this.getBBox()
+				   , parent = svgE.getRoot().parentElement || svgE.getRoot().parentNode;
 				 svgPoint.x = bbox.x+bbox.width-bbox2.x; svgPoint.y = bbox.y;
-				 svgPoint = svgPoint.matrixTransform( svgE.getRoot().parentElement.getCTM().inverse().multiply(svgE.getRoot().getCTM()) );
+				 svgPoint = svgPoint.matrixTransform( parent.getCTM().inverse().multiply(svgE.getRoot().getCTM()) );
 				 this.matrixId().translate(svgPoint.x, svgPoint.y);
 				 return this;
 				}
