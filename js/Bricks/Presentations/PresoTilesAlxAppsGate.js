@@ -8,7 +8,8 @@ define( [ "Bricks/Presentations/protoPresentation"
 	  , function( Presentation, svgUtils
 	            , svgGroup, svgLine, svgRect, svgText) {
 			 var dt = 0.1, size = 32, svg_point = null, uid = 0
-			   , L_toUnplugged = [], L_dragged = [];
+			   , L_toUnplugged = [], L_dragged = []
+			   , titleHeight = 11;
 			 
 			 // Presentation
 			 var PresoTilesAlxAppsGate = function() {
@@ -20,7 +21,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoTilesAlxAppsGate.prototype.pushDragged = function( obj ) {
 				 var node = obj.target;
 				 obj.L_nodes = [];
-				 while(node.parentElement) {obj.L_nodes.push(node); node=node.parentElement;}
+				 while(node.parentElement || node.parentNode) {obj.L_nodes.push(node); node=node.parentElement||node.parentNode;}
 				 L_dragged.push(obj);
 				}
 			 PresoTilesAlxAppsGate.prototype.removeDragged = function( idPtr ) {
@@ -71,7 +72,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.displayFgRect = (typeof(this.edited) === 'undefined')?false:this.displayFgRect;
 				 this.validity = { pixelsMinDensity : 0
 								 , pixelsMaxDensity : 999999999
-								 , pixelsRatio		 : this.w / this.h };
+								 , pixelsRatio		 : {w:0,h:0} /*this.w / this.h*/ };
 				 if(this.root) this.forceRender();
 				}
 			 PresoTilesAlxAppsGate.prototype.copy = function( preso ) {
@@ -86,7 +87,9 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.scaleToDisplayChildren = preso.scaleToDisplayChildren;
 				 this.validity = { pixelsMinDensity	: preso.validity.pixelsMinDensity
 								 , pixelsMaxDensity	: preso.validity.pixelsMaxDensity
-								 , pixelsRatio		: preso.validity.pixelsRatio };
+								 , pixelsRatio		: { w : preso.validity.pixelsRatio.w
+													  , h : preso.validity.pixelsRatio.h
+													  } };
 				}
 			 PresoTilesAlxAppsGate.prototype.canBeResizedTo = function(w, h) {
 				 if(w<=0 || h<=0) {return false;}
@@ -113,7 +116,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 // Fit inside parent?
 					 var Pinner = this.parent.getInnerDimensions();
 					 if( Pinner.w < this.x+w
-					   ||Pinner.h < this.y+h+(this.brick&&this.brick.isSpace)?1:0 ) {console.log("\tDo not fit into parent"); return false;}
+					   ||Pinner.h < this.y+h ) {console.log("\tDo not fit into parent",Pinner, this.x+w, this.y+h); return false;}
 					 // Do not collide with sibling?
 					 var child;
 					 for(var i=0; i<this.parent.children.length; i++) {
@@ -137,6 +140,8 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 // Try to place the rectangle so that bottom right corner does correspond to <x;y>
 				 var H = Math.floor((h+0)/2)
 				   , W = Math.floor((w+0)/2)
+				   , dims = this.getInnerDimensions() ;
+				   
 				 for(var j=H;j>=-H;j--) { 	// Line
 					 for(var i=W;i>=-W;i--) {// Column
 						 // coords : <x-i;y-j>
@@ -146,16 +151,16 @@ define( [ "Bricks/Presentations/protoPresentation"
 							 child = this.children[c];
 							 if( svgUtils.intersectionRect	( child.x, child.y, child.x+child.w, child.y+child.h
 															, x-i    , y-j    , x-i+w          , y-j+h              )
-							   && x-i >= 0 && x-i+w <= this.scaleFactor*this.w//Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
-						       && y-j >= 0 && y-j+h <= this.scaleFactor*this.h//Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
+							   && x-i >= 0 && x-i+w <= dims.w//this.scaleFactor*this.w//Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
+						       && y-j >= 0 && y-j+h <= dims.h//this.scaleFactor*this.h//Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
 							   ) {
 								  intersect = true;
 								  break;
 								 }
 							}
 						 if(  !intersect 
-						   && x-i >= 0 && x-i+w <= this.scaleFactor*this.w//Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
-						   && y-j >= 0 && y-j+h <= this.scaleFactor*this.h//Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
+						   && x-i >= 0 && x-i+w <= dims.w//this.scaleFactor*this.w//Math.floor(this.innerMagnitude*this.w/Math.max(this.w,this.h))
+						   && y-j >= 0 && y-j+h <= dims.h//this.scaleFactor*this.h//Math.floor(this.innerMagnitude*this.h/Math.max(this.w,this.h))
 						   ) {return {x:x-i,y:y-j};}
 						}
 					}
@@ -182,10 +187,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 w = (typeof w === 'undefined')?this.w:w;
 				 h = (typeof h === 'undefined')?this.h:h;
 				 return { w: this.scaleFactor*w
-						, h: this.scaleFactor*h }
-				 /*var max = Math.max(w,h);
-				 return { w: Math.floor(this.innerMagnitude * w / max)
-						, h: Math.floor(this.innerMagnitude * h / max) }*/
+						, h: Math.floor((this.scaleFactor*h*size - titleHeight)/size) }
 				}
 			 PresoTilesAlxAppsGate.prototype.Render = function() {
 				 var self = this;
@@ -199,25 +201,23 @@ define( [ "Bricks/Presentations/protoPresentation"
 					
 					// The root
 					 this.svgG = new svgGroup( {class: (this.brick&&this.brick.tile)?this.brick.tile.class:''}
-											 ).translate(this.x*size, this.y*(11+size));
+											 ).translate(this.x*size, this.y*(0/*11*/+size));
 						var g = this.svgG.getRoot();
 					 // var scale = (Math.max(this.w,this.h)-2*dt)/this.innerMagnitude
-					 var scale = (this.w-2*dt)/(this.scaleFactor*this.w)
-					   , titleHeight;
+					 var scale = (this.w-2*dt)/(this.scaleFactor*this.w);
 					// The space for children
-					if(this.brick.isSpace) {titleHeight = 11;} else {titleHeight = 0;}
 					 this.svgGR = new svgGroup( {class : 'rootInternal'} ).translate(dt*size, titleHeight+dt*size).scale(scale,scale);
 						var gr = this.svgGR.getRoot();
 					 this.svgGPreso = new svgGroup( {class: 'bgPreso'} );
 						this.gPreso = this.svgGPreso.getRoot();
 					 this.svgBgRect = new svgRect( { x:0.5*dt*size, y:0.5*dt*size, rx:6, ry:6
-												   , width:size*(this.w-dt), height:(titleHeight+size)*(this.h-dt)
+												   , width:size*(this.w-dt), height:size*(this.h-dt)//(titleHeight+size)*(this.h-dt)
 												   , class:'tile' } );
 					 this.svgBgRectShadow = new svgRect( { x:0.5*dt*size, y:0.5*dt*size, rx:6, ry:6
-												   , width:size*(this.w-dt), height:(titleHeight+size)*(this.h-dt)
+												   , width:size*(this.w-dt), height:size*(this.h-dt)//(titleHeight+size)*(this.h-dt)
 												   , class:'shadow' } ).translate(dt*size, dt*size);
 					 this.svgFgRect = new svgRect( { x:1.5*dt*size, y:titleHeight+1.5*dt*size
-												   , width:size*(this.w-3*dt), height:(titleHeight+size)*(this.h-0.5-dt)
+												   , width:size*(this.w-3*dt), height:size*(this.h-0.5-3*dt)//(titleHeight+size)*(this.h-0.5-dt)
 												   , class:'fgRect' } );
 						var r = this.svgBgRect.getRoot();
 					 this.gPreso.appendChild(this.svgBgRectShadow.getRoot()); this.gPreso.appendChild(r); g.appendChild(this.gPreso); g.appendChild(gr);
@@ -295,7 +295,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 														 var X = preso.x, Y = preso.y;
 														 preso.x = 100000; preso.y = 100000;
 														 var coords = self.getFreeSpaceCoordsFor( Math.floor(svg_point.x/( 0+self.getTileSize()))
-																								, Math.floor(svg_point.y/(11+self.getTileSize()))
+																								, Math.floor(svg_point.y/(0/*11*/+self.getTileSize()))
 																								, preso.w
 																								, preso.h );
 														 preso.x = X; preso.y = Y;
@@ -307,7 +307,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 															 preso.Render().style.display = 'inherit';
 															 preso.Render().setAttribute ( 'transform'
 																						 , 'translate(' + preso.x*size
-																								 + ', ' + preso.y*(11+size) + ')' 
+																								 + ', ' + preso.y*(0/*11*/+size) + ')' 
 																						 );
 															}
 														}
@@ -380,9 +380,11 @@ define( [ "Bricks/Presentations/protoPresentation"
 							dy = P1.y - P0.y,
 							scale = Math.sqrt( dx*dx + dy*dy );
 						} else {scale = 0;}
-				 return {pixelsDensity:scale,pixelsRatio:w/h};
+				 return {pixelsDensity:scale,pixelsRatio:{w:w,h:h}};
 				}
 			 PresoTilesAlxAppsGate.prototype.ComputeSemanticZoom = function(MT, L_CB/*L_toAppear, L_toDisappear*/) {
+				var displayed = this.groot.style.display;
+				this.groot.style.display = 'inherit';
 				var scale = this.getChildrenContext(this.w, this.h, MT);
 				scale = scale.pixelsDensity;
 				// console.log(scale);
@@ -392,6 +394,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 						 this.children[i].ComputeSemanticZoom(MT, L_CB/*L_toAppear, L_toDisappear*/);
 						}
 					}
+				 this.groot.style.display = displayed;
 				}
 			 PresoTilesAlxAppsGate.prototype.adaptRender = function(scale, L_CB) {
 				var res;
@@ -403,7 +406,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				  ) {
 					 // console.log("Presentation outside its plasticity domain :");
 					 var newPreso = this.brick.getNewPresentationWithContext( 
-										{ pixelsRatio	: this.w / this.h
+										{ pixelsRatio	: {w:this.w,h:this.h}
 										, pixelsDensity	: scale }
 										);
 					 if(newPreso) {
@@ -429,13 +432,15 @@ define( [ "Bricks/Presentations/protoPresentation"
 					}
 				if(scale < this.scaleToDisplayChildren) {
 					 if(this.display) {this.display = false;
-									   L_CB.push( function(v) {if(self.svgFgRect.root.parentElement) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,0,1,self.svgFgRect.root]);
+									   L_CB.push( function(v) {if( self.svgFgRect.root.parentElement
+																 ||self.svgFgRect.root.parentNode   ) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,0,1,self.svgFgRect.root]);
 															   self.displayFgRect = true;
 															   self.CB_Fade(v,1,0);} );
 									   res = true;
 									  } else {res = false;}
 					} else 	{if(!this.display) {this.display = true;
-												L_CB.push( function(v) {if(self.svgFgRect.root.parentElement) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,1,0,self.svgFgRect.root]);
+												L_CB.push( function(v) {if( self.svgFgRect.root.parentElement
+																		  ||self.svgFgRect.root.parentNode   ) PresoTilesAlxAppsGate.prototype.CB_Fade.apply(self, [v,1,0,self.svgFgRect.root]);
 																		self.displayFgRect = false;
 																		self.CB_Fade(v,0,1);} );
 											   }
@@ -456,10 +461,12 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoTilesAlxAppsGate.prototype.deletePrimitives = function() {
 				 // console.log("PresoTilesAlxAppsGate::deletePrimitives", this);
 				 if(this.root) {
-					 if(this.root.parentElement  ) this.root.parentElement.removeChild  (this.root)  ;this.root  = null;
-					 if(this.rect && this.rect.parentElement  ) this.rect.parentElement.removeChild  (this.rect)  ;this.rect  = null;
-					 if(this.gPreso && this.gPreso.parentElement) this.gPreso.parentElement.removeChild(this.gPreso);this.gPreso= null;
-					 if(this.groot && this.groot.parentElement ) this.groot.parentElement.removeChild (this.groot) ;this.groot = null;
+					 var parent;
+					 if(typeof this.root.parentElement === 'undefined') {parent = this.root.parentNode;} else {parent = this.root.parentElement;}
+					 if(parent) parent.removeChild(this.root); this.root  = null;
+					 /* if(this.rect && this.rect.parentElement  ) this.rect.parentElement.removeChild  (this.rect)  ;  */this.rect  = null;
+					 /* if(this.gPreso && this.gPreso.parentElement) this.gPreso.parentElement.removeChild(this.gPreso);*/this.gPreso= null;
+					 /* if(this.groot && this.groot.parentElement ) this.groot.parentElement.removeChild (this.groot) ; */this.groot = null;
 					 
 					 if(this.DropZone)
 						svgUtils.DD.removeDropZone( this.root );

@@ -1,9 +1,10 @@
 var pipoClock;
 define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
+		, "utils/svgUtils"
 		, "utils/svgText"
 		, "Bricks/Presentations/utils"
 		]
-	  , function(Presentation, svgText, utils) {
+	  , function(Presentation, svgUtils, svgText, utils) {
 			 // Presentation
 			 var PresoBasicClock = function() {
 				}
@@ -40,7 +41,19 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.gPreso.appendChild(this.clockText.getRoot());
 					 self.updateClock( this.brick.get_clockValue() );
 					 var coords = this.getPresoCoords();
-					 this.clockText.getRoot().addEventListener(
+					 svgUtils.onDOMNodeInsertedIntoDocument(
+						  this.clockText.getRoot()
+						, function() 	{var prev = self.clockText.get();
+										 self.clockText.set('00:00');
+										 var bbox = self.clockText.getBBox()
+										   ,    s = 0.8 * (coords.x2-coords.x1) / bbox.width;
+										 self.clockText.matrixId().translate( (coords.x2+coords.x1)/2
+																			, (coords.y2+coords.y1)/2
+																			).scale(s,s)
+										 self.clockText.set(prev);
+										}
+						);
+					 /*this.clockText.getRoot().addEventListener(
 							  'DOMNodeInsertedIntoDocument'
 							, function(e) 	{var prev = self.clockText.get();
 											 self.clockText.set('00:00');
@@ -49,21 +62,23 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											 self.clockText.matrixId().translate( (coords.x2+coords.x1)/2
 																				, (coords.y2+coords.y1)/2
 																				).scale(s,s)
-											 /*self.clockText.fillSpace( { x		: coords.x1
-																	   , y		: coords.y1
-																	   , width	: coords.x2 - coords.x1
-																	   , height	: coords.y2 - coords.y1 }
-																	 , 0.7);*/
+											 // self.clockText.fillSpace( { x		: coords.x1
+																	   // , y		: coords.y1
+																	   // , width	: coords.x2 - coords.x1
+																	   // , height	: coords.y2 - coords.y1 }
+																	 // , 0.7);
 											 self.clockText.set(prev);
 											}
-							, false );
+							, false );*/
 					}
 				 
 				 return this.root;
 				}
 			 PresoBasicClock.prototype.deletePrimitives = function() {
 				 Presentation.prototype.deletePrimitives.apply(this, []);
-				 if(this.clockText) {if(this.clockText.parentElement) this.clockText.parentElement.removeChild( this.clockText );
+				 if(this.clockText) {var parent;
+									 if(typeof this.clockText.parentElement === 'undefined') {parent = this.clockText.parentNode;} else {parent = this.clockText.parentElement;}
+									 if(parent) parent.removeChild( this.clockText );
 									 this.clockText = null;
 									}
 				}

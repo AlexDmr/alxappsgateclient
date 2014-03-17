@@ -15,17 +15,20 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						 var size = this.getTileSize();
 						 this.svgImg.setAttribute('width' , this.w*size);
 						 this.svgImg.setAttribute('height', this.h*size);
-					 var parent = this.bgRect.parentElement;
+					 var parent;
+					 if(typeof this.bgRect.parentElement === 'undefined') {parent = this.bgRect.parentNode;} else {parent = this.bgRect.parentElement;}
 					 parent.removeChild( this.bgRect );
 					 parent.appendChild( this.svgImg );
 					}
 				 return this.root;
 				}
 			 PresoMediaRenderer2.prototype.deletePrimitives = function() {
-				 console.log("Deleting primitives of", this);
+				 console.log("Deleting primitives of PresoMediaRenderer2", this);
 				 Presentation.prototype.deletePrimitives.apply(this,[]);
 				 if(this.svgImg) {
-					 if(this.svgImg.parentElement) {this.svgImg.parentElement.removeChild(this.svgImg);}
+					 var parent;
+					 if(typeof this.svgImg.parentElement === 'undefined') {parent = this.svgImg.parentNode;} else {parent = this.svgImg.parentElement;}
+					 if(parent) {parent.removeChild(this.svgImg);}
 					 this.svgImg = null;
 					}
 				}

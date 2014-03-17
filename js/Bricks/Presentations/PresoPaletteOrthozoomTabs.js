@@ -186,7 +186,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 return this.root;
 				}
 			 PresoPaletteOrthozoomTabs.prototype.selectTab = function(root) {
-				 var p = root.parentElement;
+				 var p = root.parentElement || root.parentNode;
 				 p.removeChild(root);
 				 p.appendChild(root);
 				}
@@ -213,8 +213,18 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							  , Y2      : 0
 							  };
 				 self.tabsList.push	( objTab );
-				 
-				 tabRoot.getRoot().addEventListener( 'DOMNodeInsertedIntoDocument'
+				 svgUtils.onDOMNodeInsertedIntoDocument(
+					  tabRoot.getRoot()
+					, function() 	{var bbox = text.getBBox();
+									 // console.log( bbox );
+									 var Y1 = tabNum?self.tabsList[tabNum-1].Y2:10
+									   , Y2 = Y1 + bbox.width + 6;
+									 self.tabsList[tabNum].Y2 = Y2 + 5;
+									 poly.configure( {points: '0 0 '+W+' 0 '+W+' '+H+' 0 '+H+' 0 '+(Y2+10)+' -20 '+Y2+' -20 '+Y1+' 0 '+(Y1-10)} );
+									 text.matrixId().rotate(-90).translate(-Y2+3, -3);
+									}
+					);
+				 /*tabRoot.getRoot().addEventListener( 'DOMNodeInsertedIntoDocument'
 					, function(e) 	{var bbox = text.getBBox();
 									 // console.log( bbox );
 									 var Y1 = tabNum?self.tabsList[tabNum-1].Y2:10
@@ -223,7 +233,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									 poly.configure( {points: '0 0 '+W+' 0 '+W+' '+H+' 0 '+H+' 0 '+(Y2+10)+' -20 '+Y2+' -20 '+Y1+' 0 '+(Y1-10)} );
 									 text.matrixId().rotate(-90).translate(-Y2+3, -3);
 									}
-					, false );
+					, false );*/
 				 this.svgAlxgroot.appendChild( tabRoot );
 					
 				 return objTab;
@@ -276,8 +286,42 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						 this.svgAlxRoot.appendChild( this.panelTile.Edition );
 						 this.panelTile.entryName.rightTo(this.panelTile.labelName);
 						 
+						 // Magnitudes/scale for a Brick
+						 // Pixel ration = L/H = self.editedTile.factory.pixelsRatio
+						 var factory_W = self.editedTile.factory.validity.pixelsRatio.w
+						   , factory_H = self.editedTile.factory.validity.pixelsRatio.h;
+						 this.svgG_brickMagnitude = new svgGroup().translate(3, 100);
+							this.svgTextScale = new svgText().set('Taille : ' + self.editedTile.w / factory_W);
+							this.svgG_brickMagnitude.appendChild( this.svgTextScale );
+							this.svgBtScalePlus = new svgButton	( {content: {image: 'images/Palette/plus.png', width:50, height:50}} 
+																).translate(175,-30).command( function() {
+																				 console.log('Scale plus');
+																				 var scale = Math.round(self.editedTile.w / factory_W);
+																				 if(self.editedTile.canBeResizedTo(factory_W*(scale+1), factory_H*(scale+1))) {
+																					 self.editedTile.w = factory_W*(scale+1);
+																					 self.editedTile.h = factory_H*(scale+1);
+																					 self.svgTextScale.set('Taille : ' + (scale+1));
+																					 self.editedTile.forceRender();
+																					}
+																				}
+																		 );
+							this.svgG_brickMagnitude.appendChild( this.svgBtScalePlus )
+							this.svgBtScaleMinus= new svgButton	( {content: {image: 'images/Palette/minus.png', width:50, height:50}} 
+																).translate(100,-30).command( function() {
+																				 console.log('Scale minus');
+																				 var scale = Math.round(self.editedTile.w / factory_W);
+																				 if(self.editedTile.canBeResizedTo(factory_W*(scale-1), factory_H*(scale-1))) {
+																					 self.editedTile.w = factory_W*(scale-1);
+																					 self.editedTile.h = factory_H*(scale-1);
+																					 self.svgTextScale.set('Taille : ' + (scale-1));
+																					 self.editedTile.forceRender();
+																					}
+																				}
+																		 );
+							this.svgG_brickMagnitude.appendChild( this.svgBtScaleMinus )
+							
 						 // Magnitudes for a space
-						 this.svgG_spaceMagnitude = new svgGroup().translate(3, 100);;
+						 this.svgG_spaceMagnitude = new svgGroup().translate(3, 100);
 							this.svgG_spaceWidth  = new svgGroup();
 							this.svgG_spaceMagnitude.appendChild( this.svgG_spaceWidth  );
 								this.svgTextWidth	= new svgText().set('Largeur : ' + self.editedTile.w);
@@ -362,8 +406,19 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 // size (depend whether it is a brick or a group)
 					 if(tile.brick.isSpace) {
 						 console.log("A space is under edition, we can change width and height");
+						 this.panelTile.Edition.removeChild( this.svgG_brickMagnitude );
 						 this.panelTile.Edition.appendChild( this.svgG_spaceMagnitude );
-						} else {this.panelTile.Edition.removeChild( this.svgG_spaceMagnitude );}
+						 // set values
+						 this.svgTextWidth.set ('Largeur : ' + self.editedTile.w);
+						 this.svgTextHeight.set('Hauteur : ' + self.editedTile.h);
+						} else {this.panelTile.Edition.removeChild( this.svgG_spaceMagnitude );
+								this.panelTile.Edition.appendChild( this.svgG_brickMagnitude );
+								// set values
+								if(!self.editedTile.factory.validity.pixelsRatio.w) {
+									 console.error('A brick has some problem with its ratio...', self.editedTile);
+									}
+								this.svgTextScale.set('Taille : ' + self.editedTile.w / self.editedTile.factory.validity.pixelsRatio.w);
+							   }
 					 if(tile.brick.isBrick) {
 						 console.log("A space is under edition, we can change width and height");
 						}

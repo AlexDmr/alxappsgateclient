@@ -76,7 +76,7 @@ define( [ 'Bricks/protoBricks'
 												, {x:6,y:0,w:2,h:2,brickId:'ENO878052',name:'petit fantôme Spöka'}	// Spöka
 												]
 										  }
-										, { x:0,y:9,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
+										, { x:0,y:8,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
 										] 
 									} );
 				 this.U_cat = new Univers( 'U_cat'
@@ -146,7 +146,7 @@ define( [ 'Bricks/protoBricks'
 											 self.Univers.push( newUnivers );
 											 var nbU = self.Univers.length-3;
 											 // console.log("Create univers", json[id][Udata]);
-											 var D = 3, S = 4;
+											 var D = 5, S = 4;
 											 newUnivers.parseDataFromServer	( json[id][Udata]
 																			, { x: S*(nbU%D)
 																			  , y: S*Math.floor(nbU/D)
@@ -202,7 +202,7 @@ define( [ 'Bricks/protoBricks'
 					 
 					 // Check if this brick does still exist
 					 if(typeof this.D_bricks[id] === 'undefined') {
-						 console.log("New brick", brick);
+						 // console.log("New brick", brick);
 						 if(this.bricksMap[type]) {
 							 var Constr	  = this.bricksMap[type];
 							 var newBrick = new Constr(id, brick);
@@ -214,7 +214,7 @@ define( [ 'Bricks/protoBricks'
 							 for(var p=0;p<this.Univers.length;p++) {
 								 this.Univers[p].integrateBrick(newBrick);
 								}
-							} else {console.log("Unsupported brick type :", type, " for", brick);}
+							} //else {console.log("Unsupported brick type :", type, " for", brick);}
 						} else {console.log("Brick with id", id, "has still been integrated...");}
 					}
 				}

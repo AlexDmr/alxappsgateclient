@@ -9,9 +9,9 @@ Object.defineProperty(SVGElement.prototype, 'classList', {
             var self = this;
             function update(fn) {
                 return function(value) {
-                    var classes = self.getAttribute('class') || ''
-                      , index = classes.indexOf(value);
+                    var classes = self.getAttribute('class') || '';
                     classes = classes.split(/\s+/);
+					var index = classes.indexOf(value);
 					fn(classes, index, value);
                     self.setAttribute('class', classes.join(" "));
                 }
@@ -31,17 +31,23 @@ Object.defineProperty(SVGElement.prototype, 'classList', {
                 }),
 
                 contains: function(value) {
-                    return !!~self.className.split(/\s+/).indexOf(value);
+					var className;
+					if(typeof self.className.baseVal !== 'undefined') {className = self.className.baseVal;} else {className = self.className;}
+                    return !!~className.split(/\s+/).indexOf(value);
                 },
 
                 item: function(i) {
-                    return self.className.split(/\s+/)[i] || null;
+					var className;
+					if(typeof self.className.baseVal !== 'undefined') {className = self.className.baseVal;} else {className = self.className;}
+                    return className.split(/\s+/)[i] || null;
                 }
             };
             
             Object.defineProperty(ret, 'length', {
                 get: function() {
-                    return self.className.split(/\s+/).length;
+					var className;
+					if(typeof self.className.baseVal !== 'undefined') {className = self.className.baseVal;} else {className = self.className;}
+                    return className.split(/\s+/).length;
                 }
             });
 

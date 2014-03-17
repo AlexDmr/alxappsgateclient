@@ -17,7 +17,7 @@ define( [ "Bricks/protoBricks"
 										, PresoTilesAlxAppsGate
 										, { pixelsMinDensity : 0
 										  , pixelsMaxDensity : 999999999
-										  , pixelsRatio		 : 0 }
+										  , pixelsRatio		 : {w:0,h:0} }
 										);
 				 return this;
 				}

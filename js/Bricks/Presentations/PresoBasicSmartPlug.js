@@ -2,8 +2,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 		, "utils/svgGroup"
 		, "utils/svgText"
 		, "utils/svgOval"
+		, "utils/svgUtils"
 		]
-	  , function(Presentation, svgGroup, svgText, svgOval) {
+	  , function(Presentation, svgGroup, svgText, svgOval, svgUtils) {
 			 // Presentation
 			 var PresoBasicSmartPlug = function() {
 				}
@@ -35,7 +36,20 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					this.consoText = this.svgAlxConsoText = new svgText( {style:{textAnchor: 'middle', stroke: 'none'}} );
 					this.gPreso.appendChild( this.consoText.getRoot() );
 					this.consoText = this.consoText.getRoot();
-					this.consoText.addEventListener	( 'DOMNodeInsertedIntoDocument'
+					svgUtils.onDOMNodeInsertedIntoDocument(
+						  this.consoText
+						, function(coords) {return function() {
+							 self.svgAlxConsoText.set( '9999W' )
+							 var bbox = self.svgAlxConsoText.getBBox()
+							   ,    s = 0.8 * (coords.x2-coords.x1) / bbox.width;
+							 self.svgAlxConsoText.matrixId().translate( (coords.x2+coords.x1)/2
+																	  , coords.y2 - 10*s
+																	  ).scale(s,s);
+							 self.svgAlxConsoText.set( self.brick.consumption[self.brick.consumption.length-1].val + 'W');
+							 self.updateOnOff(self.brick.isOn()); };
+							}(coords)
+						);
+					/*this.consoText.addEventListener	( 'DOMNodeInsertedIntoDocument'
 													, function(coords) {return function(e) {
 														 self.svgAlxConsoText.set( '9999W' )
 														 var bbox = self.svgAlxConsoText.getBBox()
@@ -46,7 +60,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 														 self.svgAlxConsoText.set( self.brick.consumption[self.brick.consumption.length-1].val + 'W');
 														 self.updateOnOff(self.brick.isOn()); };
 														}(coords)
-													, false );
+													, false );*/
 					this.root.addEventListener( 'click'
 											  , function(e) {self.toggle();
 															 e.preventDefault();
@@ -59,7 +73,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 			 PresoBasicSmartPlug.prototype.deletePrimitives = function() {
 				 Presentation.prototype.deletePrimitives.apply(this, []);
-				 if(this.consoText) {this.consoText.parentElement.removeChild( this.consoText );
+				 if(this.consoText) {var parent;
+									 if(typeof this.consoText.parentElement === 'undefined') {parent = this.consoText.parentNode;} else {parent = this.consoText.parentElement;}
+									 parent.removeChild( this.consoText );
 									 this.consoText = null;
 									}
 				}

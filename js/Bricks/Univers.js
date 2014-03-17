@@ -12,7 +12,7 @@ define( [ "Bricks/protoBricks"
 					 context = TF[2] || {};
 					 context.pixelsMinDensity = context.pixelsMinDensity || 0;
 					 context.pixelsMaxDensity = context.pixelsMaxDensity || 999999999;
-					 context.pixelsRatio	  = context.pixelsRatio		 || 0;
+					 context.pixelsRatio	  = context.pixelsRatio		 || {w:0,h:0};
 					 context.tags			  = context.tags			 || [];
 					 this.appendPresoFactory(TF[0], TF[1], context);
 					}
@@ -112,7 +112,7 @@ define( [ "Bricks/protoBricks"
 				 var properties = properties || {}, obj = {};
 				 for(var i in properties) json.properties.push( {key:i, value:properties[i]} );				 
 				 var dataMap = this.RecursiveParseDataFromServer( json );
-				 console.log("New univers", json.type, dataMap);
+				 console.log("New univers", json, dataMap );
 				 switch(json.type) {
 					 case 'SERVICE_ROOT': dataMap.class = 'BrickService'; dataMap.name = 'Services'; break;
 					 case 'SPATIAL_ROOT': dataMap.class = 'BrickPlace'  ; dataMap.name = 'Plan'; break;
