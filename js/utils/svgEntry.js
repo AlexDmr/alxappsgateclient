@@ -21,8 +21,8 @@ define( [ "utils/svgAlx"
 											 console.log("OK with", IN.value);
 											 document.body.removeChild(div); }
 					  , fctCA = function()  {document.body.removeChild(div);}
-					ok.addEventListener('click', fctOK, false); ok.addEventListener('touchstart', fctOK, false);
-					ca.addEventListener('click', fctCA, false); ca.addEventListener('touchstart', fctCA, false);
+					ok.addEventListener('mousedown', fctOK, false); ok.addEventListener('touchstart', fctOK, false);
+					ca.addEventListener('mousedown', fctCA, false); ca.addEventListener('touchstart', fctCA, false);
 					document.body.appendChild( div );
 					IN.focus();
 				}

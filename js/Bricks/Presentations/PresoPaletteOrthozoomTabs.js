@@ -112,6 +112,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.blocClick = function(e) {
 						 if(svgUtils.ancestors(e.target).indexOf(self.root) === -1)
 							e.stopPropagation();
+							console.log('Click blocked');
 						}
 
 					 // SVG structure

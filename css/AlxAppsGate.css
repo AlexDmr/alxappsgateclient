@@ -48,8 +48,14 @@ svg g.TileRoot > rect.fgRect {
 
 /* About tiles */
 svg g.TileRoot > g.bgPreso > rect.tile {
-	stroke-width : 3;
+	stroke-width : 2;
 	fill: white;
+	stroke: black;
+}
+
+svg g.TileRoot > g.bgPreso > rect.OutRect {
+	stroke-width : 4;
+	fill: none;
 	stroke: black;
 }
 
@@ -76,11 +82,18 @@ svg g.TileRoot.BrickService  g.bgPreso > rect.tile {
 	stroke	: orange;
 }
 
-svg g.Univers  > .gImage  > circle {
+svg g.Univers  > .gImage  > circle.inBorder {
 	stroke			: black;
 	fill			: none;
 	stroke-width	: 4px;
 }
+
+svg g.Univers  > .gImage  > circle.OutBorder {
+	stroke			: black;
+	fill			: none;
+	stroke-width	: 6px;
+}
+
 
 /* Other things... */
 svg g.Univers text		{stroke: none;}
@@ -92,13 +105,13 @@ svg .AlxTab.BrickUser 	{fill	: lightblue; stroke:black;}
 svg .BrickUser {stroke	: lightblue;}
 
 svg .AlxTab.BrickDevice	{fill	: #FF5; stroke:black;}
-svg .BrickDevice, svg g.Univers.BrickDevice  > .gImage  > circle	{stroke	: #FF5;}
+svg .BrickDevice, svg g.Univers.BrickDevice  > .gImage  > circle.inBorder	{stroke	: #FF5;}
 
 svg .AlxTab.BrickService	{fill	: orange; stroke:black;}
-svg .BrickService, svg g.Univers.BrickService > .gImage  > circle		{stroke	: orange;}
+svg .BrickService, svg g.Univers.BrickService > .gImage  > circle.inBorder		{stroke	: orange;}
 
 svg .AlxTab.BrickPlace	{fill	: lightgreen; stroke:black;}
-svg .BrickPlace, svg g.Univers.BrickPlace > .gImage  > circle 			{stroke	: lightgreen;}
+svg .BrickPlace, svg g.Univers.BrickPlace > .gImage  > circle.inBorder 			{stroke	: lightgreen;}
 
 svg .AlxTab.BrickMixed	{fill	: grey; stroke:black;}
 svg .BrickMixed	 		{stroke	: grey;}
