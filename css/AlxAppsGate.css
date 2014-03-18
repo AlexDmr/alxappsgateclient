@@ -69,7 +69,7 @@ svg g.TileRoot.BrickPlace  g.bgPreso > rect.tile {
 }
 
 svg g.TileRoot.BrickDevice  g.bgPreso > rect.tile {
-	stroke	: #CC0;
+	stroke	: #FF5;
 }
 
 svg g.TileRoot.BrickService  g.bgPreso > rect.tile {
@@ -83,14 +83,16 @@ svg g.Univers  > .gImage  > circle {
 }
 
 /* Other things... */
+svg g.Univers text		{stroke: none;}
+
 .paletteRoot text			{fill: black; stroke: none;}
 svg .AlxTab				{fill	: lightgrey; stroke:black;}
 
 svg .AlxTab.BrickUser 	{fill	: lightblue; stroke:black;}
 svg .BrickUser {stroke	: lightblue;}
 
-svg .AlxTab.BrickDevice	{fill	: yellow; stroke:black;}
-svg .BrickDevice, svg g.Univers.BrickDevice  > .gImage  > circle	{stroke	: yellow;}
+svg .AlxTab.BrickDevice	{fill	: #FF5; stroke:black;}
+svg .BrickDevice, svg g.Univers.BrickDevice  > .gImage  > circle	{stroke	: #FF5;}
 
 svg .AlxTab.BrickService	{fill	: orange; stroke:black;}
 svg .BrickService, svg g.Univers.BrickService > .gImage  > circle		{stroke	: orange;}

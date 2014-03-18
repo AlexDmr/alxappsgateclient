@@ -137,6 +137,11 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoBasicUnivers.prototype.Render = function() {
 				 PresoTile.prototype.Render.apply(this,[]);
 				 if(!this.svg_image) {
+					 this.brick.dataMap.class = this.brick.dataMap.class || '';
+					 var Classes = this.brick.dataMap.class.split(' ');
+					 for(var c=0;c<Classes.length;c++) {
+						 this.root.classList.add(Classes[c]);
+						}
 					 this.root.classList.add('Univers');
 					 this.svgG.removeChild( this.svgFgRect );
 					 // Group containing image and clip path

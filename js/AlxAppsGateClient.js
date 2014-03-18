@@ -61,8 +61,28 @@ define( [ 'Bricks/protoBricks'
 										   ] );
 				 this.U_map.setData({ x : 0, y : 8
 									, w : 4, h : 4
-									, color: 'cyan', brick: this.U_map, name: 'Plan'
+									, brick: this.U_map, name: 'Habitat spatial', class:'BrickPlace'
 									, children : [
+										  { x:4,y:0,w:4,h:3,name:"Salle de bain"
+										  , children : [] }
+										, { x:0,y:0,w:4,h:3,name:"Chambre de Paul"
+										  , children : []}
+										, { x:8,y:0,w:4,h:8,name:"Coin des enfants"
+										  , children : [
+											  {x:1,y:1,w:6,h:4,name:"Chambre Pauline"}
+											, {x:1,y:6,w:6,h:4,name:"Chambre Arthur"}
+											, {x:1,y:11,w:6,h:4,name:"Salle de jeux"}
+											] }
+										, { x:0,y:3,w:8,h:2,name:"Couloir"
+										  , children : [] }
+										, { x:0,y:5,w:8,h:3,name:"Pièce à vivre"
+										  , children : [] }
+										, { x:0,y:8,w:4,h:3,name:"Cuisine"
+										  , children : [] }
+										, { x:4,y:8,w:8,h:3,name:"Térasse"
+										  , children : [] }
+										]
+									/*, children : [
 										  { x:7,y:0,w:5,h:5,color:'blue',name:'Cuisine'
 										  , children : [
 												  {x:0,y:8,w:2,h:2,brickId:'capteurContact1',name:'pipo capteur de contact'}
@@ -77,16 +97,21 @@ define( [ 'Bricks/protoBricks'
 												]
 										  }
 										, { x:0,y:8,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
-										] 
+										] */
 									} );
 				 this.U_cat = new Univers( 'U_cat'
 										 , [ ['PresoBasicUniversType', PresoBasicUniversType]
   										   , ['PresoListUnivers'     , PresoListUnivers     , {tags:['orthozoom']}]
 										   ] );
-				 this.U_cat.setData({ x : 4, y : 8
+				 this.U_cat.setData({ x : 5, y : 8
 									, w : 4, h : 4
-									, color: 'darkslategray', brick: this.U_cat, name: 'Catégories'
+									, brick: this.U_cat, name: 'Equipements', class:'BrickDevice'
 									, children : [
+										  { x:0,y:0,w:4,h:3,color:'blue',name:'Capteurs de contacts',categId:'3'/*,brick:categ_SP*/}
+										, { x:4,y:0,w:4,h:3,color:'blue',name:'Ampoules Hue',categId:'AlxHueLamp'/*,brick:categ_SP*/}
+										, { x:8,y:0,w:4,h:3,color:'blue',name:'Prises pilotables',categId:'6'/*,brick:categ_SP*/}
+										]
+									/*, children : [
 										  { x:0,y:0,w:3,h:2,color:'blue',name:'Prises pilotable',categId:'6',brick:categ_SP}
 										, { x:3,y:0,w:3,h:2,color:'blue',name:'Thermomètres',categId:'0'}
 										, { x:6,y:0,w:3,h:3,color:'blue',name:'Luminomètres',categId:'1'}
@@ -95,20 +120,34 @@ define( [ 'Bricks/protoBricks'
 										, { x:3,y:2,w:3,h:2,color:'blue',name:'Lecteurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
 										, { x:6,y:3,w:3,h:3,color:'green',name:'Alx Hue Lamps',categId:'AlxHueLamp'}
 										// , { x:9,y:9,w:3,h:3,color:'yellow',name:'Horloge',brickId:'21106637055'} // Horloge
+										]*/
+									} );
+				 this.U_service = new Univers( 'U_service'
+										 , [ ['PresoBasicUniversType', PresoBasicUniversType]
+  										   , ['PresoListUnivers'     , PresoListUnivers     , {tags:['orthozoom']}]
+										   ] );
+				 this.U_service.setData({ x : 10, y : 8
+									, w : 4, h : 4
+									, color: 'darkslategray', brick: this.U_service, name: 'Services', class:'BrickService'
+									, children : [
+										  { x:0,y:0,w:4,h:3,color:'blue',name:'Serveurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
+										, { x:4,y:0,w:4,h:3,color:'blue',name:'Lecteurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
 										]
 									} );
 
 				 this.appendChild( this.U_map );
 				 this.appendChild( this.U_cat );
-				 this.Univers = [this.U_map, this.U_cat]
+				 this.appendChild( this.U_service );
+				 this.Univers = [this.U_map, this.U_cat, this.U_service]
 				    // this.Univers = [];
 				 
 				 // Init the palette for edition mode
 				 this.palette = new Palette();
 					this.palette.init();
 					this.appendChild( this.palette );
-					this.palette.addUniverAccess( {id:'map',name:'Plan',classes:'BrickPlace'}	  , this.U_map);
-					this.palette.addUniverAccess( {id:'cat',name:'Briques',classes:'BrickService'}, this.U_cat);
+					this.palette.addUniverAccess( {id:'map',name:'Habitat spatial',classes:'BrickPlace'}	  , this.U_map);
+					this.palette.addUniverAccess( {id:'cat',name:'Equipements',classes:'BrickDevice'}, this.U_cat);
+					this.palette.addUniverAccess( {id:'srv',name:'Services',classes:'BrickService'}, this.U_service);
 				 
 				 // Subscribe to socket.io
 				 socket.on('newDevice', function(data) {AlxClient.updateBrickList(data);});
@@ -120,6 +159,7 @@ define( [ 'Bricks/protoBricks'
 				 // Change presentations for palette
 				 this.palette.changePresentationsWithContext( {tags:['orthozoom']}, this.U_map);
 				 this.palette.changePresentationsWithContext( {tags:['orthozoom']}, this.U_cat);
+				 this.palette.changePresentationsWithContext( {tags:['orthozoom']}, this.U_service);
 				 for(var i=0; i<this.Univers.length; i++) {
 					 this.Univers[i].layoutDescendants();
 					}

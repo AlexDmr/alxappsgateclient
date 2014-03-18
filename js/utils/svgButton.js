@@ -21,6 +21,9 @@ define( [ "utils/svgAlx"
 							, function() {
 								 var bbox = self.Acontent.getRoot().getBBox();
 								 self.Arect.configure({x:bbox.x-3,y:bbox.y-3,width:bbox.width+6,height:bbox.height+6});
+								 if(config.content.realValue) {
+									 self.setText( config.content.realValue );
+									}
 								}
 							);
 						} else	{if(config.content.image) {
@@ -40,6 +43,12 @@ define( [ "utils/svgAlx"
 				 this.root.addEventListener('click', function() {CB();}, false);
 				 return this;
 				}
+			 svgButton.prototype.setText = function(txt) {
+				 if(this.Acontent) {
+					 this.Acontent.set(txt);
+					}
+				}
+				
 			 return svgButton;
 			}
 	  );

@@ -40,13 +40,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				 var svg = document.querySelector('svg');
 				 if(!svg) {return};
 				 if(OnOff) {
+					 this.btEdition.setText('FIN EDITION');
 					 svg.addEventListener('click', this.blocClick, true);
 					 svg.classList.add('edition');
 					 // var L = this.L_bricks_dropShadowFilter = document.querySelectorAll('.Brick.dropShadowFilter');
 					 // for(var i=0; i<L.length; i++) {
 						 // L.item(i).removeAttribute('filter');
 						// }
-					} else  {svg.removeEventListener('click', this.blocClick, true);
+					} else  {this.btEdition.setText('  EDITION  ');
+							 svg.removeEventListener('click', this.blocClick, true);
 							 svg.classList.remove('edition');
 							 // var L = this.L_bricks_dropShadowFilter;
 							 // for(var i=0; i<L.length; i++) {
@@ -116,9 +118,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.svgAlxRoot = new svgGroup( {class: 'paletteRoot'} );
 						// Internal structure for top menu
 						 this.svgAlxTopMenu = new svgGroup();
-							this.svgAlxTopMenu.appendChild( new svgRect( {x:-950,y:-60,width:1000,height:60,style:{fill:'lightgrey',stroke:'black'}} ) );
-							this.space = new svgRect( {style:{fill:'grey',stroke:'black'}} ).translate(-150,-55);
-							this.svgAlxTopMenu.appendChild( this.space ); //this.root.appendChild( this.space.getRoot() );
+							this.svgAlxTopMenu.appendChild( new svgRect( {x:-950,y:-60,width:1000,height:60,style:{fill:'#DDD',stroke:'black'}} ) );
+							this.spaceRoot = new svgGroup().translate(-250,-55);
+								this.space = new svgRect( {width:80, style:{fill:'white',stroke:'black'}} );
+								this.spaceRoot.appendChild( this.space );
+								this.spaceTextPlus = new svgText( {style:{fontSize:48,anchor:'middle'}} ).set('+').translate(27,40);
+								this.spaceRoot.appendChild( this.spaceTextPlus );
+							this.svgAlxTopMenu.appendChild( this.spaceRoot ); //this.root.appendChild( this.space.getRoot() );
 							this.svgAlxRoot.appendChild( this.svgAlxTopMenu );
 						// Internal structure for right tabs
 						 this.root = this.svgAlxRoot.getRoot();
@@ -126,6 +132,10 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							this.groot = this.svgAlxgroot.getRoot();
 							this.svgAlxRoot.appendChild( this.svgAlxgroot );
 						 this.svgAlxRoot.translate(950,0);
+					 
+					// Text AppsGate
+					 this.txtAppsGate = new svgText( {style:{anchor:'left'}} ).set("Bienvenue chez vous!");
+					 this.svgAlxTopMenu.appendChild( this.txtAppsGate.translate(-920, -30) );
 					 
 					// Button Save traces
 					 this.btSave = new svgButton({bg	  : {style: {fill: 'lightgreen', stroke: 'black'}}, 
@@ -136,7 +146,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																				, function(data) {console.log("Save :", data);}
 																				);
 																} );
-					 this.svgAlxTopMenu.appendChild(this.btSave.translate(-900,-20));
+					 // this.svgAlxTopMenu.appendChild(this.btSave.translate(-900,-20));
 					
 					// Button Get bricks
 					 this.btgetBrick = new svgButton({bg	  : {style: {fill: 'lightgreen', stroke: 'black'}}, 
@@ -149,13 +159,16 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 																					}}
 																				);
 																} );
-					 this.svgAlxTopMenu.appendChild(this.btgetBrick.translate(-700,-20));
+					 // this.svgAlxTopMenu.appendChild(this.btgetBrick.translate(-700,-20));
 					
 					// New space by drag and drop
-					 svgUtils.DD.DragAndDroppable( this.space.getRoot()
+					 svgUtils.DD.DragAndDroppable( this.spaceRoot.getRoot()
 												 , { tags : ['brick']
+												   , nodeFeedBack : this.space.getRoot()
 												   , size : {w:4,h:3}
 												   , start: function(config) {
+														 console.log(config);
+														 config.cloneNode.style.opacity = '0.5';
 														 // Create a new Tile and register it so that it can be manipulated by drop zones
 														 var space = new SpaceBrick().init()
 														   , preso = space.getNewPresentation();
@@ -171,13 +184,18 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					// Polygon for the button
 					 this.polyButton = new svgRect( { x:-30,y:-60,width:150,height:150,rx:75,ry:75
 													, style: {fill:'lightyellow',stroke:'black'} } );
-					 this.svgAlxRoot.appendChild( this.polyButton );
 					// Image for the button
+					 this.btEdition = new svgButton( {bg	  : {style: {fill: '#AAF', stroke: 'black'}}, 
+													  content : {value:'FIN EDITION',realValue:'  EDITION  ',style:{fontSize:32,fontFamily: 'Trebuchet'}}
+													 } ).translate(-150,35).command( function() {self.toggle();} );
+					 this.svgAlxRoot.appendChild( this.btEdition );
+					 // this.btEdition.setText('  EDITION  ');
+					 /*this.svgAlxRoot.appendChild( this.polyButton );
 					 this.imageButton = new svgImage( {width:75,height:75,transform:'translate(-25,0)'} ).load('images/parameters.png');
 					 this.svgAlxRoot.appendChild( this.imageButton );
 					 this.imageButton.getRoot().addEventListener( 'click'
 						, function() {self.toggle();}
-						, false );
+						, false );*/
 						
 					 this.root.addEventListener('longPress', function(e) {e.stopPropagation();}, false);
 					 this.root.addEventListener('dblclick' , function(e) {e.stopPropagation();}, false);
