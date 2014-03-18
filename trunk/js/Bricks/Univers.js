@@ -89,6 +89,9 @@ define( [ "Bricks/protoBricks"
 						 if(!this.mapBrickIdToTile[data.brickId]) {this.mapBrickIdToTile[data.brickId] = [];}
 						 this.mapBrickIdToTile[data.brickId].push( {data: data, brick: brick, parentBrick: parentBrick} );
 						}
+					 if(!data.categId && !data.brickId) {
+						 brick.dataServer = data;
+						}
 					}
 				 brick.setName( data.name || 'NONAME' );
 				 if(!data.brickId) {
@@ -134,8 +137,11 @@ define( [ "Bricks/protoBricks"
 				    obj.y		= properties.y || 0
 				    obj.color	= properties.color //|| 'orange'
 				    obj.name	= properties.name  || ''
-				    obj.children	= [];
-				 
+				    obj.children= [];
+					obj.server	= { id		: json.id
+								  , parent	: json.parent };
+					obj.tags	= json.tags;
+					
 				 // Other attributes
 				 if(json.type === "CATEGORY") {
 					 obj.categId = properties.deviceType || properties.serviceType;

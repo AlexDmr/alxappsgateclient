@@ -178,6 +178,7 @@ define( [ "utils/svg"
 						 svg.appendChild(clone);
 						 DragManager.addDraggable(clone);
 						 this.L_dragged.push( clone );
+						 config.cloneNode = clone;
 						 
 						 var idPtr = e.identifier===undefined?'mouse':e.identifier;
 						 this.D_draggingPtr[idPtr] = {nodeUnder:node,config:config};
