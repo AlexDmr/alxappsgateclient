@@ -61,7 +61,7 @@ define( [ 'Bricks/protoBricks'
 										   ] );
 				 this.U_map.setData({ x : 0, y : 8
 									, w : 4, h : 4
-									, brick: this.U_map, name: 'Habitat spatial', class:'BrickPlace'
+									, brick: this.U_map, name: 'Habitat spatial', class:'BrickPlace', image:'images/LogoSpatial.png'
 									, children : [
 										  { x:4,y:0,w:4,h:3,name:"Salle de bain"
 										  , children : [] }
@@ -106,6 +106,7 @@ define( [ 'Bricks/protoBricks'
 				 this.U_cat.setData({ x : 5, y : 8
 									, w : 4, h : 4
 									, brick: this.U_cat, name: 'Equipements', class:'BrickDevice'
+									, image:'images/LogoEquipement.png'
 									, children : [
 										  { x:0,y:0,w:4,h:3,color:'blue',name:'Capteurs de contacts',categId:'3'/*,brick:categ_SP*/}
 										, { x:4,y:0,w:4,h:3,color:'blue',name:'Ampoules Hue',categId:'AlxHueLamp'/*,brick:categ_SP*/}
@@ -128,7 +129,8 @@ define( [ 'Bricks/protoBricks'
 										   ] );
 				 this.U_service.setData({ x : 10, y : 8
 									, w : 4, h : 4
-									, color: 'darkslategray', brick: this.U_service, name: 'Services', class:'BrickService'
+									, brick: this.U_service, name: 'Services', class:'BrickService'
+									, image:'images/LogoService.png'
 									, children : [
 										  { x:0,y:0,w:4,h:3,color:'blue',name:'Serveurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
 										, { x:4,y:0,w:4,h:3,color:'blue',name:'Lecteurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
@@ -166,6 +168,7 @@ define( [ 'Bricks/protoBricks'
 				 
 				 // Call the server for the tree structure
 				 // setTimeout(function() {
+				 for(var p=0;p<self.presentations.length;p++) {self.presentations[p].initSemanticZoom();}
 				 self.call( 'AppsGate'
 						  , {method:'getTreeDescription', args:[]}
 						  , function(data) {

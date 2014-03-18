@@ -163,7 +163,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 					 
 					 // Image 
 					 this.svg_image = document.createElementNS("http://www.w3.org/2000/svg", 'image');
-						 this.svg_image.setAttributeNS('http://www.w3.org/1999/xlink','href', this.imgPath);
+						 this.svg_image.setAttributeNS('http://www.w3.org/1999/xlink','href', this.brick.dataMap.image || this.imgPath/*this.imgPath*/);
 						 this.svg_image.setAttribute('width' , imgSize);//'200');
 						 this.svg_image.setAttribute('height', imgSize);//'200');
 						 this.svg_image.setAttribute('clip-path', 'url(#'+idClip+')');
@@ -172,12 +172,16 @@ define( [ "Bricks/Presentations/protoPresentation"
 						circleDisplay.setAttribute('cx', imgSize/2);//'100');
 						circleDisplay.setAttribute('cy', imgSize/2);//'100');
 						circleDisplay.setAttribute('r', imgSize/2);//'100');
-						// circleDisplay.style.fill = 'none';
-						// circleDisplay.style.stroke = 'black';
-						// circleDisplay.style.strokeWidth = '4';
+						circleDisplay.setAttribute('class', 'inBorder');
+					 var circleDisplayBg = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+						circleDisplayBg.setAttribute('cx', imgSize/2);//'100');
+						circleDisplayBg.setAttribute('cy', imgSize/2);//'100');
+						circleDisplayBg.setAttribute('r', imgSize/2);//'100');
+						circleDisplayBg.setAttribute('class', 'OutBorder');
 					 
 					 this.root.appendChild( this.gImage );
 					 this.gImage.appendChild( this.clipPath );
+					 this.gImage.appendChild( circleDisplayBg );
 					 this.gImage.appendChild( this.svg_image );
 					 this.gImage.appendChild( circleDisplay );
 					}
@@ -186,11 +190,14 @@ define( [ "Bricks/Presentations/protoPresentation"
 			 PresoBasicUnivers.prototype.CB_Fade = function(dt, v0, v1) {
 				 if(v0 === 1 && dt === 0) {this.gImage.style.display = 'inherit';}
 				 if(v0 === 0 && dt === 0) {this.rect.style.display = 'inherit';}
+				 if(v0 === 0 && dt === 0) {this.OutRect.style.display = 'inherit';}
 				 this.gImage.style.opacity = Math.easeInOutQuad(dt, v1, v0-v1, 1);
 				 this.rect.style.opacity = Math.easeInOutQuad(dt, v0, v1-v0, 1);
+				 this.OutRect.style.opacity = Math.easeInOutQuad(dt, v0, v1-v0, 1);
 				 PresoTile.prototype.CB_Fade.apply(this,[dt,v0,v1]);;
 				 if(v1 === 1 && dt >= 1 && this.display) {this.gImage.style.display = 'none';}
 				 if(v1 === 0 && dt >= 1 && !this.display) {this.rect.style.display = 'none';}
+				 if(v1 === 0 && dt >= 1 && !this.display) {this.OutRect.style.display = 'none';}
 				}
 			 PresoBasicUnivers.prototype.adaptRender = function(scale, L_CB) {
 				 // console.log('PresoBasicUnivers::adaptRender',scale);
