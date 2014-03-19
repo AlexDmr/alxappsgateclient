@@ -332,9 +332,14 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.root.addEventListener( 'mousedown' , function(e) {self.longPressStart('mouse',e.clientX,e.clientY,e.target);}, false);
 					 this.root.addEventListener( 'mousemove' , function(e) {self.longPressMove('mouse',e.clientX,e.clientY);}, false);
 					 this.root.addEventListener( 'mouseup'   , function(e) {self.longPressStop('mouse');}, false);
-					 this.root.addEventListener( 'touchstart', function(e) {for(var i=0; i<e.changedTouches.length; i++) {
-																				var ptr = e.changedTouches.item(i);
-																				self.longPressStart(ptr.identifier, ptr.clientX, ptr.clientY, ptr.target); }
+					 this.root.addEventListener( 'touchstart', function(e) {for(var i=0; i<e.touches.length; i++) {
+																				 var ptr = e.touches.item(i);
+																				 self.longPressMove(ptr.identifier, -9999, -9999);
+																				}
+																			if(e.touches.length === 1) {
+																				 var ptr = e.touches.item(0);
+																				 self.longPressStart(ptr.identifier, ptr.clientX, ptr.clientY, ptr.target);
+																				}
 																		   }, false);
 					 this.root.addEventListener( 'touchmove' , function(e) {for(var i=0; i<e.changedTouches.length; i++) {
 																				var ptr = e.changedTouches.item(i);
