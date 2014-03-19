@@ -107,7 +107,7 @@ svg .BrickUser {stroke	: lightblue;}
 svg .AlxTab.BrickDevice	{fill	: #FF5; stroke:black;}
 svg .BrickDevice, svg g.Univers.BrickDevice  > .gImage  > circle.inBorder	{stroke	: #FF5;}
 
-svg .AlxTab.BrickService	{fill	: orange; stroke:black;}
+svg .AlxTab.BrickService	{fill	: #F3AF4A; stroke:black;}
 svg .BrickService, svg g.Univers.BrickService > .gImage  > circle.inBorder		{stroke	: orange;}
 
 svg .AlxTab.BrickPlace	{fill	: lightgreen; stroke:black;}
