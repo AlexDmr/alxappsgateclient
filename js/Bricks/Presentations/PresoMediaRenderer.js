@@ -6,6 +6,11 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 				}
 				
 			 PresoMediaRenderer.prototype = new Presentation();
+			 PresoMediaRenderer.prototype.init = function(brick) {
+				 var rep = Presentation.prototype.init.apply(this,[brick]);
+				 this.scaleFactor = 12;//4;
+				 return rep;
+				}
 			 PresoMediaRenderer.prototype.Render = function() {
 				 var self = this;
 				 Presentation.prototype.Render.apply(this, []) ;//this.RenderPresoTile();

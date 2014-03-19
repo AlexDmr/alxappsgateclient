@@ -54,12 +54,13 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											).translate(coords.x1+5,coords.y1+7).load('images/mini/HueLamp.png');
 						this.root.appendChild( this.img.getRoot() );
 					
+					 var scale = this.w / 2;
 					 this.rectState = new svgRect( { width  : 10
 												   , height : 10
 												   , rx:5, ry:5
 												   , style  : {stroke:'none'}
 												   }
-												 ).translate(5,5);
+												 ).translate(5,5).scale(scale,scale);;
 					 this.root.appendChild( this.rectState.getRoot() );
 					 
 					 this.IsOn( this.brick.IsOn );
