@@ -36,8 +36,8 @@ require( [ "AlxAppsGateClient"
 				 var FS = function() {toggleFullScreen();
 									  endFS();
 									 }
-				  , endFS = function() {document.body.removeEventListener('touchstart', FS, false);}
-				 document.body.addEventListener	('touchstart', FS, false);
+				  , endFS = function() {document.body.removeEventListener('touchstart', FS, true);}
+				 document.body.addEventListener	('touchstart', FS, true);
 				 
 				 document.body.addEventListener( 'mousedown'
 											   , function(e) {

@@ -135,7 +135,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 						 this.svgAlxRoot.translate(950,0);
 					 
 					// Text AppsGate
-					 this.txtAppsGate = new svgText( {style:{anchor:'left'}} ).set("Bienvenue chez vous!");
+					 this.txtAppsGate = new svgText( {style:{anchor:'left'}} ).set("Bienvenue chez vous !");
 					 this.svgAlxTopMenu.appendChild( this.txtAppsGate.translate(-920, -30) );
 					 
 					// Button Save traces
