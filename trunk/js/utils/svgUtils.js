@@ -287,7 +287,7 @@ define( [ "utils/svg"
 								  if(typeof CustomEvent === 'function') {
 									 event = new CustomEvent('AlxDD_drop', {bubbles:false,cancelable:false,draggedNode:node,draggedObject:this.D_draggingPtr[idPtr]});
 									} else {event = document.createEvent('CustomEvent');
-											event.initCustomEvent('AlxDD_leave', false, false, {draggedNode:node,draggedObject:this.D_draggingPtr[idPtr]});
+											event.initCustomEvent('AlxDD_drop', false, false, {draggedNode:node,draggedObject:this.D_draggingPtr[idPtr]});
 											event.draggedNode	= node;
 											event.draggedObject = this.D_draggingPtr[idPtr]
 										   }

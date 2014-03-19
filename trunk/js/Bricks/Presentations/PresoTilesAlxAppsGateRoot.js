@@ -494,11 +494,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 														}
 													 config.brick.unPlugPresentation( config.presentation );
 													 tile.forceRender();
-													 /*
-													 tile.parent.brick.removeChild(tile.brick, tile);
 													 
+													 console.log("End", config);
+													 if(config.tileUnder !== tile.parent) {
+														 tile.parent.brick.removeChild(tile.brick, tile);
+														 if(!config.tileUnder) {tile.brick.unPlugPresentation( tile );}
+														}
+													 /*
 													 // Clean the original tile
-													 tile.brick.unPlugPresentation( tile );
+													 
 													 */
 													 console.log("Presentations:", config.brick.presentations );
 													}
