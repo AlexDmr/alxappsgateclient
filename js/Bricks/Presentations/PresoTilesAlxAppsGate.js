@@ -218,7 +218,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 												   , class:'shadow' } ).translate(dt*size, dt*size);
 					 this.svgFgRect = new svgRect( { x:1.5*dt*size, y:titleHeight+1.5*dt*size
 												   , width:size*(this.w-3*dt), height:size*(this.h-0.5-3*dt)//(titleHeight+size)*(this.h-0.5-dt)
-												   , class:'OutRect' } );
+												   , class:'fgRect' } );
 						var r = this.svgBgRect.getRoot();
 					 this.svgOutRect = new svgRect( { x:0.5*dt*size, y:0.5*dt*size, rx:6, ry:6
 												   , width:size*(this.w-dt), height:size*(this.h-dt)
@@ -265,6 +265,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 														 self.bgRect.classList.add('selected');
 														 var brick = evt.config.brick
 														   , preso = evt.config.presentation;
+														 evt.config.tileUnder = self;
 														 // Plug the brick
 														 if(self.brick !== brick && self.brick.ancestors().indexOf(brick) === -1) {
 															 self.appendChild( preso );
@@ -294,6 +295,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 														   , preso = evt.config.presentation;
 														 // Unplug the brick
 														 self.removeChild( preso );
+														 delete evt.config.tileUnder;
 														}
 									   , dragOver	: function(evt) {
 														 // Resize the rectangle so that it fit into the cases
@@ -323,6 +325,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 															}
 														}
 									   , drop		: function(evt) {
+														 console.log("drop", evt);
 														 var brick = evt.config.brick
 														   , preso = evt.config.presentation;
 														 self.bgRect.classList.remove('selected');

@@ -64,23 +64,23 @@ define( [ 'Bricks/protoBricks'
 									, brick: this.U_map, name: 'Habitat spatial', class:'BrickPlace', image:'images/LogoSpatial.png'
 									, children : [
 										  { x:4,y:0,w:4,h:3,name:"Salle de bain"
-										  , children : [] }
+										  , children : [{x:3,y:2,w:2,h:2,brickId:'L_sdb',type:AlxHueLamp}] }
 										, { x:0,y:0,w:4,h:3,name:"Chambre de Paul"
-										  , children : []}
+										  , children : [{x:3,y:2,w:2,h:2,brickId:'L_paul',type:AlxHueLamp}]}
 										, { x:8,y:0,w:4,h:8,name:"Coin des enfants"
 										  , children : [
-											  {x:1,y:1,w:6,h:4,name:"Chambre Pauline"}
-											, {x:1,y:6,w:6,h:4,name:"Chambre Arthur"}
-											, {x:1,y:11,w:6,h:4,name:"Salle de jeux"}
+											  {x:1,y:1,w:6,h:4,name:"Chambre Pauline",children:[{x:5,y:3,w:2,h:2,brickId:'L_pauline',type:AlxHueLamp}]}
+											, {x:1,y:6,w:6,h:4,name:"Chambre Arthur",children:[{x:5,y:3,w:2,h:2,brickId:'L_arthur',type:AlxHueLamp}]}
+											, {x:1,y:11,w:6,h:4,name:"Salle de jeux",children:[{x:5,y:3,w:2,h:2,brickId:'L_jeux',type:AlxHueLamp}]}
 											] }
 										, { x:0,y:3,w:8,h:2,name:"Couloir"
-										  , children : [] }
+										  , children : [{x:7,y:0,w:2,h:2,brickId:'L_couloir',type:AlxHueLamp}] }
 										, { x:0,y:5,w:8,h:3,name:"Pièce à vivre"
-										  , children : [] }
+										  , children : [{x:7,y:1,w:2,h:2,brickId:'L_vivre',type:AlxHueLamp}] }
 										, { x:0,y:8,w:4,h:3,name:"Cuisine"
-										  , children : [] }
+										  , children : [{x:3,y:1,w:2,h:2,brickId:'L_cuisine',type:AlxHueLamp}] }
 										, { x:4,y:8,w:8,h:3,name:"Térasse"
-										  , children : [] }
+										  , children : [{x:7,y:1,w:2,h:2,brickId:'L_terasse',type:AlxHueLamp}] }
 										]
 									/*, children : [
 										  { x:7,y:0,w:5,h:5,color:'blue',name:'Cuisine'

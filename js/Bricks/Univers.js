@@ -73,8 +73,13 @@ define( [ "Bricks/protoBricks"
 					 if (data.categId && data.brick) {
 						 brick = data.brick;
 						} else {if(!data.brickId || !this.mapBrickIdToTile[data.brickId]) {
-									 brick = new SpaceBrick();
-									 brick.init([]);
+									 // If brickId AND a constructor, then use it instead of SpaceBrick
+									 if(data.brickId && data.type) {
+										 brick = new data.type(data.brickId, {});
+										 brick.init([]);
+										} else	{brick = new SpaceBrick();
+												 brick.init([]);
+												}
 									} else {brick = this.mapBrickIdToTile[data.brickId][0].brick;}
 							   }
 					 data.brick = brick;
