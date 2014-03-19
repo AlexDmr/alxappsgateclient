@@ -64,23 +64,23 @@ define( [ 'Bricks/protoBricks'
 									, brick: this.U_map, name: 'Habitat spatial', class:'BrickPlace', image:'images/LogoSpatial.png'
 									, children : [
 										  { x:4,y:0,w:4,h:3,name:"Salle de bain"
-										  , children : [{x:3,y:2,w:2,h:2,brickId:'L_sdb',type:AlxHueLamp}] }
+										  , children : [{x:3,y:2,w:2,h:2,brickId:'L_sdb',type:AlxHueLamp,name:'Lampe 1'}] }
 										, { x:0,y:0,w:4,h:3,name:"Chambre de Paul"
-										  , children : [{x:3,y:2,w:2,h:2,brickId:'L_paul',type:AlxHueLamp}]}
+										  , children : [{x:3,y:2,w:2,h:2,brickId:'L_paul',type:AlxHueLamp,name:'Lampe 2'}]}
 										, { x:8,y:0,w:4,h:8,name:"Coin des enfants"
 										  , children : [
-											  {x:1,y:1,w:6,h:4,name:"Chambre Pauline",children:[{x:5,y:3,w:2,h:2,brickId:'L_pauline',type:AlxHueLamp}]}
-											, {x:1,y:6,w:6,h:4,name:"Chambre Arthur",children:[{x:5,y:3,w:2,h:2,brickId:'L_arthur',type:AlxHueLamp}]}
-											, {x:1,y:11,w:6,h:4,name:"Salle de jeux",children:[{x:5,y:3,w:2,h:2,brickId:'L_jeux',type:AlxHueLamp}]}
+											  {x:1,y:1,w:6,h:4,name:"Chambre Pauline",children:[{x:5,y:3,w:2,h:2,brickId:'L_pauline',type:AlxHueLamp,name:'Lampe 3'}]}
+											, {x:1,y:6,w:6,h:4,name:"Chambre Arthur",children:[{x:5,y:3,w:2,h:2,brickId:'L_arthur',type:AlxHueLamp,name:'Lampe 4'}]}
+											, {x:1,y:11,w:6,h:4,name:"Salle de jeux",children:[{x:5,y:3,w:2,h:2,brickId:'L_jeux',type:AlxHueLamp,name:'Lampe 5'}]}
 											] }
 										, { x:0,y:3,w:8,h:2,name:"Couloir"
-										  , children : [{x:7,y:0,w:2,h:2,brickId:'L_couloir',type:AlxHueLamp}] }
+										  , children : [{x:7,y:0,w:2,h:2,brickId:'L_couloir',type:AlxHueLamp,name:'Lampe 6'}] }
 										, { x:0,y:5,w:8,h:3,name:"Pièce à vivre"
-										  , children : [{x:7,y:1,w:2,h:2,brickId:'L_vivre',type:AlxHueLamp}] }
+										  , children : [{x:7,y:1,w:2,h:2,brickId:'L_vivre',type:AlxHueLamp,name:'Lampe 7'}] }
 										, { x:0,y:8,w:4,h:3,name:"Cuisine"
-										  , children : [{x:3,y:1,w:2,h:2,brickId:'L_cuisine',type:AlxHueLamp}] }
-										, { x:4,y:8,w:8,h:3,name:"Térasse"
-										  , children : [{x:7,y:1,w:2,h:2,brickId:'L_terasse',type:AlxHueLamp}] }
+										  , children : [{x:3,y:1,w:2,h:2,brickId:'L_cuisine',type:AlxHueLamp,name:'Lampe 8'}] }
+										, { x:4,y:8,w:8,h:3,name:"Terrasse"
+										  , children : [{x:7,y:1,w:2,h:2,brickId:'L_terasse',type:AlxHueLamp,name:'Lampe 9'}] }
 										]
 									/*, children : [
 										  { x:7,y:0,w:5,h:5,color:'blue',name:'Cuisine'
@@ -109,7 +109,19 @@ define( [ 'Bricks/protoBricks'
 									, image:'images/LogoEquipement.png'
 									, children : [
 										  { x:0,y:0,w:4,h:3,color:'blue',name:'Capteurs de contacts',categId:'3'/*,brick:categ_SP*/}
-										, { x:4,y:0,w:4,h:3,color:'blue',name:'Ampoules Hue',categId:'AlxHueLamp'/*,brick:categ_SP*/}
+										, { x:4,y:0,w:4,h:3,color:'blue',name:'Ampoules Hue',categId:'AlxHueLamp'/*,brick:categ_SP*/
+										  , children : [
+												  {x:0,y:0,w:1,h:1,brickId:'L_sdb',type:AlxHueLamp,name:'Lampe 1'}
+												, {x:1,y:0,w:1,h:1,brickId:'L_paul',type:AlxHueLamp,name:'Lampe 2'}
+												, {x:2,y:0,w:1,h:1,brickId:'L_pauline',type:AlxHueLamp,name:'Lampe 3'}
+												, {x:3,y:0,w:1,h:1,brickId:'L_arthur',type:AlxHueLamp,name:'Lampe 4'}
+												, {x:4,y:0,w:1,h:1,brickId:'L_jeux',type:AlxHueLamp,name:'Lampe 5'}
+												, {x:5,y:0,w:1,h:1,brickId:'L_couloir',type:AlxHueLamp,name:'Lampe 6'}
+												, {x:6,y:0,w:1,h:1,brickId:'L_vivre',type:AlxHueLamp,name:'Lampe 7'}
+												, {x:7,y:0,w:1,h:1,brickId:'L_cuisine',type:AlxHueLamp,name:'Lampe 8'}
+												, {x:0,y:1,w:1,h:1,brickId:'L_terasse',type:AlxHueLamp,name:'Lampe 9'}
+												]
+										  }
 										, { x:8,y:0,w:4,h:3,color:'blue',name:'Prises pilotables',categId:'6'/*,brick:categ_SP*/}
 										]
 									/*, children : [
@@ -132,8 +144,9 @@ define( [ 'Bricks/protoBricks'
 									, brick: this.U_service, name: 'Services', class:'BrickService'
 									, image:'images/LogoService.png'
 									, children : [
-										  { x:0,y:0,w:4,h:3,color:'blue',name:'Serveurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
-										, { x:4,y:0,w:4,h:3,color:'blue',name:'Lecteurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'}
+										  { x:0,y:0,w:4,h:3,color:'blue',name:'Serveurs de média',categId:'urn:schemas-upnp-org:device:MediaServer:1'}
+										, { x:4,y:0,w:4,h:3,color:'blue',name:'Lecteurs de média',categId:'urn:schemas-upnp-org:device:MediaRenderer:1'
+										  , children : [{x:0,y:0,w:1,h:1,brickId:'pipoMedia',name:'Télévision',type:UpnpMediaRenderer}]}
 										]
 									} );
 

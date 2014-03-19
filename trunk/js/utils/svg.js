@@ -243,7 +243,7 @@ var DragManager = {
 		}
 	, stopDragNode		: function(node) {
 		 var i = this.indexOfNode(node);
-		 console.log('stopDragNode', i, ":", node);
+		 // console.log('stopDragNode', i, ":", node);
 		 if( this.TabDragged_node.indexOf(node) >= 0) {
 			 if( typeof this.TabDraggable[i].id_ptr2 !== 'undefined' ) {this.stopDrag({target:node}, this.TabDraggable[i].id_ptr2);}
 			 if( typeof this.TabDraggable[i].id_ptr1 !== 'undefined' ) {this.stopDrag({target:node}, this.TabDraggable[i].id_ptr1);}

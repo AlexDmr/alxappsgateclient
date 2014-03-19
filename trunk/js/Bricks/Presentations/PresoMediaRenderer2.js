@@ -3,9 +3,15 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 	  , function(Presentation) {
 			 // Presentation
 			 var PresoMediaRenderer2 = function() {
+				 this.scale
 				}
 				
 			 PresoMediaRenderer2.prototype = new Presentation();
+			 PresoMediaRenderer2.prototype.init = function(brick) {
+				 var rep = Presentation.prototype.init.apply(this,[brick]);
+				 this.scaleFactor = 12;//4;
+				 return rep;
+				}
 			 PresoMediaRenderer2.prototype.Render = function() {
 				 this.root = Presentation.prototype.Render.apply(this,[]);
 				 var self = this;
@@ -19,6 +25,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 if(typeof this.bgRect.parentElement === 'undefined') {parent = this.bgRect.parentNode;} else {parent = this.bgRect.parentElement;}
 					 parent.removeChild( this.bgRect );
 					 parent.appendChild( this.svgImg );
+					 
+					 var outR = this.svgOutRect.getRoot();
+					 outR.parentNode.removeChild( outR );
 					}
 				 return this.root;
 				}

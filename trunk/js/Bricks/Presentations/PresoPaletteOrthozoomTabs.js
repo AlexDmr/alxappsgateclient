@@ -57,7 +57,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							}
 				}
 			 PresoPaletteOrthozoomTabs.prototype.toggleTileEdition = function(b) {
-				 console.log('toggleTileEdition');
+				 // console.log('toggleTileEdition');
 				 var self = this;
 				 if(b) {this.editedTile.root.classList.add('selected');
 					   } else {this.editedTile.root.classList.remove('selected');}
@@ -187,7 +187,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													, style: {fill:'lightyellow',stroke:'black'} } );
 					// Image for the button
 					 this.btEdition = new svgButton( {bg	  : {style: {fill: '#AAF', stroke: 'black'}}, 
-													  content : {value:'FIN EDITION',realValue:'  EDITION  ',style:{fontSize:32,fontFamily: 'Trebuchet'}}
+													  content : {value:'FIN EDITION-',realValue:'  EDITION  ',style:{fontSize:32,fontFamily: 'Trebuchet'}}
 													 } ).translate(-150,35).command( function() {self.toggle();} );
 					 this.svgAlxRoot.appendChild( this.btEdition );
 					 // this.btEdition.setText('  EDITION  ');
@@ -424,7 +424,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.panelTile.entryName.set( tile.brick.getName() );
 					 // size (depend whether it is a brick or a group)
 					 if(tile.brick.isSpace) {
-						 console.log("A space is under edition, we can change width and height");
+						 // console.log("A space is under edition, we can change width and height");
 						 this.panelTile.Edition.removeChild( this.svgG_brickMagnitude );
 						 this.panelTile.Edition.appendChild( this.svgG_spaceMagnitude );
 						 // set values

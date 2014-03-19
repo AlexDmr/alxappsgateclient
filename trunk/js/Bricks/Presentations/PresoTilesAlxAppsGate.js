@@ -285,7 +285,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 																 preso.y = coords.y;
 																}
 															 preso.forceRender();
-															 console.log(preso);
+															 // console.log(preso);
 															 if(!coords) {preso.Render().style.display = 'none';}
 															} else {console.error('Ancestors violation');}
 														}
@@ -325,9 +325,10 @@ define( [ "Bricks/Presentations/protoPresentation"
 															}
 														}
 									   , drop		: function(evt) {
-														 console.log("drop", evt);
+														 // console.log("drop", evt);
 														 var brick = evt.config.brick
-														   , preso = evt.config.presentation;
+														   , preso = evt.config.presentation
+														   , config= evt.config;
 														 self.bgRect.classList.remove('selected');
 														 if(preso.Render().style.display === 'none') {
 															 console.log('Not really inserted...abort!');
@@ -339,10 +340,14 @@ define( [ "Bricks/Presentations/protoPresentation"
 															 console.log("Plug", brick, "under", self.brick);
 															 if(preso.parent) preso.parent.removeChild( preso );
 															 brick.unPlugPresentation( preso );
-															 self.brick.appendChild( brick );
+															 
+															 self.brick.appendChild( brick ); // Problème de disparition de la tuile dans certains cas...
+															 // XXX Problème, on veut ici retrouver la bonne presentation
+															 // La nouvelle qui vient d'être branchée ...
 															 var preso2 = self.getPresoBrickFromDescendant( brick );
+															 
 															 if(preso2 !== preso) {
-																 console.log("Ca sent le déplacement...");
+																 console.log("PROBELEM! Ca sent le déplacement...");
 																}
 															 brick.configPresoHavingParentBrick	( self.brick
 																								, function() {
@@ -353,6 +358,13 @@ define( [ "Bricks/Presentations/protoPresentation"
 																									 this.class = objData.class;
 																									 this.color = objData.color;
 																									 this.forceRender();
+																									 // Recursive placement, mimic config.originalPresentation
+																									 if(config.originalPresentation && config.originalPresentation !== preso2 ) {
+																										 console.log('originalPresentation :', config.originalPresentation);
+																										 if(config.originalPresentation !== this) {
+																											 config.originalPresentation.parent.brick.removeChild(config.originalPresentation.brick, config.originalPresentation);
+																											}
+																										}
 																									}
 																								 );
 															} else	{console.error("Ca sent la vue multiple...");
@@ -404,8 +416,9 @@ define( [ "Bricks/Presentations/protoPresentation"
 				// console.log(scale);
 				if(this.adaptRender(scale,L_CB/*L_toAppear,L_toDisappear*/)) {
 					// Recursing across semantic zoom structure
-					for(var i=0;i<this.children.length;i++) {
-						 this.children[i].ComputeSemanticZoom(MT, L_CB/*L_toAppear, L_toDisappear*/);
+					var L = []; for(var i=0;i<this.children.length;i++) {L.push(this.children[i]);}
+					for(var i=0;i<L.length;i++) {
+						 L[i].ComputeSemanticZoom(MT, L_CB/*L_toAppear, L_toDisappear*/);
 						}
 					}
 				 this.groot.style.display = displayed;

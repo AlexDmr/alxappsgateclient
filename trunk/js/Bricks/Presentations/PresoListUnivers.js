@@ -122,9 +122,10 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 					 this.mapBrickIdToTile[brick.id] = this.mapBrickIdToTile[brick.id] || [];
 					 this.mapBrickIdToTile[brick.id].push( {g:g,txt:txt} );
 					 this.mapBrickIdToBrick[brick.id] = brick;
-					 txt.configure( {style:{fill:'yellow'}} );
+					 // txt.configure( {style:{fill:'yellow'}} );
 					 // console.log('Color in yellow', brick.tile.brickId);
 					}
+				 if(this.brick.mapBrickIdToTile[brick.id]) // XXX Debug, only item are draggable
 				 svgUtils.DD.DragAndDroppable( txt.getRoot()
 							 , { tags : ['brick']
 							   , size : {w:1,h:1}
@@ -138,6 +139,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 									};}(brickId)
 							   }
 							 );
+					else txt.configure( {style:{fontStyle:'oblique', fontWeight:'bold'}} );
 				 
 				 g.appendChild( txt );
 				 root.appendChild( g );
