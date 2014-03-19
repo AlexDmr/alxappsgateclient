@@ -68,7 +68,7 @@ define( [ "Bricks/Presentations/protoPresentation"
 				 this.display = true;
 				 this.edited  = (typeof(this.edited) === 'undefined')?false:this.edited;
 				 this.setEdited( this.edited );
-				 this.scaleToDisplayChildren = 0.5;
+				 this.scaleToDisplayChildren = 0.4;
 				 this.displayFgRect = (typeof(this.edited) === 'undefined')?false:this.displayFgRect;
 				 this.validity = { pixelsMinDensity : 0
 								 , pixelsMaxDensity : 999999999

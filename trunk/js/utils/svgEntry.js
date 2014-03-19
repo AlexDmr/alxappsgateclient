@@ -12,7 +12,7 @@ define( [ "utils/svgAlx"
 				 // document.body.classList.remove( 'noUserSelect' );
 				 var div = document.createElement('div');
 					div.classList.add('AlxModal');
-					div.innerHTML = '<input class="name" type="text" value="'+svgE.get()+'"/><button class="OK" value="OK">OK</button><button type="button" class="Cancel" value="Cancel">Cancel</button>'
+					div.innerHTML = '<input class="name" type="text" value="'+svgE.get()+'"/><button class="OK" value="Valider">Valider</button><button type="button" class="Cancel" value="Annuler">Annuler</button>'
 					var IN = div.querySelector('input')
 					  , ok = div.querySelector('.OK')
 					  , ca = div.querySelector('.Cancel');

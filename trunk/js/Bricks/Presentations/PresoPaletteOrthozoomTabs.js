@@ -314,6 +314,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							this.svgG_brickMagnitude.appendChild( this.svgTextScale );
 							this.svgBtScalePlus = new svgButton	( {content: {image: 'images/Palette/plus.png', width:50, height:50}} 
 																).translate(175,-30).command( function() {
+																				 var factory_W = self.editedTile.factory.validity.pixelsRatio.w
+																				   , factory_H = self.editedTile.factory.validity.pixelsRatio.h;
 																				 console.log('Scale plus');
 																				 var scale = Math.round(self.editedTile.w / factory_W);
 																				 if(self.editedTile.canBeResizedTo(factory_W*(scale+1), factory_H*(scale+1))) {
@@ -327,6 +329,8 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 							this.svgG_brickMagnitude.appendChild( this.svgBtScalePlus )
 							this.svgBtScaleMinus= new svgButton	( {content: {image: 'images/Palette/minus.png', width:50, height:50}} 
 																).translate(100,-30).command( function() {
+																				 var factory_W = self.editedTile.factory.validity.pixelsRatio.w
+																				   , factory_H = self.editedTile.factory.validity.pixelsRatio.h;
 																				 console.log('Scale minus');
 																				 var scale = Math.round(self.editedTile.w / factory_W);
 																				 if(self.editedTile.canBeResizedTo(factory_W*(scale-1), factory_H*(scale-1))) {
