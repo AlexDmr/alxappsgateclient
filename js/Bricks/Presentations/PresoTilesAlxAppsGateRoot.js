@@ -450,7 +450,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											 delete this.A_longPress[id];}
 				}
 			 PresoTilesAlxAppsGateRoot.prototype.editTile = function(tile, x, y) {
-				 console.log('Edit node', tile.brick.name, tile);
+				 // console.log('Edit node', tile.brick.name, tile);
 				 this.brick.editTile( tile );
 				 tile.setEdited(true);
 				// Turn the tile DragAndDroppable
@@ -470,6 +470,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 // console.log('svgUtils.DD.start');
 													 config.brick 		 = tile.brick;
 													 config.presentation = new tile.constructor();
+													 config.originalPresentation = tile;
 													 config.presentation.copy( tile );
 													 config.tileUnder	 = tile.parent;
 													 config.coords = { x : tile.x
@@ -479,7 +480,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 											   , end  : function(config) {
 													 svgUtils.DD.removeDragAndDroppable(config.node);
 													 if(DropZone) {
-														 console.log('We activate the dropzone again for', config.presentation);
+														 // console.log('We activate the dropzone again for', config.presentation);
 														 tile.addDropZone();
 														}
 													 // config.presentation.setEdited(false);
@@ -497,7 +498,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 tile.forceRender();
 													 
 													 // console.log("End", config);
-													 if(config.tileUnder !== tile.parent) {
+													 if(!config.tileUnder/*config.tileUnder !== tile.parent*/) {
 														 console.log("Removing:",config.tileUnder, tile.parent);
 														 tile.parent.brick.removeChild(tile.brick, tile);
 														 if(!config.tileUnder) {tile.brick.unPlugPresentation( tile );}
@@ -506,7 +507,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 // Clean the original tile
 													 
 													 */
-													 console.log("Presentations:", config.brick.presentations );
+													 // console.log("Presentations:", config.brick.presentations );
 													}
 											   }
 											 );

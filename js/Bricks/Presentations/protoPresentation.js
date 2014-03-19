@@ -65,6 +65,13 @@ define( function() {
 					}
 				 return rep;
 				}
+			 Presentation.prototype.getPresoBrickFromChildren = function(brick) {
+				 var rep = null;
+				 for(var i=0; i<this.children.length; i++) {
+					 if(this.children[i].brick === brick) {return this.children[i];}
+					}
+				 return rep;
+				}
 			 Presentation.prototype.appendChildFromBrick = function(brick, fParams, constrName) {
 				 // Stop here if there is still an existing presentation plugged to this and brick
 				 var preExistingPreso = false, nb = 0;

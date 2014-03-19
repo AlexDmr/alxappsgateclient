@@ -6,7 +6,7 @@ define( [ "Bricks/protoBricks"
 				 var self = this;
 				 this.id = id;
 				 this.data = brick;
-				 console.log('Init Hue lamp', brick);
+				 // console.log('Init Hue lamp', brick);
 				 if(brick.HueLocation) {
 					 this.HueLocation 	= brick.HueLocation[0].val;
 					 this.HueUser		= brick.HueUser[0].val;

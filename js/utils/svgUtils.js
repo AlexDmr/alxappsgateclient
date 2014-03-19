@@ -182,7 +182,7 @@ define( [ "utils/svg"
 						 
 						 var idPtr = e.identifier===undefined?'mouse':e.identifier;
 						 this.D_draggingPtr[idPtr] = {nodeUnder:node,config:config};
-						 console.log('start_DragAndDroppable:', e, 'Pointer', idPtr, ':', this.D_draggingPtr[idPtr]);
+						 // console.log('start_DragAndDroppable:', e, 'Pointer', idPtr, ':', this.D_draggingPtr[idPtr]);
 						 
 						 // Callbacks
 						 if(config.start) {config.start.apply(node, [config]);}
