@@ -471,6 +471,7 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 config.brick 		 = tile.brick;
 													 config.presentation = new tile.constructor();
 													 config.presentation.copy( tile );
+													 config.tileUnder	 = tile.parent;
 													 config.coords = { x : tile.x
 																	 , y : tile.y };
 													 tile.x = tile.y = 10000; // Put that away before removing it
@@ -495,8 +496,9 @@ define( [ "Bricks/Presentations/PresoTilesAlxAppsGate"
 													 config.brick.unPlugPresentation( config.presentation );
 													 tile.forceRender();
 													 
-													 console.log("End", config);
+													 // console.log("End", config);
 													 if(config.tileUnder !== tile.parent) {
+														 console.log("Removing:",config.tileUnder, tile.parent);
 														 tile.parent.brick.removeChild(tile.brick, tile);
 														 if(!config.tileUnder) {tile.brick.unPlugPresentation( tile );}
 														}
